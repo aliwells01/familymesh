@@ -81,6 +81,13 @@
   FLOOD ADVERTISE
 </button>
 
+<button id="repeaters" disabled>
+  FIND REPEATERS
+</button>
+
+<div id="repeatersList"></div>
+
+
 <div id="log">Ready.</div>
 
 
@@ -98,6 +105,9 @@ const log = document.getElementById("log");
 const connectBtn = document.getElementById("connect");
 const advertBtn = document.getElementById("advert");
 const floodBtn = document.getElementById("flood");
+
+const repeatersBtn = document.getElementById("repeaters");
+const repeatersList = document.getElementById("repeatersList");
 
 
 function message(text) {
@@ -129,6 +139,8 @@ connection.on("connected", async () => {
   connectBtn.innerHTML = "CONNECTED";
   connectBtn.disabled = true;
 
+  repeatersBtn.disabled = false;
+
 });
 
 connection.on("disconnected", () => {
@@ -142,6 +154,8 @@ connection.on("disconnected", () => {
   connectBtn.disabled = false;
 
   message("Radio disconnected.");
+
+  repeatersBtn.disabled = true;
 
 });
 
@@ -194,6 +208,106 @@ floodBtn.onclick = async () => {
 
     console.error(err);
     message("Flood advert error: " + err);
+
+  }
+
+};
+
+repeatersBtn.onclick = async () => {
+
+  try {
+
+    message("Reading contacts from radio...");
+
+    const contacts = await connection.getContacts();
+
+    console.log("ALL CONTACTS:", contacts);
+
+    // First try known MeshCore fields used for advertised node type.
+    const repeaters = contacts.filter(contact => {
+
+      if (contact.advType === 2) return true;
+
+      if (contact.type === 2) return true;
+
+      if (contact.type === "REPEATER") return true;
+
+      if (contact.advType === "REPEATER") return true;
+
+      return false;
+
+    });
+
+    repeatersList.innerHTML = "";
+
+    if (repeaters.length === 0) {
+
+      repeatersList.innerHTML =
+        "<p>No repeaters identified.</p>" +
+        "<p>Total contacts stored: " + contacts.length + "</p>";
+
+      // Temporary diagnostic output
+      if (contacts.length > 0) {
+        repeatersList.innerHTML +=
+          "<pre style='text-align:left;white-space:pre-wrap;font-size:11px;'>" +
+          JSON.stringify(contacts[0], null, 2) +
+          "</pre>";
+      }
+
+      message("Contacts loaded. No repeaters matched yet.");
+
+      return;
+    }
+
+    let html = "<h3>Repeaters</h3>";
+
+    repeaters.forEach(contact => {
+
+      const name =
+        contact.advName ||
+        contact.name ||
+        "Unnamed repeater";
+
+      const lastSeen =
+        contact.lastAdvert ||
+        contact.lastSeen ||
+        contact.lastModified ||
+        null;
+
+      html += "<div style='padding:12px;border-bottom:1px solid #444;'>";
+
+      html += "<strong>" + name + "</strong>";
+
+      if (lastSeen) {
+        html += "<br><small>Last heard: " + lastSeen + "</small>";
+      }
+
+      html += "</div>";
+
+    });
+
+    repeatersList.innerHTML = html;
+
+    message(
+      "✅ Found " +
+      repeaters.length +
+      " repeaters from " +
+      contacts.length +
+      " stored contacts."
+    );
+
+  }
+
+  catch(err) {
+
+    console.error(err);
+
+    repeatersList.innerHTML =
+      "<pre style='white-space:pre-wrap'>" +
+      String(err) +
+      "</pre>";
+
+    message("Repeater lookup error: " + err);
 
   }
 
