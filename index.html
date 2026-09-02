@@ -1,0 +1,203 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Family Mesh</title>
+
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #111;
+      color: white;
+      margin: 0;
+      padding: 30px 20px;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 5px;
+    }
+
+    #status {
+      margin: 25px 0;
+      font-size: 20px;
+    }
+
+    button {
+      display: block;
+      width: 100%;
+      max-width: 420px;
+      margin: 15px auto;
+      padding: 20px;
+      font-size: 21px;
+      font-weight: 600;
+      border-radius: 14px;
+      border: none;
+    }
+
+    #connect {
+      background: #eee;
+    }
+
+    #advert {
+      background: #5ad66f;
+    }
+
+    #flood {
+      background: #ffb347;
+    }
+
+    button:disabled {
+      opacity: .35;
+    }
+
+    #log {
+      margin-top: 30px;
+      font-size: 14px;
+      color: #aaa;
+      text-align: left;
+      max-width: 420px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>Family Mesh</h1>
+<div>Simple MeshCore Controller</div>
+
+<div id="status">🔴 Not connected</div>
+
+<button id="connect">CONNECT TO RADIO</button>
+
+<button id="advert" disabled>
+  ADVERTISE LOCALLY
+</button>
+
+<button id="flood" disabled>
+  FLOOD ADVERTISE
+</button>
+
+<div id="log">Ready.</div>
+
+
+<script type="module">
+
+import {
+  WebBleConnection
+} from "https://esm.sh/@liamcottle/meshcore.js";
+
+
+let connection = null;
+
+const status = document.getElementById("status");
+const log = document.getElementById("log");
+const connectBtn = document.getElementById("connect");
+const advertBtn = document.getElementById("advert");
+const floodBtn = document.getElementById("flood");
+
+
+function message(text) {
+  log.innerHTML = text;
+}
+
+
+connectBtn.onclick = async () => {
+
+  try {
+
+    status.innerHTML = "🟡 Connecting...";
+    message("Opening Bluetooth selector...");
+
+    connection = new WebBleConnection();
+
+    connection.on("connected", async () => {
+
+      status.innerHTML = "🟢 Connected";
+      message("MeshCore radio connected.");
+
+      advertBtn.disabled = false;
+      floodBtn.disabled = false;
+
+      connectBtn.innerHTML = "CONNECTED";
+      connectBtn.disabled = true;
+
+    });
+
+    connection.on("disconnected", () => {
+
+      status.innerHTML = "🔴 Disconnected";
+
+      advertBtn.disabled = true;
+      floodBtn.disabled = true;
+
+      connectBtn.innerHTML = "CONNECT TO RADIO";
+      connectBtn.disabled = false;
+
+      message("Radio disconnected.");
+
+    });
+
+    await connection.connect();
+
+  }
+  catch(err) {
+
+    console.error(err);
+
+    status.innerHTML = "🔴 Connection failed";
+    message("Error: " + err);
+
+  }
+
+};
+
+
+advertBtn.onclick = async () => {
+
+  try {
+
+    message("Sending local advert...");
+
+    await connection.sendZeroHopAdvert();
+
+    message("✅ Local advert sent.");
+
+  }
+  catch(err) {
+
+    console.error(err);
+    message("Advert error: " + err);
+
+  }
+
+};
+
+
+floodBtn.onclick = async () => {
+
+  try {
+
+    message("Sending flood advert...");
+
+    await connection.sendFloodAdvert();
+
+    message("✅ Flood advert sent.");
+
+  }
+  catch(err) {
+
+    console.error(err);
+    message("Flood advert error: " + err);
+
+  }
+
+};
+
+</script>
+
+</body>
+</html>
