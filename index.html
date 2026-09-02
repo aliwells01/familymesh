@@ -265,6 +265,7 @@ connection.on("connected", async () => {
   repeatersBtn.disabled = false;
 
   installDiscoveryListener();
+  installRoomListener();
 
   roomBtn.disabled = false;
 
@@ -431,38 +432,56 @@ roomBtn.onclick = async () => {
 
     const contacts = await connection.getContacts();
 
-    const room = contacts.find(c => {
-
-      const name = c.advName || c.name || "";
-
-      const type =
-        c.advType ??
-        c.type;
-
-      return (
-        name === CHECKIN_ROOM_NAME &&
-        (type === 3 || type === "ROOM")
-      );
-
-    });
+    const room = contacts.find(c =>
+      c.advName === CHECKIN_ROOM_NAME &&
+      c.type === 3
+    );
 
     if (!room) {
       throw new Error(
-        "Room '" + CHECKIN_ROOM_NAME + "' not found in contacts."
+        "Room '" + CHECKIN_ROOM_NAME + "' not found."
       );
     }
 
-    console.log("ROOM CONTACT:", room);
+    roomStatus.innerHTML =
+      "📡 Connecting to " + room.advName + "...";
+
+    message("Sending room login...");
+
+    // Convert publicKey object into actual 32 bytes
+    const publicKey = Uint8Array.from(
+      Object.values(room.publicKey)
+    );
+
+    if (publicKey.length !== 32) {
+      throw new Error(
+        "Invalid room public key length: " +
+        publicKey.length
+      );
+    }
+
+    // Password -> bytes
+    const password =
+      new TextEncoder().encode(CHECKIN_ROOM_PASSWORD);
+
+    // CMD_SEND_LOGIN = 0x1A
+    const frame =
+      new Uint8Array(1 + 32 + password.length);
+
+    frame[0] = 0x1A;
+
+    frame.set(publicKey, 1);
+    frame.set(password, 33);
+
+    await connection.sendToRadioFrame(frame);
 
     roomStatus.innerHTML =
-      "Room found: " + CHECKIN_ROOM_NAME;
+      "⏳ Login sent. Waiting for room...";
 
-    message("Room found.");
-
-      roomStatus.innerHTML +=
-        "<pre style='text-align:left;white-space:pre-wrap;font-size:11px;'>" +
-        JSON.stringify(room, null, 2) +
-        "</pre>";
+    message(
+      "Login request transmitted to " +
+      room.advName
+    );
 
   }
 
@@ -478,6 +497,52 @@ roomBtn.onclick = async () => {
   }
 
 };
+function installRoomListener() {
+
+  connection.txCharacteristic.addEventListener(
+    "characteristicvaluechanged",
+    (event) => {
+
+      const frame =
+        new Uint8Array(event.target.value.buffer);
+
+      console.log("RX:", frame);
+
+      // PUSH_CODE_LOGIN_SUCCESS
+      if (frame[0] === 0x85) {
+
+        const permissions = frame[1];
+
+        roomStatus.innerHTML =
+          "✅ CONNECTED TO " +
+          CHECKIN_ROOM_NAME +
+          "<br><small>Permission: " +
+          permissions +
+          "</small>";
+
+        message(
+          "Room login successful."
+        );
+
+        return;
+      }
+
+
+      // PUSH_CODE_LOGIN_FAIL
+      if (frame[0] === 0x86) {
+
+        roomStatus.innerHTML =
+          "❌ ROOM NOT REACHED";
+
+        message(
+          "Room login failed or timed out."
+        );
+
+      }
+
+    }
+  );
+}
 
 </script>
 
