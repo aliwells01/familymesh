@@ -112,36 +112,38 @@ connectBtn.onclick = async () => {
     status.innerHTML = "🟡 Connecting...";
     message("Opening Bluetooth selector...");
 
-    connection = new WebBleConnection();
+   connection = await WebBleConnection.open();
 
-    connection.on("connected", async () => {
+if (!connection) {
+  throw new Error("No Bluetooth device selected");
+}
 
-      status.innerHTML = "🟢 Connected";
-      message("MeshCore radio connected.");
+connection.on("connected", async () => {
 
-      advertBtn.disabled = false;
-      floodBtn.disabled = false;
+  status.innerHTML = "🟢 Connected";
+  message("MeshCore radio connected.");
 
-      connectBtn.innerHTML = "CONNECTED";
-      connectBtn.disabled = true;
+  advertBtn.disabled = false;
+  floodBtn.disabled = false;
 
-    });
+  connectBtn.innerHTML = "CONNECTED";
+  connectBtn.disabled = true;
 
-    connection.on("disconnected", () => {
+});
 
-      status.innerHTML = "🔴 Disconnected";
+connection.on("disconnected", () => {
 
-      advertBtn.disabled = true;
-      floodBtn.disabled = true;
+  status.innerHTML = "🔴 Disconnected";
 
-      connectBtn.innerHTML = "CONNECT TO RADIO";
-      connectBtn.disabled = false;
+  advertBtn.disabled = true;
+  floodBtn.disabled = true;
 
-      message("Radio disconnected.");
+  connectBtn.innerHTML = "CONNECT TO RADIO";
+  connectBtn.disabled = false;
 
-    });
+  message("Radio disconnected.");
 
-    await connection.connect();
+});
 
   }
   catch(err) {
