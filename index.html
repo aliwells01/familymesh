@@ -457,12 +457,12 @@ roomBtn.onclick = async () => {
     roomStatus.innerHTML =
       "Room found: " + CHECKIN_ROOM_NAME;
 
-    message("Room found. Logging in...");
+    message("Room found.");
 
-    /*
-      We'll call the meshcore.js room-login method here.
-      The exact method name depends on the current library API.
-    */
+      roomStatus.innerHTML +=
+        "<pre style='text-align:left;white-space:pre-wrap;font-size:11px;'>" +
+        JSON.stringify(room, null, 2) +
+        "</pre>";
 
   }
 
