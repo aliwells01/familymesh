@@ -99,6 +99,9 @@ import {
 
 
 let connection = null;
+let discoveryTag = null;
+let discoveredRepeaters = [];
+let discoveryTimer = null;
 
 const status = document.getElementById("status");
 const log = document.getElementById("log");
@@ -114,6 +117,115 @@ function message(text) {
   log.innerHTML = text;
 }
 
+
+function uint32ToLE(value) {
+  return [
+    value & 0xff,
+    (value >> 8) & 0xff,
+    (value >> 16) & 0xff,
+    (value >> 24) & 0xff
+  ];
+}
+
+function bytesToHex(bytes) {
+  return Array.from(bytes)
+    .map(b => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+
+function installDiscoveryListener() {
+
+  connection.txCharacteristic.addEventListener(
+    "characteristicvaluechanged",
+    (event) => {
+
+      const frame = new Uint8Array(event.target.value.buffer);
+
+      // 0x8E = PUSH_CODE_CONTROL_DATA
+      if (frame[0] !== 0x8E) return;
+
+      const localSnr = (frame[1] << 24 >> 24) / 4;
+      const localRssi = frame[2] << 24 >> 24;
+
+      const pathLen = frame[3];
+
+      const payloadStart = 4 + pathLen;
+      const payload = frame.slice(payloadStart);
+
+      if (payload.length < 6) return;
+
+      // upper nibble 0x90 = DISCOVER_RESP
+      const responseType = payload[0] & 0xF0;
+
+      if (responseType !== 0x90) return;
+
+      // lower nibble is node type
+      const nodeType = payload[0] & 0x0F;
+
+      // 2 = repeater
+      if (nodeType !== 2) return;
+
+      const remoteSnr = (payload[1] << 24 >> 24) / 4;
+
+      const responseTag =
+        payload[2] |
+        (payload[3] << 8) |
+        (payload[4] << 16) |
+        (payload[5] << 24);
+
+      // only accept replies to OUR discovery request
+      if ((responseTag >>> 0) !== (discoveryTag >>> 0)) return;
+
+      const pubKey = payload.slice(6);
+
+      const pubKeyHex = bytesToHex(pubKey);
+
+      // avoid duplicate responders
+      if (discoveredRepeaters.some(r => r.pubKey === pubKeyHex)) {
+        return;
+      }
+
+      discoveredRepeaters.push({
+        pubKey: pubKeyHex,
+        localSnr,
+        localRssi,
+        remoteSnr
+      });
+
+      showDiscoveryResults();
+    }
+  );
+}
+function showDiscoveryResults() {
+
+  if (discoveredRepeaters.length === 0) {
+    repeatersList.innerHTML =
+      "<h3>Scanning...</h3><p>No repeater replies yet.</p>";
+    return;
+  }
+
+  let html =
+    "<h3>✅ " +
+    discoveredRepeaters.length +
+    " nearby repeater" +
+    (discoveredRepeaters.length === 1 ? "" : "s") +
+    " found</h3>";
+
+  discoveredRepeaters.forEach((r, i) => {
+
+    html +=
+      "<div style='padding:12px;border-bottom:1px solid #444;text-align:left;'>" +
+      "<strong>Repeater " + (i + 1) + "</strong>" +
+      "<br>Radio SNR: " + r.localSnr + " dB" +
+      "<br>Repeater heard us: " + r.remoteSnr + " dB" +
+      "<br>RSSI: " + r.localRssi + " dBm" +
+      "<br><small>" + r.pubKey.substring(0, 16) + "...</small>" +
+      "</div>";
+  });
+
+  repeatersList.innerHTML = html;
+}
 
 connectBtn.onclick = async () => {
 
@@ -140,6 +252,8 @@ connection.on("connected", async () => {
   connectBtn.disabled = true;
 
   repeatersBtn.disabled = false;
+
+  installDiscoveryListener();
 
 });
 
@@ -217,84 +331,67 @@ repeatersBtn.onclick = async () => {
 
   try {
 
-    message("Reading contacts from radio...");
+    discoveredRepeaters = [];
 
-    const contacts = await connection.getContacts();
+    repeatersList.innerHTML =
+      "<h3>Scanning zero-hop...</h3>" +
+      "<p>Listening for nearby repeaters.</p>";
 
-    console.log("ALL CONTACTS:", contacts);
+    message("Sending zero-hop repeater discovery...");
 
-    // First try known MeshCore fields used for advertised node type.
-    const repeaters = contacts.filter(contact => {
+    // random 32-bit discovery tag
+    discoveryTag =
+      Math.floor(Math.random() * 0xFFFFFFFF) >>> 0;
 
-      if (contact.advType === 2) return true;
+    /*
+      Companion command:
 
-      if (contact.type === 2) return true;
+      byte 0 = 0x37   CMD_SEND_CONTROL_DATA
+      byte 1 = 0x00   flags
+      byte 2 = 0x80   NODE_DISCOVER_REQ
+      byte 3 = 0x04   filter bit for ADV_TYPE_REPEATER (type 2)
+      bytes 4-7 = random discovery tag
+      bytes 8-11 = "since", zero
+    */
 
-      if (contact.type === "REPEATER") return true;
+    const frame = new Uint8Array([
+      0x37,
+      0x00,
+      0x80,
+      0x04,
+      ...uint32ToLE(discoveryTag),
+      0x00, 0x00, 0x00, 0x00
+    ]);
 
-      if (contact.advType === "REPEATER") return true;
+    await connection.sendToRadioFrame(frame);
 
-      return false;
+    message("📡 Discovery transmitted. Listening...");
 
-    });
-
-    repeatersList.innerHTML = "";
-
-    if (repeaters.length === 0) {
-
-      repeatersList.innerHTML =
-        "<p>No repeaters identified.</p>" +
-        "<p>Total contacts stored: " + contacts.length + "</p>";
-
-      // Temporary diagnostic output
-      if (contacts.length > 0) {
-        repeatersList.innerHTML +=
-          "<pre style='text-align:left;white-space:pre-wrap;font-size:11px;'>" +
-          JSON.stringify(contacts[0], null, 2) +
-          "</pre>";
-      }
-
-      message("Contacts loaded. No repeaters matched yet.");
-
-      return;
+    if (discoveryTimer) {
+      clearTimeout(discoveryTimer);
     }
 
-    let html = "<h3>Repeaters</h3>";
+    discoveryTimer = setTimeout(() => {
 
-    repeaters.forEach(contact => {
+      if (discoveredRepeaters.length === 0) {
 
-      const name =
-        contact.advName ||
-        contact.name ||
-        "Unnamed repeater";
+        repeatersList.innerHTML =
+          "<h3>⚠️ NO NEARBY REPEATER HEARD</h3>" +
+          "<p>No zero-hop repeater replied.</p>";
 
-      const lastSeen =
-        contact.lastAdvert ||
-        contact.lastSeen ||
-        contact.lastModified ||
-        null;
+        message("Discovery finished — no repeater heard.");
 
-      html += "<div style='padding:12px;border-bottom:1px solid #444;'>";
+      } else {
 
-      html += "<strong>" + name + "</strong>";
+        message(
+          "✅ Discovery finished — " +
+          discoveredRepeaters.length +
+          " repeater(s) heard."
+        );
 
-      if (lastSeen) {
-        html += "<br><small>Last heard: " + lastSeen + "</small>";
       }
 
-      html += "</div>";
-
-    });
-
-    repeatersList.innerHTML = html;
-
-    message(
-      "✅ Found " +
-      repeaters.length +
-      " repeaters from " +
-      contacts.length +
-      " stored contacts."
-    );
+    }, 7000);
 
   }
 
@@ -303,11 +400,9 @@ repeatersBtn.onclick = async () => {
     console.error(err);
 
     repeatersList.innerHTML =
-      "<pre style='white-space:pre-wrap'>" +
-      String(err) +
-      "</pre>";
+      "<pre>" + String(err) + "</pre>";
 
-    message("Repeater lookup error: " + err);
+    message("Discovery error: " + err);
 
   }
 
