@@ -85,6 +85,12 @@
   FIND REPEATERS
 </button>
 
+<button id="room" disabled>
+  CHECK IN ROOM
+</button>
+
+<div id="roomStatus"></div>
+
 <div id="repeatersList"></div>
 
 
@@ -111,6 +117,11 @@ const floodBtn = document.getElementById("flood");
 
 const repeatersBtn = document.getElementById("repeaters");
 const repeatersList = document.getElementById("repeatersList");
+
+const roomBtn = document.getElementById("room");
+const roomStatus = document.getElementById("roomStatus");
+const CHECKIN_ROOM_NAME = "GhostPacketCheckIn";
+const CHECKIN_ROOM_PASSWORD = "177345";
 
 
 function message(text) {
@@ -255,6 +266,8 @@ connection.on("connected", async () => {
 
   installDiscoveryListener();
 
+  roomBtn.disabled = false;
+
 });
 
 connection.on("disconnected", () => {
@@ -270,6 +283,7 @@ connection.on("disconnected", () => {
   message("Radio disconnected.");
 
   repeatersBtn.disabled = true;
+  roomBtn.disabled = true;
 
 });
 
@@ -403,6 +417,63 @@ repeatersBtn.onclick = async () => {
       "<pre>" + String(err) + "</pre>";
 
     message("Discovery error: " + err);
+
+  }
+
+};
+
+roomBtn.onclick = async () => {
+
+  try {
+
+    roomStatus.innerHTML = "Finding room...";
+    message("Looking for check-in room...");
+
+    const contacts = await connection.getContacts();
+
+    const room = contacts.find(c => {
+
+      const name = c.advName || c.name || "";
+
+      const type =
+        c.advType ??
+        c.type;
+
+      return (
+        name === CHECKIN_ROOM_NAME &&
+        (type === 3 || type === "ROOM")
+      );
+
+    });
+
+    if (!room) {
+      throw new Error(
+        "Room '" + CHECKIN_ROOM_NAME + "' not found in contacts."
+      );
+    }
+
+    console.log("ROOM CONTACT:", room);
+
+    roomStatus.innerHTML =
+      "Room found: " + CHECKIN_ROOM_NAME;
+
+    message("Room found. Logging in...");
+
+    /*
+      We'll call the meshcore.js room-login method here.
+      The exact method name depends on the current library API.
+    */
+
+  }
+
+  catch(err) {
+
+    console.error(err);
+
+    roomStatus.innerHTML =
+      "❌ " + String(err);
+
+    message("Room error: " + err);
 
   }
 
