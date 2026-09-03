@@ -458,45 +458,61 @@ roomBtn.onclick = async () => {
       );
     }
 
-    roomStatus.innerHTML =
-      "📡 Connecting to " + room.advName + "...";
+   roomStatus.innerHTML =
+  "📡 Connecting to " + room.advName + "...";
 
-    message("Sending room login...");
+message("Requesting full retained room history...");
 
-    // Convert publicKey object into actual 32 bytes
-    const publicKey = Uint8Array.from(
-      Object.values(room.publicKey)
-    );
+const publicKey = Uint8Array.from(
+  Object.values(room.publicKey)
+);
 
-    if (publicKey.length !== 32) {
-      throw new Error(
-        "Invalid room public key length: " +
-        publicKey.length
-      );
-    }
+const password =
+  new TextEncoder().encode(CHECKIN_ROOM_PASSWORD);
 
-    // Password -> bytes
-    const password =
-      new TextEncoder().encode(CHECKIN_ROOM_PASSWORD);
+/*
+  CMD_SEND_ANON_REQ = 57 = 0x39
 
-    // CMD_SEND_LOGIN = 0x1A
-    const frame =
-      new Uint8Array(1 + 32 + password.length);
+  Companion adds the sender timestamp itself.
 
-    frame[0] = 0x1A;
+  We provide:
+    sync_since = 0
+    password
+*/
 
-    frame.set(publicKey, 1);
-    frame.set(password, 33);
+const frame =
+  new Uint8Array(
+    1 +               // command
+    32 +              // room public key
+    4 +               // sync_since
+    password.length
+  );
 
-    await connection.sendToRadioFrame(frame);
+let pos = 0;
 
-    roomStatus.innerHTML =
-      "⏳ Login sent. Waiting for room...";
+frame[pos++] = 0x39;
 
-    message(
-      "Login request transmitted to " +
-      room.advName
-    );
+// Room public key
+frame.set(publicKey, pos);
+pos += 32;
+
+// sync_since = 0
+frame[pos++] = 0x00;
+frame[pos++] = 0x00;
+frame[pos++] = 0x00;
+frame[pos++] = 0x00;
+
+// password
+frame.set(password, pos);
+
+await connection.sendToRadioFrame(frame);
+
+roomStatus.innerHTML =
+  "⏳ Request sent — loading retained history...";
+
+message(
+  "Requested room history from beginning."
+);
 
   }
 
