@@ -73,8 +73,28 @@
 
 <button id="connect">CONNECT TO RADIO</button>
 
+
+<button id="mapRepeaters" disabled>
+  SHOW REPEATER MAP
+</button>
+
+<div id="gpsStatus"></div>
+
+<svg id="gaMap"
+     viewBox="0 0 500 620"
+     style="
+       width:100%;
+       max-width:420px;
+       background:#222;
+       margin-top:15px;
+       border:1px solid #555;
+     ">
+</svg>
+
+<div id="nearestRepeaters"></div>
+
 <button id="advert" disabled>
-  ADVERTISE LOCALLY2
+  ADVERTISE LOCALLY
 </button>
 
 <button id="flood" disabled>
@@ -154,6 +174,18 @@ const sendRoomStatus =
   document.getElementById("sendRoomStatus");
 
 let currentRoom = null;
+
+const mapRepeatersBtn =
+  document.getElementById("mapRepeaters");
+
+const gpsStatus =
+  document.getElementById("gpsStatus");
+
+const gaMap =
+  document.getElementById("gaMap");
+
+const nearestRepeaters =
+  document.getElementById("nearestRepeaters");
 
 
 function message(text) {
@@ -296,6 +328,8 @@ connection.on("connected", async () => {
 
   repeatersBtn.disabled = false;
 
+  mapRepeatersBtn.disabled = false;
+
 installDiscoveryListener();
 installRoomListener();
 installRoomMessageListener();
@@ -321,6 +355,7 @@ connection.on("disconnected", () => {
   repeatersBtn.disabled = true;
   roomBtn.disabled = true;
   readRoomBtn.disabled = true;
+  mapRepeatersBtn.disabled = true;
 
 });
 
@@ -923,6 +958,399 @@ sendRoomPostBtn.onclick = async () => {
     console.error(err);
 
     sendRoomStatus.innerHTML =
+      "❌ " + String(err);
+
+  }
+
+};
+
+function toRadians(deg) {
+  return deg * Math.PI / 180;
+}
+
+function toDegrees(rad) {
+  return rad * 180 / Math.PI;
+}
+
+
+function distanceMiles(lat1, lon1, lat2, lon2) {
+
+  const R = 3958.8;
+
+  const dLat =
+    toRadians(lat2 - lat1);
+
+  const dLon =
+    toRadians(lon2 - lon1);
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRadians(lat1)) *
+    Math.cos(toRadians(lat2)) *
+    Math.sin(dLon / 2) ** 2;
+
+  const c =
+    2 *
+    Math.atan2(
+      Math.sqrt(a),
+      Math.sqrt(1 - a)
+    );
+
+  return R * c;
+}
+
+
+function bearingDegrees(lat1, lon1, lat2, lon2) {
+
+  const φ1 = toRadians(lat1);
+  const φ2 = toRadians(lat2);
+
+  const λ1 = toRadians(lon1);
+  const λ2 = toRadians(lon2);
+
+  const y =
+    Math.sin(λ2 - λ1) *
+    Math.cos(φ2);
+
+  const x =
+    Math.cos(φ1) *
+    Math.sin(φ2) -
+    Math.sin(φ1) *
+    Math.cos(φ2) *
+    Math.cos(λ2 - λ1);
+
+  return (
+    toDegrees(Math.atan2(y, x)) + 360
+  ) % 360;
+}
+
+
+function bearingName(deg) {
+
+  const directions = [
+    "N",
+    "NE",
+    "E",
+    "SE",
+    "S",
+    "SW",
+    "W",
+    "NW"
+  ];
+
+  return directions[
+    Math.round(deg / 45) % 8
+  ];
+}
+
+const GA_BOUNDS = {
+  north: 35.05,
+  south: 30.35,
+  west: -85.65,
+  east: -80.75
+};
+
+
+function geoToMap(lat, lon) {
+
+  const x =
+    ((lon - GA_BOUNDS.west) /
+    (GA_BOUNDS.east - GA_BOUNDS.west))
+    * 500;
+
+  const y =
+    ((GA_BOUNDS.north - lat) /
+    (GA_BOUNDS.north - GA_BOUNDS.south))
+    * 620;
+
+  return { x, y };
+}
+
+
+function drawGeorgiaMap(userLat, userLon, repeaters) {
+
+  gaMap.innerHTML = "";
+
+  /*
+    Crude Georgia outline for now.
+
+    This is intentionally approximate.
+    Later we can replace it with a proper SVG path.
+  */
+
+  gaMap.innerHTML = `
+    <polygon
+      points="
+        90,20
+        420,20
+        470,350
+        400,580
+        160,580
+        70,350
+      "
+      fill="none"
+      stroke="#777"
+      stroke-width="3"
+    />
+  `;
+
+
+  // repeaters
+
+  repeaters.forEach(r => {
+
+    const pos =
+      geoToMap(r.lat, r.lon);
+
+    const circle =
+      document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "circle"
+      );
+
+    circle.setAttribute("cx", pos.x);
+    circle.setAttribute("cy", pos.y);
+    circle.setAttribute("r", "5");
+
+    circle.setAttribute(
+      "fill",
+      "#aaa"
+    );
+
+    gaMap.appendChild(circle);
+
+  });
+
+
+  // user
+
+  const userPos =
+    geoToMap(userLat, userLon);
+
+  const userCircle =
+    document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "circle"
+    );
+
+  userCircle.setAttribute(
+    "cx",
+    userPos.x
+  );
+
+  userCircle.setAttribute(
+    "cy",
+    userPos.y
+  );
+
+  userCircle.setAttribute(
+    "r",
+    "8"
+  );
+
+  userCircle.setAttribute(
+    "fill",
+    "#00aaff"
+  );
+
+  gaMap.appendChild(userCircle);
+
+}
+
+
+mapRepeatersBtn.onclick = async () => {
+
+  try {
+
+    gpsStatus.innerHTML =
+      "Reading repeater locations...";
+
+    const contacts =
+      await connection.getContacts();
+
+
+    const repeaters =
+      contacts
+        .filter(c => {
+
+          if (c.type !== 2)
+            return false;
+
+          if (!c.advLat || !c.advLon)
+            return false;
+
+          return true;
+
+        })
+        .map(c => {
+
+          return {
+
+            name:
+              c.advName ||
+              "Unnamed repeater",
+
+            lat:
+              c.advLat / 1000000,
+
+            lon:
+              c.advLon / 1000000,
+
+            lastAdvert:
+              c.lastAdvert
+
+          };
+
+        });
+
+
+    if (repeaters.length === 0) {
+
+      gpsStatus.innerHTML =
+        "No repeaters with coordinates found.";
+
+      return;
+
+    }
+
+
+    gpsStatus.innerHTML =
+      "Getting iPhone location...";
+
+
+    navigator.geolocation.getCurrentPosition(
+
+      position => {
+
+        const userLat =
+          position.coords.latitude;
+
+        const userLon =
+          position.coords.longitude;
+
+
+        repeaters.forEach(r => {
+
+          r.distance =
+            distanceMiles(
+              userLat,
+              userLon,
+              r.lat,
+              r.lon
+            );
+
+          r.bearing =
+            bearingDegrees(
+              userLat,
+              userLon,
+              r.lat,
+              r.lon
+            );
+
+        });
+
+
+        repeaters.sort(
+          (a, b) =>
+            a.distance - b.distance
+        );
+
+
+        gpsStatus.innerHTML =
+          "📍 Location acquired. " +
+          repeaters.length +
+          " known repeaters.";
+
+
+        drawGeorgiaMap(
+          userLat,
+          userLon,
+          repeaters
+        );
+
+
+        let html =
+          "<h3>Nearest Repeaters</h3>";
+
+
+        repeaters
+          .slice(0, 10)
+          .forEach((r, index) => {
+
+            const direction =
+              bearingName(r.bearing);
+
+            const lastSeen =
+              r.lastAdvert
+                ? new Date(
+                    r.lastAdvert * 1000
+                  ).toLocaleDateString()
+                : "Unknown";
+
+
+            html += `
+              <div style="
+                padding:12px;
+                border-bottom:1px solid #444;
+                text-align:left;
+              ">
+
+                <strong>
+                  ${index + 1}. ${r.name}
+                </strong>
+
+                <br>
+
+                ${r.distance.toFixed(1)}
+                miles
+
+                ${direction}
+
+                (${Math.round(r.bearing)}°)
+
+                <br>
+
+                <small>
+                  Last advert:
+                  ${lastSeen}
+                </small>
+
+              </div>
+            `;
+
+          });
+
+
+        nearestRepeaters.innerHTML =
+          html;
+
+      },
+
+      error => {
+
+        console.error(error);
+
+        gpsStatus.innerHTML =
+          "❌ GPS error: " +
+          error.message;
+
+      },
+
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 30000
+      }
+
+    );
+
+  }
+
+  catch(err) {
+
+    console.error(err);
+
+    gpsStatus.innerHTML =
       "❌ " + String(err);
 
   }
