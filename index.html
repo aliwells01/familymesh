@@ -93,6 +93,16 @@
   READ ROOM
 </button>
 
+<textarea id="roomPostText"
+          placeholder="Type check-in message..."
+          style="width:100%;max-width:420px;height:80px;margin-top:15px;"></textarea>
+
+<button id="sendRoomPost" disabled>
+  SEND TO ROOM
+</button>
+
+<div id="sendRoomStatus"></div>
+
 <div id="roomMessages"></div>
 
 <div id="roomStatus"></div>
@@ -133,6 +143,17 @@ const readRoomBtn = document.getElementById("readRoom");
 const roomMessages = document.getElementById("roomMessages");
 
 let roomPosts = [];
+
+const roomPostText =
+  document.getElementById("roomPostText");
+
+const sendRoomPostBtn =
+  document.getElementById("sendRoomPost");
+
+const sendRoomStatus =
+  document.getElementById("sendRoomStatus");
+
+let currentRoom = null;
 
 
 function message(text) {
@@ -450,7 +471,9 @@ roomBtn.onclick = async () => {
     const room = contacts.find(c =>
       c.advName === CHECKIN_ROOM_NAME &&
       c.type === 3
+      
     );
+currentRoom = room;
 
     if (!room) {
       throw new Error(
@@ -771,7 +794,7 @@ function installRoomListener() {
       if (frame[0] === 0x85) {
 
         const permissions = frame[1];
-
+        sendRoomPostBtn.disabled = false;
         roomStatus.innerHTML =
           "✅ CONNECTED TO " +
           CHECKIN_ROOM_NAME +
@@ -802,6 +825,106 @@ function installRoomListener() {
     }
   );
 }
+
+function uint32ToLEBytes(value) {
+  return new Uint8Array([
+    value & 0xff,
+    (value >>> 8) & 0xff,
+    (value >>> 16) & 0xff,
+    (value >>> 24) & 0xff
+  ]);
+}
+
+sendRoomPostBtn.onclick = async () => {
+
+  try {
+
+    const text =
+      roomPostText.value.trim();
+
+    if (!text) {
+      sendRoomStatus.innerHTML =
+        "Type a message first.";
+      return;
+    }
+
+    if (!currentRoom) {
+      throw new Error(
+        "Room has not been selected."
+      );
+    }
+
+    const roomKey =
+      Uint8Array.from(
+        Object.values(currentRoom.publicKey)
+      );
+
+    const recipientPrefix =
+      roomKey.slice(0, 6);
+
+    const textBytes =
+      new TextEncoder().encode(text);
+
+    const timestamp =
+      Math.floor(Date.now() / 1000);
+
+    /*
+      CMD_SEND_TXT_MSG
+
+      byte 0    = 0x02
+      byte 1    = txt_type 0 = plain text
+      byte 2    = attempt 0
+      bytes 3-6 = timestamp
+      bytes 7-12 = first 6 bytes of room public key
+      bytes 13+ = message
+    */
+
+    const frame =
+      new Uint8Array(
+        13 + textBytes.length
+      );
+
+    frame[0] = 0x02;
+    frame[1] = 0x00;
+    frame[2] = 0x00;
+
+    frame.set(
+      uint32ToLEBytes(timestamp),
+      3
+    );
+
+    frame.set(
+      recipientPrefix,
+      7
+    );
+
+    frame.set(
+      textBytes,
+      13
+    );
+
+    sendRoomStatus.innerHTML =
+      "📡 Sending...";
+
+    await connection.sendToRadioFrame(frame);
+
+    sendRoomStatus.innerHTML =
+      "✅ Message handed to radio.";
+
+    roomPostText.value = "";
+
+  }
+
+  catch(err) {
+
+    console.error(err);
+
+    sendRoomStatus.innerHTML =
+      "❌ " + String(err);
+
+  }
+
+};
 
 </script>
 
