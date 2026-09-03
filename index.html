@@ -74,7 +74,7 @@
 <button id="connect">CONNECT TO RADIO</button>
 
 <button id="advert" disabled>
-  ADVERTISE LOCALLY1
+  ADVERTISE LOCALLY2
 </button>
 
 <button id="flood" disabled>
@@ -475,11 +475,14 @@ roomBtn.onclick = async () => {
     );
 currentRoom = room;
 
+
     if (!room) {
       throw new Error(
         "Room '" + CHECKIN_ROOM_NAME + "' not found."
       );
     }
+
+sendRoomPostBtn.disabled = false;
 
    roomStatus.innerHTML =
   "📡 Connecting to " + room.advName + "...";
