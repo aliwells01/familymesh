@@ -74,7 +74,7 @@
 <button id="connect">CONNECT TO RADIO</button>
 
 <button id="advert" disabled>
-  ADVERTISE LOCALLY
+  ADVERTISE LOCALLY1
 </button>
 
 <button id="flood" disabled>
@@ -794,7 +794,7 @@ function installRoomListener() {
       if (frame[0] === 0x85) {
 
         const permissions = frame[1];
-        sendRoomPostBtn.disabled = false;
+        
         roomStatus.innerHTML =
           "✅ CONNECTED TO " +
           CHECKIN_ROOM_NAME +
@@ -805,7 +805,7 @@ function installRoomListener() {
         message(
           "Room login successful."
         );
-
+        sendRoomPostBtn.disabled = false;
         return;
       }
 
