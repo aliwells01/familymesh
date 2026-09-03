@@ -89,6 +89,12 @@
   CHECK IN ROOM
 </button>
 
+<button id="readRoom" disabled>
+  READ ROOM
+</button>
+
+<div id="roomMessages"></div>
+
 <div id="roomStatus"></div>
 
 <div id="repeatersList"></div>
@@ -122,6 +128,11 @@ const roomBtn = document.getElementById("room");
 const roomStatus = document.getElementById("roomStatus");
 const CHECKIN_ROOM_NAME = "GhostPacketCheckIn";
 const CHECKIN_ROOM_PASSWORD = "177345";
+
+const readRoomBtn = document.getElementById("readRoom");
+const roomMessages = document.getElementById("roomMessages");
+
+let roomPosts = [];
 
 
 function message(text) {
@@ -264,10 +275,13 @@ connection.on("connected", async () => {
 
   repeatersBtn.disabled = false;
 
-  installDiscoveryListener();
-  installRoomListener();
+installDiscoveryListener();
+installRoomListener();
+installRoomMessageListener();
 
-  roomBtn.disabled = false;
+
+  roomBtn.disabled = false
+  readRoomBtn.disabled = false;
 
 });
 
@@ -285,6 +299,7 @@ connection.on("disconnected", () => {
 
   repeatersBtn.disabled = true;
   roomBtn.disabled = true;
+  readRoomBtn.disabled = true;
 
 });
 
@@ -497,6 +512,234 @@ roomBtn.onclick = async () => {
   }
 
 };
+function readUint32LE(bytes, offset) {
+  return (
+    bytes[offset] |
+    (bytes[offset + 1] << 8) |
+    (bytes[offset + 2] << 16) |
+    (bytes[offset + 3] << 24)
+  ) >>> 0;
+}
+
+function decodeText(bytes) {
+  return new TextDecoder("utf-8").decode(bytes);
+}
+
+async function requestNextMessage() {
+  // CMD_SYNC_NEXT_MESSAGE = 0x0A
+  await connection.sendToRadioFrame(
+    new Uint8Array([0x0A])
+  );
+}
+
+function installRoomMessageListener() {
+
+  connection.txCharacteristic.addEventListener(
+    "characteristicvaluechanged",
+    async (event) => {
+
+      const frame =
+        new Uint8Array(event.target.value.buffer);
+
+      // PUSH_CODE_MSG_WAITING
+      // Radio says there is a queued message waiting.
+      if (frame[0] === 0x83) {
+
+        console.log("Message waiting");
+
+        await requestNextMessage();
+
+        return;
+      }
+
+
+      /*
+        RESP_CODE_CONTACT_MSG_RECV_V3 = 16
+
+        layout:
+
+        0      response code
+        1      SNR * 4
+        2-3    reserved
+        4-9    sender public-key prefix
+        10     path length
+        11     text type
+        12-15  timestamp
+        16...  message
+
+        Room posts use SIGNED_PLAIN and include
+        an additional four-byte author prefix before
+        the actual text.
+      */
+
+      if (frame[0] === 16) {
+
+        const snr =
+          (frame[1] << 24 >> 24) / 4;
+
+        const senderPrefix =
+          bytesToHex(frame.slice(4, 10));
+
+        const pathLen = frame[10];
+
+        const txtType = frame[11];
+
+        const timestamp =
+          readUint32LE(frame, 12);
+
+        let textStart = 16;
+
+        let authorPrefix = null;
+
+        /*
+          Signed room posts contain an extra
+          4-byte author public-key prefix.
+        */
+        if (txtType === 2) {
+
+          authorPrefix =
+            bytesToHex(frame.slice(16, 20));
+
+          textStart = 20;
+        }
+
+        const text =
+          decodeText(frame.slice(textStart));
+
+        console.log(
+          "ROOM MESSAGE:",
+          {
+            senderPrefix,
+            authorPrefix,
+            timestamp,
+            snr,
+            pathLen,
+            txtType,
+            text
+          }
+        );
+
+        roomPosts.push({
+          senderPrefix,
+          authorPrefix,
+          timestamp,
+          snr,
+          text
+        });
+
+        displayRoomPosts();
+
+        // Keep draining the queue
+        await requestNextMessage();
+
+        return;
+      }
+
+
+      // RESP_CODE_NO_MORE_MESSAGES
+      if (frame[0] === 10) {
+
+        message(
+          "✅ Room message sync complete."
+        );
+
+        if (roomPosts.length === 0) {
+
+          roomMessages.innerHTML =
+            "<p>No unread room messages.</p>";
+
+        }
+
+        return;
+      }
+
+    }
+  );
+}
+
+
+function displayRoomPosts() {
+
+  let html =
+    "<h3>Room Messages</h3>";
+
+  roomPosts.forEach(post => {
+
+    const when =
+      new Date(
+        post.timestamp * 1000
+      ).toLocaleString();
+
+    html +=
+      "<div style='" +
+      "padding:12px;" +
+      "border-bottom:1px solid #444;" +
+      "text-align:left;" +
+      "'>";
+
+    html +=
+      "<strong>" +
+      when +
+      "</strong>";
+
+    if (post.authorPrefix) {
+
+      html +=
+        "<br><small>" +
+        "Sender: " +
+        post.authorPrefix +
+        "</small>";
+
+    }
+
+    html +=
+      "<br><br>" +
+      post.text;
+
+    html +=
+      "</div>";
+
+  });
+
+  roomMessages.innerHTML = html;
+
+}
+
+readRoomBtn.onclick = async () => {
+
+  try {
+
+    roomPosts = [];
+
+    roomMessages.innerHTML =
+      "<p>Checking room...</p>";
+
+    message(
+      "Reading room messages..."
+    );
+
+    await requestNextMessage();
+
+  }
+
+  catch(err) {
+
+    console.error(err);
+
+    roomMessages.innerHTML =
+      "<pre>" +
+      String(err) +
+      "</pre>";
+
+    message(
+      "Read room error: " +
+      err
+    );
+
+  }
+
+};
+
 function installRoomListener() {
 
   connection.txCharacteristic.addEventListener(
