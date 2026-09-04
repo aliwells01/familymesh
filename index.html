@@ -706,6 +706,34 @@
   text-align: right;
 }
 
+.family-map-dot {
+  fill: #ff9f43;
+  stroke: #ffd09b;
+  stroke-width: 2;
+  filter: drop-shadow(0 0 6px rgba(255,159,67,.65));
+}
+
+.family-map-label {
+  fill: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: #07131d;
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.family-map-detail {
+  fill: #ffb86c;
+  font-size: 10px;
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: #07131d;
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+
   </style>
 </head>
 
@@ -2377,6 +2405,183 @@ function drawLocalRepeaterMap(userLat, userLon, repeaters) {
 
   gaMap.appendChild(radiusLabel);
 
+addFamilyToMap(
+  gaMap,
+  userLat,
+  userLon,
+  250,
+  250,
+  210,
+  LOCAL_RADIUS_MILES
+);
+
+
+}
+
+
+function addFamilyToMap(
+  svg,
+  userLat,
+  userLon,
+  centerX,
+  centerY,
+  mapRadius,
+  radiusMiles
+) {
+
+  if (!familyMembers || !familyLocations)
+    return;
+
+  familyMembers.forEach(member => {
+
+    const data =
+      familyLocations[member.keyPrefix];
+
+    if (!data)
+      return;
+
+    if (
+      !Number.isFinite(data.lat) ||
+      !Number.isFinite(data.lon)
+    )
+      return;
+
+
+    // Distance from us to family member
+    const distance =
+      haversineMiles(
+        userLat,
+        userLon,
+        data.lat,
+        data.lon
+      );
+
+
+    // Don't plot outside map radius
+    if (distance > radiusMiles)
+      return;
+
+
+    const bearing =
+      calculateBearing(
+        userLat,
+        userLon,
+        data.lat,
+        data.lon
+      );
+
+
+    /*
+      Convert bearing + distance to
+      position on radar.
+
+      0 degrees = North
+      90 degrees = East
+    */
+
+    const angle =
+      bearing * Math.PI / 180;
+
+    const radialDistance =
+      (distance / radiusMiles) *
+      mapRadius;
+
+
+    const x =
+      centerX +
+      Math.sin(angle) *
+      radialDistance;
+
+    const y =
+      centerY -
+      Math.cos(angle) *
+      radialDistance;
+
+
+    /*
+      Family marker
+    */
+
+    const dot =
+      document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "circle"
+      );
+
+    dot.setAttribute("cx", x);
+    dot.setAttribute("cy", y);
+    dot.setAttribute("r", "8");
+
+    dot.setAttribute(
+      "class",
+      "family-map-dot"
+    );
+
+    svg.appendChild(dot);
+
+
+    /*
+      Family name
+    */
+
+    const label =
+      document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "text"
+      );
+
+    label.setAttribute(
+      "x",
+      x + 12
+    );
+
+    label.setAttribute(
+      "y",
+      y - 3
+    );
+
+    label.setAttribute(
+      "class",
+      "family-map-label"
+    );
+
+    label.textContent =
+      member.name;
+
+    svg.appendChild(label);
+
+
+    /*
+      Distance + direction
+    */
+
+    const detail =
+      document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "text"
+      );
+
+    detail.setAttribute(
+      "x",
+      x + 12
+    );
+
+    detail.setAttribute(
+      "y",
+      y + 12
+    );
+
+    detail.setAttribute(
+      "class",
+      "family-map-detail"
+    );
+
+    detail.textContent =
+      `${distance.toFixed(1)} mi ${bearingName(bearing)}`;
+
+    svg.appendChild(detail);
+
+  });
 }
 
 
