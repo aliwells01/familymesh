@@ -646,6 +646,65 @@
   color: #8faec5;
 }
 
+#familyList {
+  position: absolute;
+  inset: 64px 14px 14px;
+  z-index: 2;
+  overflow-y: auto;
+  background: rgba(4,18,29,.92);
+  border-radius: 14px;
+  padding: 6px 14px;
+}
+
+.family-row {
+  display: grid;
+  grid-template-columns: 12px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 15px 4px;
+  border-bottom: 1px solid rgba(99,147,178,.18);
+}
+
+.family-row:last-child {
+  border-bottom: 0;
+}
+
+.family-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #536674;
+}
+
+.family-dot.family-known {
+  background: #42d77d;
+  box-shadow: 0 0 8px rgba(66,215,125,.45);
+}
+
+.family-info {
+  min-width: 0;
+}
+
+.family-name {
+  color: #fff;
+  font-weight: 650;
+  text-align: left;
+}
+
+.family-time {
+  color: #8faec5;
+  font-size: 12px;
+  margin-top: 3px;
+  text-align: left;
+}
+
+.family-location {
+  color: #63baff;
+  font-weight: 650;
+  font-size: 13px;
+  white-space: nowrap;
+  text-align: right;
+}
 
   </style>
 </head>
@@ -692,9 +751,10 @@
     <section class="section-panel map-shell" aria-label="Nearby repeater map">
       <div class="map-topbar">
         <div class="segmented">
-            <button id="mapTab" class="active" type="button">Map</button>
-            <button id="listTab" type="button">List</button>
-          </div>
+          <button id="mapTab" class="active" type="button">Map</button>
+          <button id="listTab" type="button">List</button>
+          <button id="familyTab" type="button">Family</button>
+        </div>
         <div class="locate" aria-hidden="true">↻</div>
       </div>
 
@@ -704,6 +764,7 @@
       </div>
 
       <div id="localRepeaterList" style="display:none;"></div>
+      <div id="familyList" style="display:none;"></div>
 
       <div id="gpsStatus">Waiting for radio connection…</div>
       <div class="map-radius">5 mile radius</div>
@@ -845,6 +906,12 @@ const listTab =
 const localRepeaterList =
   document.getElementById("localRepeaterList");
 
+const familyTab =
+  document.getElementById("familyTab");
+
+const familyList =
+  document.getElementById("familyList");
+
 
 let mapView = {
   x: 0,
@@ -853,13 +920,40 @@ let mapView = {
   height: 620
 };
 
+
+const FAMILY = [
+  {
+    name: "GhostPacketCC",
+    keyPrefix: "a053028f4203"
+  },
+  {
+    name: "GhostPacketD1",
+    keyPrefix: "083ffcb7b742"
+  },
+  {
+    name: "GhostPacketI8",
+    keyPrefix: "a3926318273e"
+  },
+  {
+    name: "GhostPacketPT",
+    keyPrefix: "774c66e368b4"
+  }
+];
+
+const FAMILY_STATUS_PREFIX = "WLLOC|";
+
+let familyLocations = {};
+let myPosition = null;
+
 mapTab.onclick = () => {
 
   mapPanel.style.display = "block";
   localRepeaterList.style.display = "none";
+  familyList.style.display = "none";
 
   mapTab.classList.add("active");
   listTab.classList.remove("active");
+  familyTab.classList.remove("active");
 };
 
 
@@ -867,9 +961,25 @@ listTab.onclick = () => {
 
   mapPanel.style.display = "none";
   localRepeaterList.style.display = "block";
+  familyList.style.display = "none";
 
   listTab.classList.add("active");
   mapTab.classList.remove("active");
+  familyTab.classList.remove("active");
+};
+
+
+familyTab.onclick = () => {
+
+  mapPanel.style.display = "none";
+  localRepeaterList.style.display = "none";
+  familyList.style.display = "block";
+
+  familyTab.classList.add("active");
+  mapTab.classList.remove("active");
+  listTab.classList.remove("active");
+
+  renderFamilyStatus();
 };
 
 function applyMapView() {
@@ -1444,6 +1554,7 @@ function installRoomMessageListener() {
       const frame =
         new Uint8Array(event.target.value.buffer);
 
+
       // PUSH_CODE_MSG_WAITING
       // Radio says there is a queued message waiting.
       if (frame[0] === 0x83) {
@@ -1483,9 +1594,11 @@ function installRoomMessageListener() {
         const senderPrefix =
           bytesToHex(frame.slice(4, 10));
 
-        const pathLen = frame[10];
+        const pathLen =
+          frame[10];
 
-        const txtType = frame[11];
+        const txtType =
+          frame[11];
 
         const timestamp =
           readUint32LE(frame, 12);
@@ -1494,6 +1607,7 @@ function installRoomMessageListener() {
 
         let authorPrefix = null;
 
+
         /*
           Signed room posts contain an extra
           4-byte author public-key prefix.
@@ -1501,13 +1615,19 @@ function installRoomMessageListener() {
         if (txtType === 2) {
 
           authorPrefix =
-            bytesToHex(frame.slice(16, 20));
+            bytesToHex(
+              frame.slice(16, 20)
+            );
 
           textStart = 20;
         }
 
+
         const text =
-          decodeText(frame.slice(textStart));
+          decodeText(
+            frame.slice(textStart)
+          );
+
 
         console.log(
           "ROOM MESSAGE:",
@@ -1522,6 +1642,145 @@ function installRoomMessageListener() {
           }
         );
 
+
+        /*
+          =========================================
+          WELLSLINK FAMILY LOCATION RECORD
+          =========================================
+
+          Location records look like:
+
+          WLLOC|timestamp|latitude|longitude
+
+          They are stored for the Family tab but
+          are NOT displayed as chat messages.
+        */
+
+        if (
+          text.startsWith(
+            FAMILY_STATUS_PREFIX
+          )
+        ) {
+
+          const parts =
+            text.split("|");
+
+          if (parts.length >= 4) {
+
+            const locationTimestamp =
+              Number(parts[1]);
+
+            const lat =
+              Number(parts[2]);
+
+            const lon =
+              Number(parts[3]);
+
+
+            /*
+              For signed room posts authorPrefix
+              identifies the actual radio that
+              created the post.
+            */
+
+            const member =
+              getFamilyMember(
+                authorPrefix
+              );
+
+
+            if (
+              member &&
+              Number.isFinite(
+                locationTimestamp
+              ) &&
+              Number.isFinite(lat) &&
+              Number.isFinite(lon)
+            ) {
+
+              const existing =
+                familyLocations[
+                  member.keyPrefix
+                ];
+
+
+              /*
+                Only replace the stored location
+                if this check-in is newer.
+              */
+
+              if (
+                !existing ||
+                locationTimestamp >
+                  existing.timestamp
+              ) {
+
+                familyLocations[
+                  member.keyPrefix
+                ] = {
+                  timestamp:
+                    locationTimestamp,
+
+                  lat: lat,
+                  lon: lon
+                };
+
+
+                console.log(
+                  "Family location updated:",
+                  member.name,
+                  familyLocations[
+                    member.keyPrefix
+                  ]
+                );
+              }
+
+
+              /*
+                Refresh the Family tab.
+              */
+
+              renderFamilyStatus();
+
+            } else {
+
+              console.log(
+                "Location record received but family member could not be identified:",
+                {
+                  authorPrefix,
+                  text
+                }
+              );
+
+            }
+
+          }
+
+
+          /*
+            IMPORTANT:
+
+            This is a machine-generated WellsLink
+            location record.
+
+            Do NOT add it to roomPosts, otherwise
+            it would appear in Family Messages.
+          */
+
+
+          // Keep draining the room queue.
+          await requestNextMessage();
+
+          return;
+        }
+
+
+        /*
+          =========================================
+          NORMAL FAMILY MESSAGE
+          =========================================
+        */
+
         roomPosts.push({
           senderPrefix,
           authorPrefix,
@@ -1530,7 +1789,9 @@ function installRoomMessageListener() {
           text
         });
 
+
         displayRoomPosts();
+
 
         // Keep draining the queue
         await requestNextMessage();
@@ -1546,12 +1807,22 @@ function installRoomMessageListener() {
           "✅ Room message sync complete."
         );
 
+
         if (roomPosts.length === 0) {
 
           roomMessages.innerHTML =
             '<div class="empty-chat">No family messages yet.</div>';
 
         }
+
+
+        /*
+          Refresh Family display after all
+          room history has been processed.
+        */
+
+        renderFamilyStatus();
+
 
         return;
       }
@@ -2453,6 +2724,228 @@ document.querySelector(".map-shell").addEventListener("click", (event) => {
   if (event.target.closest("#radioStatusCard")) return;
   if (!mapRepeatersBtn.disabled) mapRepeatersBtn.click();
 });
+
+
+function getFamilyMember(keyPrefix) {
+
+  const key =
+    String(keyPrefix || "").toLowerCase();
+
+  return FAMILY.find(member =>
+    key.startsWith(member.keyPrefix.toLowerCase()) ||
+    member.keyPrefix.toLowerCase().startsWith(key)
+  );
+}
+
+
+function formatLastSeen(timestamp) {
+
+  if (!timestamp)
+    return "No check-in received";
+
+  const seconds =
+    Math.max(
+      0,
+      Math.floor(Date.now() / 1000) - timestamp
+    );
+
+  if (seconds < 60)
+    return "Checked in just now";
+
+  const minutes =
+    Math.floor(seconds / 60);
+
+  if (minutes < 60)
+    return `Checked in ${minutes} min ago`;
+
+  const hours =
+    Math.floor(minutes / 60);
+
+  if (hours < 24)
+    return `Checked in ${hours} hr${hours === 1 ? "" : "s"} ago`;
+
+  const days =
+    Math.floor(hours / 24);
+
+  return `Last check-in ${days} day${days === 1 ? "" : "s"} ago`;
+}
+
+
+function renderFamilyStatus() {
+
+  let html = "";
+
+  FAMILY.forEach(member => {
+
+    const data =
+      familyLocations[member.keyPrefix];
+
+    let locationText =
+      "Location unknown";
+
+    if (
+      data &&
+      myPosition &&
+      Number.isFinite(data.lat) &&
+      Number.isFinite(data.lon)
+    ) {
+
+      const distance =
+        haversineMiles(
+          myPosition.lat,
+          myPosition.lon,
+          data.lat,
+          data.lon
+        );
+
+      const bearing =
+        calculateBearing(
+          myPosition.lat,
+          myPosition.lon,
+          data.lat,
+          data.lon
+        );
+
+      locationText =
+        `${distance.toFixed(1)} mi ${bearingName(bearing)}`;
+    }
+
+    html += `
+      <div class="family-row">
+
+        <div class="family-dot ${
+          data ? "family-known" : ""
+        }"></div>
+
+        <div class="family-info">
+
+          <div class="family-name">
+            ${escapeHtml(member.name)}
+          </div>
+
+          <div class="family-time">
+            ${
+              data
+                ? formatLastSeen(data.timestamp)
+                : "No check-in received"
+            }
+          </div>
+
+        </div>
+
+        <div class="family-location">
+          ${locationText}
+        </div>
+
+      </div>
+    `;
+  });
+
+  familyList.innerHTML = html;
+}
+
+async function sendLocationCheckIn() {
+
+  if (!currentRoom)
+    return;
+
+  try {
+
+    const position =
+      await new Promise((resolve, reject) => {
+
+        navigator.geolocation.getCurrentPosition(
+          resolve,
+          reject,
+          {
+            enableHighAccuracy: true,
+            timeout: 8000,
+            maximumAge: 60000
+          }
+        );
+
+      });
+
+    const lat =
+      position.coords.latitude;
+
+    const lon =
+      position.coords.longitude;
+
+    myPosition = {
+      lat,
+      lon
+    };
+
+    const timestamp =
+      Math.floor(Date.now() / 1000);
+
+    const text =
+      `${FAMILY_STATUS_PREFIX}${timestamp}|${lat.toFixed(6)}|${lon.toFixed(6)}`;
+
+    await sendRoomText(text);
+
+    console.log(
+      "Family location check-in sent:",
+      text
+    );
+
+  } catch (err) {
+
+    console.log(
+      "Location check-in unavailable:",
+      err
+    );
+
+  }
+}
+
+async function sendRoomText(text) {
+
+  if (!currentRoom)
+    throw new Error("No room selected");
+
+  const textBytes =
+    new TextEncoder().encode(text);
+
+  const publicKey =
+    Uint8Array.from(
+      Object.values(currentRoom.publicKey)
+    );
+
+  const timestamp =
+    Math.floor(Date.now() / 1000);
+
+  const frame =
+    new Uint8Array(
+      13 + textBytes.length
+    );
+
+  frame[0] = 0x02; // CMD_SEND_TXT_MSG
+  frame[1] = 0;
+  frame[2] = 0;
+
+  const view =
+    new DataView(frame.buffer);
+
+  view.setUint32(
+    3,
+    timestamp,
+    true
+  );
+
+  frame.set(
+    publicKey.slice(0, 6),
+    7
+  );
+
+  frame.set(
+    textBytes,
+    13
+  );
+
+  await connection.sendToRadioFrame(frame);
+}
 
   </script>
 </body>
