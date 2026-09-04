@@ -625,12 +625,23 @@ roomBtn.onclick = async () => {
     );
 currentRoom = room;
 
+if (!room) {
+  throw new Error(
+    "Room '" + CHECKIN_ROOM_NAME + "' not found."
+  );
+}
 
-    if (!room) {
-      throw new Error(
-        "Room '" + CHECKIN_ROOM_NAME + "' not found."
-      );
-    }
+message("Resetting room path to flood...");
+
+await resetContactPath(room);
+
+message("Room path reset to flood.");
+
+sendRoomPostBtn.disabled = false;
+
+roomStatus.innerHTML =
+  "📡 Connecting to " + room.advName + "...";
+  
 
 sendRoomPostBtn.disabled = false;
 
@@ -1565,6 +1576,23 @@ mapRepeatersBtn.onclick = async () => {
   }
 
 };
+
+async function resetContactPath(contact) {
+
+  const publicKey =
+    Uint8Array.from(
+      Object.values(contact.publicKey)
+    );
+
+  const frame =
+    new Uint8Array(1 + 32);
+
+  frame[0] = 0x0D; // CMD_RESET_PATH
+
+  frame.set(publicKey, 1);
+
+  await connection.sendToRadioFrame(frame);
+}
 
 </script>
 
