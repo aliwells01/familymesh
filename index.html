@@ -71,11 +71,13 @@
 
 <div id="status">🔴 Not connected</div>
 
-<button id="connect">CONNECT TO RADIO</button>
-
 <div id="batteryStatus">
   🔋 --
 </div>
+
+<button id="connect">CONNECT TO RADIO</button>
+
+
 
 <button id="mapRepeaters" disabled>
   SHOW REPEATER MAP
@@ -1623,11 +1625,29 @@ function installBatteryListener() {
       if (frame[0] !== 0x0C)
         return;
 
-      console.log("BATTERY FRAME:", Array.from(frame));
+      if (frame.length < 4)
+        return;
+
+      const millivolts =
+        frame[1] |
+        (frame[2] << 8);
+
+      const batteryPercent =
+        frame[3];
+
+      const volts =
+        millivolts / 1000;
 
       batteryStatus.innerHTML =
-        "Battery frame: " +
-        Array.from(frame).join(", ");
+        "🔋 " +
+        batteryPercent +
+        "%";
+
+      console.log(
+        "Battery:",
+        batteryPercent + "%",
+        volts.toFixed(3) + "V"
+      );
 
     }
   );
