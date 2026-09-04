@@ -187,7 +187,7 @@
     .status-icon.mesh {
       color: var(--green);
       background: rgba(53,214,122,.08);
-      font-size: 15px;
+      font-size: 25px;
     }
 
     .status-copy {
@@ -664,7 +664,7 @@
         <div class="status-icon radio"></div>
         <div class="status-copy">
           <div id="status" class="status-value disconnected">Not connected</div>
-          <div id="radioDeviceLabel" class="status-sub">RadioName</div>
+          <div class="status-sub" id="radioName">RadioName</div>
         </div>
       </div>
 
@@ -1088,6 +1088,17 @@ installDiscoveryListener();
 installRoomListener();
 installRoomMessageListener();
 installBatteryListener();
+
+message("Announcing node to mesh...");
+
+try {
+  await connection.sendFloodAdvert();
+  message("Node announced to mesh.");
+} catch (err) {
+  console.error("Flood advert failed:", err);
+}
+
+document.getElementById("radioName").textContent = radioName;
 
 await requestBattery();
 
