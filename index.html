@@ -73,6 +73,9 @@
 
 <button id="connect">CONNECT TO RADIO</button>
 
+<div id="batteryStatus">
+  🔋 --
+</div>
 
 <button id="mapRepeaters" disabled>
   SHOW REPEATER MAP
@@ -232,6 +235,9 @@ const nearestRepeaters =
 const zoomInBtn = document.getElementById("zoomIn");
 const zoomOutBtn = document.getElementById("zoomOut");
 const resetMapBtn = document.getElementById("resetMap");
+
+const batteryStatus =
+  document.getElementById("batteryStatus");
 
 let mapView = {
   x: 0,
@@ -448,7 +454,9 @@ connection.on("connected", async () => {
 installDiscoveryListener();
 installRoomListener();
 installRoomMessageListener();
+installBatteryListener();
 
+await requestBattery();
 
   roomBtn.disabled = false
   readRoomBtn.disabled = false;
@@ -641,7 +649,7 @@ sendRoomPostBtn.disabled = false;
 
 roomStatus.innerHTML =
   "📡 Connecting to " + room.advName + "...";
-  
+
 
 sendRoomPostBtn.disabled = false;
 
@@ -1594,6 +1602,53 @@ async function resetContactPath(contact) {
   await connection.sendToRadioFrame(frame);
 }
 
+
+async function requestBattery() {
+
+  await connection.sendToRadioFrame(
+    new Uint8Array([0x14])
+  );
+
+}
+
+function installBatteryListener() {
+
+  connection.txCharacteristic.addEventListener(
+    "characteristicvaluechanged",
+    (event) => {
+
+      const frame =
+        new Uint8Array(event.target.value.buffer);
+
+      // RESP_CODE_BATT_AND_STORAGE
+      if (frame[0] !== 0x0C)
+        return;
+
+      if (frame.length < 3)
+        return;
+
+      const millivolts =
+        frame[1] |
+        (frame[2] << 8);
+
+      const volts =
+        millivolts / 1000;
+
+      batteryStatus.innerHTML =
+        "🔋 " +
+        volts.toFixed(2) +
+        " V";
+
+      console.log(
+        "Radio battery:",
+        millivolts,
+        "mV"
+      );
+
+    }
+  );
+
+}
 </script>
 
 </body>
