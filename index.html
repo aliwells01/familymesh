@@ -58,38 +58,36 @@
         max(5px, env(safe-area-inset-bottom));
     }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      padding: 8px 48px 18px;
-    }
+   .brand {
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  line-height: 1;
+}
 
-    .brand-title {
-      margin: 0;
-      font-size: clamp(36px, 10vw, 56px);
-      line-height: .95;
-      letter-spacing: -2.6px;
-      font-weight: 800;
-    }
+.brand-mesh {
+  color: #ffffff;
+}
 
-    .brand-title span {
-      background: linear-gradient(180deg, #6dc5ff, #168cff);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
+.brand-kin {
+  background: linear-gradient(
+    135deg,
+    #39b9ff,
+    #087cff
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
 
-    .tagline {
-      margin-top: 8px;
-      text-align: center;
-      color: #8eb8da;
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-    }
+.tagline {
+  margin-top: 7px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.1px;
+  color: #6f8798;
+}
 
     .gear {
       position: absolute;
@@ -741,10 +739,10 @@
   <main class="app">
 
     <header class="brand">
-      <div>
-        
-       <span class="brand-mesh">Mesh</span><span class=".brand-title">Kin</span>
-
+      <div class="brand">
+           <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin</span>
+      </div>
+      
       <div class="gear" aria-hidden="true">⚙</div>
     </header>
 
