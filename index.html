@@ -355,7 +355,7 @@
       margin-top: 3px;
       display: flex;
       flex-direction: column;
-      min-height: 390px;
+      min-height: 350px;
     }
 
     .messages-head {
@@ -365,6 +365,7 @@
       justify-content: space-between;
       gap: 12px;
       border-bottom: 1px solid rgba(89,139,170,.16);
+      background: rgba(2,11,18,.35);
     }
 
     .messages-title {
@@ -718,7 +719,7 @@
       </div>
 
       <div id="roomMessages">
-        <div class="empty-chat">Connect the radio to load family messages.</div>
+        <div class="empty-chat">Waiting to connect to the family check-in room...</div>
       </div>
 
       <div class="composer">
@@ -761,6 +762,7 @@ let connection = null;
 let discoveryTag = null;
 let discoveredRepeaters = [];
 let discoveryTimer = null;
+let roomConnectTimer = null;
 
 const status = document.getElementById("status");
 const log = document.getElementById("log");
@@ -1289,7 +1291,14 @@ roomBtn.onclick = async () => {
   try {
 
     roomStatus.innerHTML = "Connecting to family room...";
-    if (familyStatus) familyStatus.textContent = "Connecting...";
+    if (familyStatus) familyStatus.textContent = "Checking...";
+
+roomMessages.innerHTML = `
+  <div class="empty-chat">
+    Trying to reach the family check-in room...
+  </div>
+`;
+
     message("Looking for check-in room...");
 
     const contacts = await connection.getContacts();
@@ -1370,12 +1379,27 @@ frame.set(password, pos);
 
 await connection.sendToRadioFrame(frame);
 
-roomStatus.innerHTML =
-  "Loading recent family messages...";
+if (roomConnectTimer) {
+  clearTimeout(roomConnectTimer);
+}
 
-message(
-  "Requested room history from beginning."
-);
+roomConnectTimer = setTimeout(() => {
+
+  if (familyStatus) {
+    familyStatus.textContent = "Check-In Not Connected";
+  }
+
+  roomMessages.innerHTML = `
+    <div class="empty-chat">
+      <strong>Family check-in room could not be reached.</strong>
+      <br><br>
+      Try again, or move closer to a repeater and retry.
+    </div>
+  `;
+
+  roomStatus.innerHTML = "";
+
+}, 8000);
 
   }
 
@@ -1638,30 +1662,50 @@ function installRoomListener() {
       console.log("RX:", frame);
 
       // PUSH_CODE_LOGIN_SUCCESS
-      if (frame[0] === 0x85) {
+              if (frame[0] === 0x85) {
 
-        const permissions = frame[1];
-        
-        roomStatus.innerHTML = "";
-        if (familyStatus) familyStatus.textContent = "Connected";
+              if (roomConnectTimer) {
+                clearTimeout(roomConnectTimer);
+                roomConnectTimer = null;
+              }
 
-        message(
-          "Room login successful."
-        );
-        sendRoomPostBtn.disabled = false;
-        return;
-      }
+              const permissions = frame[1];
+
+              roomStatus.innerHTML = "";
+
+              if (familyStatus) {
+                familyStatus.textContent = "Check-In Connected";
+              }
+
+              message("Room login successful.");
+
+              sendRoomPostBtn.disabled = false;
+
+              return;
+            }
 
 
       // PUSH_CODE_LOGIN_FAIL
       if (frame[0] === 0x86) {
 
-        roomStatus.innerHTML = "";
-        if (familyStatus) familyStatus.textContent = "Room unavailable";
+                  if (roomConnectTimer) {
+            clearTimeout(roomConnectTimer);
+            roomConnectTimer = null;
+          }
 
-        message(
-          "Room login failed or timed out."
-        );
+          if (familyStatus) {
+            familyStatus.textContent = "Check-In Not Connected";
+          }
+
+          roomMessages.innerHTML = `
+            <div class="empty-chat">
+              <strong>Family check-in room could not be reached.</strong>
+              <br><br>
+              Try again, or move closer to a repeater and retry.
+            </div>
+          `;
+
+          sendRoomPostBtn.disabled = true;
 
       }
 
