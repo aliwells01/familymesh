@@ -578,6 +578,74 @@
         min-height: 250px;
       }
     }
+
+
+.segmented button {
+  border: 0;
+  background: transparent;
+  color: #8faec5;
+  min-width: 72px;
+  padding: 9px 14px;
+  border-radius: 11px;
+  font-weight: 650;
+  font-size: 15px;
+  margin: 0;
+}
+
+.segmented button.active {
+  color: #fff;
+  background: linear-gradient(180deg, #1c99ff, #0c79eb);
+  box-shadow: 0 6px 18px rgba(10,126,238,.28);
+}
+
+#localRepeaterList {
+  position: absolute;
+  inset: 64px 14px 14px;
+  z-index: 2;
+  overflow-y: auto;
+  background: rgba(4,18,29,.92);
+  border-radius: 14px;
+  padding: 6px 14px;
+}
+
+.repeater-list-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 16px;
+  align-items: center;
+  padding: 15px 4px;
+  border-bottom: 1px solid rgba(99,147,178,.18);
+}
+
+.repeater-list-row:last-child {
+  border-bottom: 0;
+}
+
+.repeater-list-name {
+  font-weight: 650;
+  color: #fff;
+  text-align: left;
+}
+
+.repeater-list-distance {
+  color: #b7cfdf;
+  white-space: nowrap;
+}
+
+.repeater-list-direction {
+  color: #63baff;
+  font-weight: 700;
+  min-width: 28px;
+  text-align: right;
+}
+
+.repeater-empty {
+  padding: 40px 12px;
+  text-align: center;
+  color: #8faec5;
+}
+
+
   </style>
 </head>
 
@@ -622,10 +690,10 @@
 
     <section class="section-panel map-shell" aria-label="Nearby repeater map">
       <div class="map-topbar">
-        <div class="segmented" aria-hidden="true">
-          <span class="active">Map</span>
-          <span>List</span>
-        </div>
+        <div class="segmented">
+            <button id="mapTab" class="active" type="button">Map</button>
+            <button id="listTab" type="button">List</button>
+          </div>
         <div class="locate" aria-hidden="true">↻</div>
       </div>
 
@@ -633,6 +701,8 @@
         <svg id="gaMap" viewBox="0 0 500 500"></svg>
         <div id="nearestRepeaters"></div>
       </div>
+
+      <div id="localRepeaterList" style="display:none;"></div>
 
       <div id="gpsStatus">Waiting for radio connection…</div>
       <div class="map-radius">5 mile radius</div>
@@ -764,11 +834,40 @@ const meshReadySub =
 const familyStatus =
   document.getElementById("familyStatus");
 
+const mapTab =
+  document.getElementById("mapTab");
+
+const listTab =
+  document.getElementById("listTab");
+
+const localRepeaterList =
+  document.getElementById("localRepeaterList");
+
+
 let mapView = {
   x: 0,
   y: 0,
   width: 500,
   height: 620
+};
+
+mapTab.onclick = () => {
+
+  mapPanel.style.display = "block";
+  localRepeaterList.style.display = "none";
+
+  mapTab.classList.add("active");
+  listTab.classList.remove("active");
+};
+
+
+listTab.onclick = () => {
+
+  mapPanel.style.display = "none";
+  localRepeaterList.style.display = "block";
+
+  listTab.classList.add("active");
+  mapTab.classList.remove("active");
 };
 
 function applyMapView() {
@@ -2045,6 +2144,49 @@ mapRepeatersBtn.onclick = async () => {
           repeaters.filter(
             r => r.distance <= LOCAL_RADIUS_MILES
           );
+
+          let listHtml = "";
+
+if (nearbyRepeaters.length === 0) {
+
+  listHtml = `
+    <div class="repeater-empty">
+      No known repeaters within
+      ${LOCAL_RADIUS_MILES} miles.
+    </div>
+  `;
+
+} else {
+
+  nearbyRepeaters.forEach(r => {
+
+    const direction =
+      bearingName(r.bearing);
+
+    listHtml += `
+      <div class="repeater-list-row">
+
+        <div class="repeater-list-name">
+          ${escapeHtml(r.name)}
+        </div>
+
+        <div class="repeater-list-distance">
+          ${r.distance.toFixed(1)} mi
+        </div>
+
+        <div class="repeater-list-direction">
+          ${direction}
+        </div>
+
+      </div>
+    `;
+
+  });
+
+}
+
+localRepeaterList.innerHTML = listHtml;
+
 
         gpsStatus.innerHTML =
           "📍 " +
