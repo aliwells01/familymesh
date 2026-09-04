@@ -664,7 +664,7 @@
         <div class="status-icon radio"></div>
         <div class="status-copy">
           <div id="status" class="status-value disconnected">Not connected</div>
-          <div class="status-sub" id="radioName">RadioName</div>
+          <div id="radioDeviceLabel" class="status-sub" >RadioName</div>
         </div>
       </div>
 
@@ -1074,6 +1074,20 @@ connection.on("connected", async () => {
   status.className = "status-value connected";
   message("MeshCore radio connected.");
 
+  const connectedRadioName =
+    connection.device?.name ||
+    connection.bluetoothDevice?.name ||
+    connection.gatt?.device?.name ||
+    "MeshCore Radio";
+
+  radioDeviceLabel.textContent = connectedRadioName;
+
+  message("MeshCore radio connected.");
+
+
+
+
+
   advertBtn.disabled = false;
   floodBtn.disabled = false;
 
@@ -1098,7 +1112,7 @@ try {
   console.error("Flood advert failed:", err);
 }
 
-document.getElementById("radioName").textContent = radioName;
+// document.getElementById("radioName").textContent = radioName;
 
 await requestBattery();
 
