@@ -109,7 +109,7 @@
 
     .status-strip {
       display: grid;
-      grid-template-columns: 1.5fr .5fr 1.5fr;
+      grid-template-columns: 1.2fr 1.5fr 0.5fr;
       border: 1px solid var(--line);
       background: rgba(8, 26, 41, .92);
       border-radius: 22px;
@@ -171,8 +171,8 @@
       height: 2px;
       border-radius: 2px 2px 0 0;
       background: #7ba8c3;
-      left: 7px;
-      top: -7px;
+      left: 1px;
+      top: -1px;
     }
 
     .status-icon.battery::after {
@@ -181,7 +181,7 @@
       height: 74%;
       align-self: end;
       background: linear-gradient(180deg, #5bea8b, #26c96d);
-      border-radius: 2px;
+      border-radius: 1px;
     }
 
     .status-icon.mesh {
@@ -600,13 +600,7 @@
         </div>
       </div>
 
-      <div class="status-card">
-        <div class="status-icon battery"></div>
-        <div class="status-copy">
-          <div id="batteryStatus" class="status-value">--%</div>
-        
-        </div>
-      </div>
+
 
       <div class="status-card">
         <div class="status-icon mesh">⌁</div>
@@ -615,6 +609,15 @@
           <div id="meshReadySub" class="status-sub">not checked yet</div>
         </div>
       </div>
+
+      <div class="status-card">
+        <div class="status-icon battery"></div>
+        <div class="status-copy">
+          <div id="batteryStatus" class="status-value">--%</div>
+        
+        </div>
+      </div>
+
     </section>
 
     <section class="section-panel map-shell" aria-label="Nearby repeater map">
