@@ -168,6 +168,8 @@ const CHECKIN_ROOM_PASSWORD = "177345";
 const readRoomBtn = document.getElementById("readRoom");
 const roomMessages = document.getElementById("roomMessages");
 
+const LOCAL_RADIUS_MILES = 5;
+
 let roomPosts = [];
 
 const roomPostText =
@@ -1140,93 +1142,172 @@ function geoToMap(lat, lon) {
 }
 
 
-function drawGeorgiaMap(userLat, userLon, repeaters) {
+function drawLocalRepeaterMap(userLat, userLon, repeaters) {
 
   gaMap.innerHTML = "";
 
-  /*
-    Crude Georgia outline for now.
+  // We will use a simple 500 x 500 local map
+  gaMap.setAttribute("viewBox", "0 0 500 500");
 
-    This is intentionally approximate.
-    Later we can replace it with a proper SVG path.
-  */
-
-  gaMap.innerHTML = `
-    <polygon
-      points="
-        90,20
-        420,20
-        470,350
-        400,580
-        160,580
-        70,350
-      "
-      fill="none"
-      stroke="#777"
-      stroke-width="3"
-    />
-  `;
-
-
-  // repeaters
-
-  repeaters.forEach(r => {
-
-    const pos =
-      geoToMap(r.lat, r.lon);
-
-    const circle =
-      document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "circle"
-      );
-
-    circle.setAttribute("cx", pos.x);
-    circle.setAttribute("cy", pos.y);
-    circle.setAttribute("r", "5");
-
-    circle.setAttribute(
-      "fill",
-      "#aaa"
+  // Outer 5-mile circle
+  const outerCircle =
+    document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "circle"
     );
 
-    gaMap.appendChild(circle);
+  outerCircle.setAttribute("cx", "250");
+  outerCircle.setAttribute("cy", "250");
+  outerCircle.setAttribute("r", "220");
+  outerCircle.setAttribute("fill", "none");
+  outerCircle.setAttribute("stroke", "#555");
+  outerCircle.setAttribute("stroke-width", "2");
 
-  });
+  gaMap.appendChild(outerCircle);
 
 
-  // user
+  // Half-radius circle
+  const innerCircle =
+    document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "circle"
+    );
 
-  const userPos =
-    geoToMap(userLat, userLon);
+  innerCircle.setAttribute("cx", "250");
+  innerCircle.setAttribute("cy", "250");
+  innerCircle.setAttribute("r", "110");
+  innerCircle.setAttribute("fill", "none");
+  innerCircle.setAttribute("stroke", "#333");
+  innerCircle.setAttribute("stroke-width", "1");
 
+  gaMap.appendChild(innerCircle);
+
+
+  // North marker
+  const north =
+    document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "text"
+    );
+
+  north.setAttribute("x", "250");
+  north.setAttribute("y", "22");
+  north.setAttribute("text-anchor", "middle");
+  north.setAttribute("fill", "#aaa");
+  north.setAttribute("font-size", "18");
+
+  north.textContent = "N";
+
+  gaMap.appendChild(north);
+
+
+  // User in center
   const userCircle =
     document.createElementNS(
       "http://www.w3.org/2000/svg",
       "circle"
     );
 
-  userCircle.setAttribute(
-    "cx",
-    userPos.x
-  );
-
-  userCircle.setAttribute(
-    "cy",
-    userPos.y
-  );
-
-  userCircle.setAttribute(
-    "r",
-    "8"
-  );
-
-  userCircle.setAttribute(
-    "fill",
-    "#00aaff"
-  );
+  userCircle.setAttribute("cx", "250");
+  userCircle.setAttribute("cy", "250");
+  userCircle.setAttribute("r", "9");
+  userCircle.setAttribute("fill", "#00aaff");
 
   gaMap.appendChild(userCircle);
+
+
+  // Only show repeaters within radius
+  const nearby =
+    repeaters.filter(
+      r => r.distance <= LOCAL_RADIUS_MILES
+    );
+
+
+  nearby.forEach(r => {
+
+    /*
+      Convert distance+bearing into map coordinates.
+
+      220 pixels = LOCAL_RADIUS_MILES
+    */
+
+    const distanceRatio =
+      r.distance / LOCAL_RADIUS_MILES;
+
+    const pixelDistance =
+      distanceRatio * 220;
+
+    const angle =
+      toRadians(r.bearing);
+
+    const x =
+      250 +
+      Math.sin(angle) *
+      pixelDistance;
+
+    const y =
+      250 -
+      Math.cos(angle) *
+      pixelDistance;
+
+
+    const dot =
+      document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "circle"
+      );
+
+    dot.setAttribute("cx", x);
+    dot.setAttribute("cy", y);
+    dot.setAttribute("r", "7");
+    dot.setAttribute("fill", "#aaa");
+
+    gaMap.appendChild(dot);
+
+
+    // Repeater label
+
+    const label =
+      document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "text"
+      );
+
+    label.setAttribute("x", x + 10);
+    label.setAttribute("y", y - 8);
+    label.setAttribute("fill", "#ddd");
+    label.setAttribute("font-size", "12");
+
+    label.textContent =
+      r.name +
+      " " +
+      r.distance.toFixed(1) +
+      " mi";
+
+    gaMap.appendChild(label);
+
+  });
+
+
+  // Radius label
+
+  const radiusLabel =
+    document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "text"
+    );
+
+  radiusLabel.setAttribute("x", "250");
+  radiusLabel.setAttribute("y", "488");
+  radiusLabel.setAttribute("text-anchor", "middle");
+  radiusLabel.setAttribute("fill", "#777");
+  radiusLabel.setAttribute("font-size", "12");
+
+  radiusLabel.textContent =
+    LOCAL_RADIUS_MILES +
+    " mile radius";
+
+  gaMap.appendChild(radiusLabel);
 
 }
 
@@ -1329,13 +1410,20 @@ mapRepeatersBtn.onclick = async () => {
         );
 
 
+        const nearbyRepeaters =
+          repeaters.filter(
+            r => r.distance <= LOCAL_RADIUS_MILES
+          );
+
         gpsStatus.innerHTML =
-          "📍 Location acquired. " +
-          repeaters.length +
-          " known repeaters.";
+          "📍 " +
+          nearbyRepeaters.length +
+          " known repeaters within " +
+          LOCAL_RADIUS_MILES +
+          " miles.";
 
 
-        drawGeorgiaMap(
+        drawLocalRepeaterMap(
           userLat,
           userLon,
           repeaters
@@ -1347,7 +1435,12 @@ mapRepeatersBtn.onclick = async () => {
 
 
         repeaters
+         .filter(r => r.distance <= LOCAL_RADIUS_MILES)
           .slice(0, 10)
+
+          
+
+
           .forEach((r, index) => {
 
             const direction =
