@@ -2,177 +2,683 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Family Mesh</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#06131f">
+  <title>WellsLink</title>
 
   <style>
+    :root {
+      --bg: #020b13;
+      --panel: #071827;
+      --panel-2: #0a2032;
+      --panel-3: #0c2740;
+      --line: #234762;
+      --line-soft: rgba(92, 157, 205, .22);
+      --text: #f5f9ff;
+      --muted: #9ab6cb;
+      --blue: #178bff;
+      --blue-2: #57b3ff;
+      --green: #35d67a;
+      --green-deep: #0d8f4d;
+      --danger: #ff6b6b;
+      --shadow: 0 18px 50px rgba(0,0,0,.28);
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      background: var(--bg);
+      color-scheme: dark;
+    }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #111;
-      color: white;
       margin: 0;
-      padding: 30px 20px;
-      text-align: center;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 50% -10%, rgba(39, 121, 180, .22), transparent 32rem),
+        linear-gradient(180deg, #05121d 0%, #020a12 100%);
+      color: var(--text);
     }
 
-    h1 {
-      margin-bottom: 5px;
-    }
-
-    #status {
-      margin: 25px 0;
-      font-size: 20px;
+    button, textarea {
+      font: inherit;
     }
 
     button {
-      display: block;
-      width: 100%;
-      max-width: 420px;
-      margin: 15px auto;
-      padding: 20px;
-      font-size: 21px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .app {
+      width: min(100%, 760px);
+      margin: 0 auto;
+      padding:
+        max(18px, env(safe-area-inset-top))
+        16px
+        max(18px, env(safe-area-inset-bottom));
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 8px 48px 18px;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: clamp(36px, 10vw, 56px);
+      line-height: .95;
+      letter-spacing: -2.6px;
+      font-weight: 800;
+    }
+
+    .brand-title span {
+      background: linear-gradient(180deg, #6dc5ff, #168cff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .tagline {
+      margin-top: 8px;
+      text-align: center;
+      color: #8eb8da;
+      font-size: 13px;
       font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .gear {
+      position: absolute;
+      right: 3px;
+      top: 3px;
+      width: 44px;
+      height: 44px;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      color: #7fc4f4;
+      font-size: 28px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+    }
+
+    .status-strip {
+      display: grid;
+      grid-template-columns: 1.18fr .95fr 1.2fr;
+      border: 1px solid var(--line);
+      background: rgba(8, 26, 41, .92);
+      border-radius: 22px;
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.015);
+      margin-bottom: 14px;
+    }
+
+    .status-card {
+      min-width: 0;
+      padding: 15px 13px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+    }
+
+    .status-card + .status-card::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 18%;
+      height: 64%;
+      width: 1px;
+      background: var(--line-soft);
+    }
+
+    .status-icon {
+      flex: 0 0 auto;
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 11px;
+      font-size: 21px;
+    }
+
+    .status-icon.radio {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #48e882;
+      box-shadow: 0 0 18px rgba(72,232,130,.35);
+    }
+
+    .status-icon.battery {
+      border: 2px solid #7ba8c3;
+      border-radius: 5px;
+      width: 23px;
+      height: 34px;
+      position: relative;
+      padding: 3px;
+    }
+
+    .status-icon.battery::before {
+      content: "";
+      position: absolute;
+      width: 9px;
+      height: 3px;
+      border-radius: 2px 2px 0 0;
+      background: #7ba8c3;
+      left: 5px;
+      top: -5px;
+    }
+
+    .status-icon.battery::after {
+      content: "";
+      width: 100%;
+      height: 74%;
+      align-self: end;
+      background: linear-gradient(180deg, #5bea8b, #26c96d);
+      border-radius: 2px;
+    }
+
+    .status-icon.mesh {
+      color: var(--green);
+      background: rgba(53,214,122,.08);
+      font-size: 25px;
+    }
+
+    .status-copy {
+      min-width: 0;
+    }
+
+    .status-value {
+      color: white;
+      font-weight: 750;
+      font-size: 17px;
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .status-value.connecting { color: #ffd36e; }
+    .status-value.disconnected { color: #ff8d8d; }
+
+    .status-sub {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.15;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .section-panel {
+      background: linear-gradient(180deg, rgba(9,31,49,.96), rgba(5,20,33,.98));
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .map-shell {
+      height: min(43vh, 390px);
+      min-height: 290px;
+      position: relative;
+      background:
+        radial-gradient(circle at 50% 52%, rgba(18,121,210,.18), transparent 24%),
+        linear-gradient(135deg, rgba(38,74,93,.20) 1px, transparent 1px) 0 0/38px 38px,
+        linear-gradient(45deg, rgba(31,65,84,.16) 1px, transparent 1px) 0 0/38px 38px,
+        #071b2a;
+    }
+
+    .map-shell::before,
+    .map-shell::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .map-shell::before {
+      background:
+        linear-gradient(18deg, transparent 39%, rgba(91,127,147,.30) 40%, rgba(91,127,147,.30) 41%, transparent 42%),
+        linear-gradient(132deg, transparent 44%, rgba(91,127,147,.20) 45%, rgba(91,127,147,.20) 46%, transparent 47%),
+        linear-gradient(82deg, transparent 52%, rgba(91,127,147,.18) 53%, rgba(91,127,147,.18) 54%, transparent 55%);
+      opacity: .7;
+    }
+
+    .map-topbar {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      right: 14px;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .segmented {
+      display: inline-flex;
+      padding: 3px;
       border-radius: 14px;
-      border: none;
+      background: rgba(2,12,20,.83);
+      border: 1px solid rgba(97,157,194,.18);
     }
 
-    #connect {
-      background: #eee;
+    .segmented span {
+      min-width: 72px;
+      text-align: center;
+      padding: 9px 14px;
+      border-radius: 11px;
+      color: #8faec5;
+      font-weight: 650;
+      font-size: 15px;
     }
 
-    #advert {
-      background: #5ad66f;
+    .segmented .active {
+      color: #fff;
+      background: linear-gradient(180deg, #1c99ff, #0c79eb);
+      box-shadow: 0 6px 18px rgba(10,126,238,.28);
     }
 
-    #flood {
-      background: #ffb347;
+    .locate {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid #dcefff;
+      background: rgba(4,15,24,.72);
+      display: grid;
+      place-items: center;
+      color: white;
+      font-size: 20px;
     }
 
-    button:disabled {
-      opacity: .35;
+    #mapPanel {
+      display: block !important;
+      position: absolute !important;
+      inset: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: transparent !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      z-index: 1;
     }
 
-    #log {
-      margin-top: 30px;
+    #gaMap {
+      width: 100%;
+      height: 100%;
+      display: block;
+      position: absolute;
+      inset: 0;
+    }
+
+    #nearestRepeaters {
+      display: none;
+    }
+
+    #gpsStatus {
+      position: absolute;
+      left: 18px;
+      bottom: 14px;
+      z-index: 3;
+      padding: 8px 11px;
+      border-radius: 12px;
+      background: rgba(3,13,22,.74);
+      color: #d9ecfa;
+      font-size: 12px;
+      backdrop-filter: blur(8px);
+      max-width: calc(100% - 36px);
+    }
+
+    .map-radius {
+      position: absolute;
+      right: 16px;
+      bottom: 14px;
+      z-index: 3;
+      color: #c6dbe9;
+      font-size: 12px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: rgba(3,13,22,.74);
+      backdrop-filter: blur(8px);
+    }
+
+    .messages {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      min-height: 390px;
+    }
+
+    .messages-head {
+      padding: 18px 18px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid rgba(89,139,170,.16);
+    }
+
+    .messages-title {
+      margin: 0;
+      font-size: 25px;
+      letter-spacing: -.6px;
+    }
+
+    .room-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 11px;
+      border-radius: 999px;
+      background: rgba(55,99,131,.20);
+      border: 1px solid rgba(101,158,195,.25);
+      color: #b9d0df;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .room-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 10px rgba(53,214,122,.35);
+    }
+
+    #roomMessages {
+      flex: 1;
+      min-height: 250px;
+      max-height: 420px;
+      overflow-y: auto;
+      padding: 12px 16px 18px;
+      scroll-behavior: smooth;
+    }
+
+    .message-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      align-items: flex-start;
+    }
+
+    .message-row.outgoing {
+      justify-content: flex-end;
+    }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+      flex: 0 0 38px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(180deg, #55b6ff, #2c88e7);
+      color: white;
+      font-weight: 750;
+      font-size: 12px;
+      margin-top: 18px;
+    }
+
+    .message-stack {
+      max-width: min(78%, 520px);
+    }
+
+    .message-row.outgoing .message-stack {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .message-meta {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin: 0 5px 5px;
+      font-size: 13px;
+      color: #96b2c6;
+    }
+
+    .message-meta span {
+      color: #f6fbff;
+      font-weight: 700;
       font-size: 14px;
-      color: #aaa;
+    }
+
+    .bubble {
+      background: linear-gradient(180deg, #29435c, #20384e);
+      color: white;
+      border-radius: 18px 18px 18px 6px;
+      padding: 11px 14px;
+      font-size: 16px;
+      line-height: 1.35;
       text-align: left;
-      max-width: 420px;
-      margin-left: auto;
-      margin-right: auto;
+      word-break: break-word;
+    }
+
+    .message-row.outgoing .bubble {
+      background: linear-gradient(180deg, #168dff, #0876eb);
+      border-radius: 18px 18px 6px 18px;
+    }
+
+    .empty-chat {
+      color: #8ba8bd;
+      text-align: center;
+      padding: 34px 16px;
+      font-size: 14px;
+    }
+
+    .composer {
+      display: grid;
+      grid-template-columns: 1fr 58px;
+      gap: 10px;
+      align-items: end;
+      padding: 12px;
+      border-top: 1px solid rgba(89,139,170,.16);
+      background: rgba(2,11,18,.35);
+    }
+
+    #roomPostText {
+      width: 100%;
+      min-height: 54px;
+      max-height: 120px;
+      resize: vertical;
+      border: 1px solid #28506b;
+      outline: none;
+      border-radius: 28px;
+      background: #081d2d;
+      color: white;
+      padding: 15px 18px;
+      font-size: 16px;
+      line-height: 1.35;
+    }
+
+    #roomPostText::placeholder {
+      color: #7393aa;
+    }
+
+    #roomPostText:focus {
+      border-color: #3da2e8;
+      box-shadow: 0 0 0 3px rgba(61,162,232,.10);
+    }
+
+    #sendRoomPost {
+      width: 58px;
+      height: 58px;
+      border: 0;
+      border-radius: 50%;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(180deg, #39dc7d, #21b960);
+      color: white;
+      box-shadow: 0 10px 25px rgba(27,181,93,.24);
+      font-size: 24px;
+    }
+
+    #sendRoomPost:disabled {
+      opacity: .35;
+      box-shadow: none;
+    }
+
+    #sendRoomStatus {
+      min-height: 16px;
+      padding: 0 18px 10px;
+      color: #8fb2c8;
+      font-size: 12px;
+      text-align: right;
+    }
+
+    .technical {
+      display: none !important;
+    }
+
+    #log, #roomStatus, #repeatersList {
+      display: none;
+    }
+
+    @media (max-width: 430px) {
+      .app {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
+      .brand {
+        padding-bottom: 15px;
+      }
+
+      .status-card {
+        padding: 13px 8px;
+        gap: 7px;
+      }
+
+      .status-value {
+        font-size: 15px;
+      }
+
+      .status-sub {
+        font-size: 11px;
+      }
+
+      .map-shell {
+        min-height: 270px;
+        height: 39vh;
+      }
+
+      .messages {
+        min-height: 360px;
+      }
     }
   </style>
 </head>
 
 <body>
+  <main class="app">
 
-<h1>Family Mesh</h1>
-<div>Simple MeshCore Controller</div>
+    <header class="brand">
+      <div>
+        <h1 class="brand-title">Wells<span>Link</span></h1>
+        <div class="tagline">Family connected. Anywhere.</div>
+      </div>
+      <div class="gear" aria-hidden="true">⚙</div>
+    </header>
 
-<div id="status">🔴 Not connected</div>
+    <section class="status-strip" aria-label="Radio status">
+      <div class="status-card" id="radioStatusCard" role="button" tabindex="0" aria-label="Connect to radio">
+        <div class="status-icon radio"></div>
+        <div class="status-copy">
+          <div id="status" class="status-value disconnected">Not connected</div>
+          <div id="radioDeviceLabel" class="status-sub">T1000</div>
+        </div>
+      </div>
 
-<div id="batteryStatus">
-  🔋 --
-</div>
+      <div class="status-card">
+        <div class="status-icon battery"></div>
+        <div class="status-copy">
+          <div id="batteryStatus" class="status-value">--%</div>
+          <div id="batteryVolts" class="status-sub">-- V</div>
+        </div>
+      </div>
 
-<button id="connect">CONNECT TO RADIO</button>
+      <div class="status-card">
+        <div class="status-icon mesh">⌁</div>
+        <div class="status-copy">
+          <div id="meshReadyMain" class="status-value">Mesh Ready</div>
+          <div id="meshReadySub" class="status-sub">not checked yet</div>
+        </div>
+      </div>
+    </section>
 
+    <section class="section-panel map-shell" aria-label="Nearby repeater map">
+      <div class="map-topbar">
+        <div class="segmented" aria-hidden="true">
+          <span class="active">Map</span>
+          <span>List</span>
+        </div>
+        <div class="locate" aria-hidden="true">⌖</div>
+      </div>
 
+      <div id="mapPanel">
+        <svg id="gaMap" viewBox="0 0 500 500"></svg>
+        <div id="nearestRepeaters"></div>
+      </div>
 
-<button id="mapRepeaters" disabled>
-  SHOW REPEATER MAP
-</button>
+      <div id="gpsStatus">Waiting for radio connection…</div>
+      <div class="map-radius">5 mile radius</div>
+    </section>
 
-<div id="gpsStatus"></div>
+    <section class="section-panel messages" aria-label="Family messages">
+      <div class="messages-head">
+        <h2 class="messages-title">Family Messages</h2>
+        <div class="room-pill">
+          <span class="room-dot"></span>
+          <span id="familyStatus">Waiting</span>
+        </div>
+      </div>
 
-<div id="mapPanel"
-     style="
-       display:none;
-       position:relative;
-       margin-top:15px;
-       padding:10px;
-       background:#222;
-       border:1px solid #555;
-       border-radius:10px;
-     ">
+      <div id="roomMessages">
+        <div class="empty-chat">Connect the radio to load family messages.</div>
+      </div>
 
-  <button id="closeMap"
-          style="
-            position:absolute;
-            right:8px;
-            top:8px;
-            z-index:10;
-            width:40px;
-            height:40px;
-            font-size:22px;
-            padding:0;
-          ">
-    ✕
-  </button>
+      <div class="composer">
+        <textarea id="roomPostText" placeholder="Type a message..." rows="1"></textarea>
+        <button id="sendRoomPost" disabled aria-label="Send message">➤</button>
+      </div>
+      <div id="sendRoomStatus"></div>
+    </section>
 
-  <svg id="gaMap"
-       viewBox="0 0 500 500"
-       style="
-         width:100%;
-         max-width:500px;
-         display:block;
-         margin:auto;
-       ">
-  </svg>
+    <!-- Working MeshCore controls kept in the DOM but hidden from the family interface. -->
+    <div class="technical">
+      <button id="connect">CONNECT TO RADIO</button>
+      <button id="mapRepeaters" disabled>SHOW REPEATER MAP</button>
+      <button id="advert" disabled>ADVERTISE LOCALLY</button>
+      <button id="flood" disabled>FLOOD ADVERTISE</button>
+      <button id="repeaters" disabled>FIND REPEATERS</button>
+      <button id="room" disabled>CHECK IN ROOM</button>
+      <button id="readRoom" disabled>READ ROOM</button>
+      <button id="closeMap">CLOSE MAP</button>
+      <button id="zoomIn">+</button>
+      <button id="zoomOut">−</button>
+      <button id="resetMap">RESET</button>
+    </div>
 
-  <div id="nearestRepeaters"></div>
+    <div id="roomStatus"></div>
+    <div id="repeatersList"></div>
+    <div id="log">Ready.</div>
 
-</div>
+  </main>
 
-<div style="margin-top:10px;">
-  <button id="zoomIn">+</button>
-  <button id="zoomOut">−</button>
-  <button id="resetMap">RESET</button>
-</div>
+  <script type="module">
 
-
-
-<button id="advert" disabled>
-  ADVERTISE LOCALLY
-</button>
-
-<button id="flood" disabled>
-  FLOOD ADVERTISE
-</button>
-
-<button id="repeaters" disabled>
-  FIND REPEATERS
-</button>
-
-<button id="room" disabled>
-  CHECK IN ROOM
-</button>
-
-<button id="readRoom" disabled>
-  READ ROOM
-</button>
-
-<textarea id="roomPostText"
-          placeholder="Type check-in message..."
-          style="width:100%;max-width:420px;height:80px;margin-top:15px;"></textarea>
-
-<button id="sendRoomPost" disabled>
-  SEND TO ROOM
-</button>
-
-<div id="sendRoomStatus"></div>
-
-<div id="roomMessages"></div>
-
-<div id="roomStatus"></div>
-
-<div id="repeatersList"></div>
-
-
-<div id="log">Ready.</div>
-
-
-<script type="module">
 
 import {
   WebBleConnection
@@ -240,6 +746,21 @@ const resetMapBtn = document.getElementById("resetMap");
 
 const batteryStatus =
   document.getElementById("batteryStatus");
+
+const radioDeviceLabel =
+  document.getElementById("radioDeviceLabel");
+
+const batteryVolts =
+  document.getElementById("batteryVolts");
+
+const meshReadyMain =
+  document.getElementById("meshReadyMain");
+
+const meshReadySub =
+  document.getElementById("meshReadySub");
+
+const familyStatus =
+  document.getElementById("familyStatus");
 
 let mapView = {
   x: 0,
@@ -398,8 +919,9 @@ function installDiscoveryListener() {
 function showDiscoveryResults() {
 
   if (discoveredRepeaters.length === 0) {
-    repeatersList.innerHTML =
-      "<h3>Scanning...</h3><p>No repeater replies yet.</p>";
+    meshReadyMain.textContent = "Checking...";
+    meshReadySub.textContent = "listening nearby";
+    repeatersList.innerHTML = "";
     return;
   }
 
@@ -422,14 +944,21 @@ function showDiscoveryResults() {
       "</div>";
   });
 
-  repeatersList.innerHTML = html;
+  repeatersList.innerHTML = "";
+  meshReadyMain.textContent = "Mesh Ready";
+  meshReadySub.textContent =
+    discoveredRepeaters.length +
+    " repeater" +
+    (discoveredRepeaters.length === 1 ? "" : "s") +
+    " heard";
 }
 
 connectBtn.onclick = async () => {
 
   try {
 
-    status.innerHTML = "🟡 Connecting...";
+    status.innerHTML = "Connecting";
+    status.className = "status-value connecting";
     message("Opening Bluetooth selector...");
 
    connection = await WebBleConnection.open();
@@ -440,7 +969,8 @@ if (!connection) {
 
 connection.on("connected", async () => {
 
-  status.innerHTML = "🟢 Connected";
+  status.innerHTML = "Connected";
+  status.className = "status-value connected";
   message("MeshCore radio connected.");
 
   advertBtn.disabled = false;
@@ -460,14 +990,24 @@ installBatteryListener();
 
 await requestBattery();
 
-  roomBtn.disabled = false
+  roomBtn.disabled = false;
   readRoomBtn.disabled = false;
+
+  // WellsLink family flow: populate local map and connect to the family room automatically.
+  setTimeout(() => {
+    if (!mapRepeatersBtn.disabled) mapRepeatersBtn.click();
+  }, 250);
+
+  setTimeout(() => {
+    if (!roomBtn.disabled) roomBtn.click();
+  }, 700);
 
 });
 
 connection.on("disconnected", () => {
 
-  status.innerHTML = "🔴 Disconnected";
+  status.innerHTML = "Disconnected";
+  status.className = "status-value disconnected";
 
   advertBtn.disabled = true;
   floodBtn.disabled = true;
@@ -489,7 +1029,8 @@ connection.on("disconnected", () => {
 
     console.error(err);
 
-    status.innerHTML = "🔴 Connection failed";
+    status.innerHTML = "Connection failed";
+    status.className = "status-value disconnected";
     message("Error: " + err);
 
   }
@@ -544,10 +1085,9 @@ repeatersBtn.onclick = async () => {
 
     discoveredRepeaters = [];
 
-    repeatersList.innerHTML =
-      "<h3>Scanning zero-hop...</h3>" +
-      "<p>Listening for nearby repeaters.</p>";
-
+    repeatersList.innerHTML = "";
+    meshReadyMain.textContent = "Checking...";
+    meshReadySub.textContent = "zero-hop scan";
     message("Sending zero-hop repeater discovery...");
 
     // random 32-bit discovery tag
@@ -586,10 +1126,9 @@ repeatersBtn.onclick = async () => {
 
       if (discoveredRepeaters.length === 0) {
 
-        repeatersList.innerHTML =
-          "<h3>⚠️ NO NEARBY REPEATER HEARD</h3>" +
-          "<p>No zero-hop repeater replied.</p>";
-
+        repeatersList.innerHTML = "";
+        meshReadyMain.textContent = "No direct link";
+        meshReadySub.textContent = "use nearest repeater";
         message("Discovery finished — no repeater heard.");
 
       } else {
@@ -623,7 +1162,8 @@ roomBtn.onclick = async () => {
 
   try {
 
-    roomStatus.innerHTML = "Finding room...";
+    roomStatus.innerHTML = "Connecting to family room...";
+    if (familyStatus) familyStatus.textContent = "Connecting...";
     message("Looking for check-in room...");
 
     const contacts = await connection.getContacts();
@@ -705,7 +1245,7 @@ frame.set(password, pos);
 await connection.sendToRadioFrame(frame);
 
 roomStatus.innerHTML =
-  "⏳ Request sent — loading retained history...";
+  "Loading recent family messages...";
 
 message(
   "Requested room history from beginning."
@@ -859,7 +1399,7 @@ function installRoomMessageListener() {
         if (roomPosts.length === 0) {
 
           roomMessages.innerHTML =
-            "<p>No unread room messages.</p>";
+            '<div class="empty-chat">No family messages yet.</div>';
 
         }
 
@@ -873,49 +1413,56 @@ function installRoomMessageListener() {
 
 function displayRoomPosts() {
 
-  let html =
-    "<h3>Room Messages</h3>";
+  let html = "";
 
-  roomPosts.forEach(post => {
+  const posts = [...roomPosts].sort((a, b) => a.timestamp - b.timestamp);
 
-    const when =
-      new Date(
-        post.timestamp * 1000
-      ).toLocaleString();
+  posts.forEach(post => {
 
-    html +=
-      "<div style='" +
-      "padding:12px;" +
-      "border-bottom:1px solid #444;" +
-      "text-align:left;" +
-      "'>";
+    const whenDate = new Date(post.timestamp * 1000);
+    const when = whenDate.toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit"
+    });
 
-    html +=
-      "<strong>" +
-      when +
-      "</strong>";
+    const sender =
+      post.authorPrefix
+        ? "Family"
+        : "Family";
 
-    if (post.authorPrefix) {
-
-      html +=
-        "<br><small>" +
-        "Sender: " +
-        post.authorPrefix +
-        "</small>";
-
-    }
-
-    html +=
-      "<br><br>" +
-      post.text;
-
-    html +=
-      "</div>";
-
+    html += `
+      <div class="message-row incoming">
+        <div class="avatar">${sender.substring(0,2).toUpperCase()}</div>
+        <div class="message-stack">
+          <div class="message-meta">
+            <span>${sender}</span>
+            <time>${when}</time>
+          </div>
+          <div class="bubble">${escapeHtml(post.text)}</div>
+        </div>
+      </div>
+    `;
   });
 
-  roomMessages.innerHTML = html;
+  if (!posts.length) {
+    html = `
+      <div class="empty-chat">
+        No family messages yet.
+      </div>
+    `;
+  }
 
+  roomMessages.innerHTML = html;
+  roomMessages.scrollTop = roomMessages.scrollHeight;
+}
+
+function escapeHtml(text) {
+  return String(text)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 readRoomBtn.onclick = async () => {
@@ -969,12 +1516,8 @@ function installRoomListener() {
 
         const permissions = frame[1];
         
-        roomStatus.innerHTML =
-          "✅ CONNECTED TO " +
-          CHECKIN_ROOM_NAME +
-          "<br><small>Permission: " +
-          permissions +
-          "</small>";
+        roomStatus.innerHTML = "";
+        if (familyStatus) familyStatus.textContent = "Connected";
 
         message(
           "Room login successful."
@@ -987,8 +1530,8 @@ function installRoomListener() {
       // PUSH_CODE_LOGIN_FAIL
       if (frame[0] === 0x86) {
 
-        roomStatus.innerHTML =
-          "❌ ROOM NOT REACHED";
+        roomStatus.innerHTML = "";
+        if (familyStatus) familyStatus.textContent = "Room unavailable";
 
         message(
           "Room login failed or timed out."
@@ -1082,10 +1625,28 @@ sendRoomPostBtn.onclick = async () => {
 
     await connection.sendToRadioFrame(frame);
 
-    sendRoomStatus.innerHTML =
-      "✅ Message handed to radio.";
+    sendRoomStatus.innerHTML = "Sent";
+
+    const sentTime = new Date().toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit"
+    });
+
+    const outgoing = document.createElement("div");
+    outgoing.className = "message-row outgoing";
+    outgoing.innerHTML = `
+      <div class="message-stack">
+        <div class="message-meta"><time>${sentTime}</time></div>
+        <div class="bubble">${escapeHtml(text)}</div>
+      </div>
+    `;
+    roomMessages.appendChild(outgoing);
+    roomMessages.scrollTop = roomMessages.scrollHeight;
 
     roomPostText.value = "";
+    setTimeout(() => {
+      sendRoomStatus.innerHTML = "";
+    }, 1800);
 
   }
 
@@ -1221,7 +1782,7 @@ function drawLocalRepeaterMap(userLat, userLon, repeaters) {
   outerCircle.setAttribute("cy", "250");
   outerCircle.setAttribute("r", "220");
   outerCircle.setAttribute("fill", "none");
-  outerCircle.setAttribute("stroke", "#555");
+  outerCircle.setAttribute("stroke", "#31536d");
   outerCircle.setAttribute("stroke-width", "2");
 
   gaMap.appendChild(outerCircle);
@@ -1238,7 +1799,7 @@ function drawLocalRepeaterMap(userLat, userLon, repeaters) {
   innerCircle.setAttribute("cy", "250");
   innerCircle.setAttribute("r", "110");
   innerCircle.setAttribute("fill", "none");
-  innerCircle.setAttribute("stroke", "#333");
+  innerCircle.setAttribute("stroke", "#20394f");
   innerCircle.setAttribute("stroke-width", "1");
 
   gaMap.appendChild(innerCircle);
@@ -1272,7 +1833,9 @@ function drawLocalRepeaterMap(userLat, userLon, repeaters) {
   userCircle.setAttribute("cx", "250");
   userCircle.setAttribute("cy", "250");
   userCircle.setAttribute("r", "9");
-  userCircle.setAttribute("fill", "#00aaff");
+  userCircle.setAttribute("fill", "#1188ff");
+  userCircle.setAttribute("stroke", "#ffffff");
+  userCircle.setAttribute("stroke-width", "3");
 
   gaMap.appendChild(userCircle);
 
@@ -1321,7 +1884,9 @@ function drawLocalRepeaterMap(userLat, userLon, repeaters) {
     dot.setAttribute("cx", x);
     dot.setAttribute("cy", y);
     dot.setAttribute("r", "7");
-    dot.setAttribute("fill", "#aaa");
+    dot.setAttribute("fill", "#35d67a");
+    dot.setAttribute("stroke", "#0e3a2a");
+    dot.setAttribute("stroke-width", "3");
 
     gaMap.appendChild(dot);
 
@@ -1336,7 +1901,8 @@ function drawLocalRepeaterMap(userLat, userLon, repeaters) {
 
     label.setAttribute("x", x + 10);
     label.setAttribute("y", y - 8);
-    label.setAttribute("fill", "#ddd");
+    label.setAttribute("fill", "#ffffff");
+    label.setAttribute("font-weight", "600");
     label.setAttribute("font-size", "12");
 
     label.textContent =
@@ -1377,7 +1943,7 @@ mapRepeatersBtn.onclick = async () => {
 
   try {
 
-    mapPanel.style.display = "none";
+    mapPanel.style.display = "block";
 
     gpsStatus.innerHTML =
       "Reading repeater locations...";
@@ -1638,10 +2204,12 @@ function installBatteryListener() {
       const volts =
         millivolts / 1000;
 
-      batteryStatus.innerHTML =
-        "🔋 " +
-        batteryPercent +
-        "%";
+      batteryStatus.textContent =
+        batteryPercent + "%";
+
+      if (batteryVolts) {
+        batteryVolts.textContent = volts.toFixed(2) + " V";
+      }
 
       console.log(
         "Battery:",
@@ -1653,7 +2221,26 @@ function installBatteryListener() {
   );
 
 }
-</script>
 
+const radioStatusCard = document.getElementById("radioStatusCard");
+
+radioStatusCard.addEventListener("click", () => {
+  if (!connectBtn.disabled) connectBtn.click();
+});
+
+radioStatusCard.addEventListener("keydown", (event) => {
+  if ((event.key === "Enter" || event.key === " ") && !connectBtn.disabled) {
+    event.preventDefault();
+    connectBtn.click();
+  }
+});
+
+// Also make the map itself re-run the GPS/repeater calculation when tapped.
+document.querySelector(".map-shell").addEventListener("click", (event) => {
+  if (event.target.closest("#radioStatusCard")) return;
+  if (!mapRepeatersBtn.disabled) mapRepeatersBtn.click();
+});
+
+  </script>
 </body>
 </html>
