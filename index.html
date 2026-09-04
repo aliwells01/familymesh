@@ -1,175 +1,402 @@
 <!doctype html>
-<html>
+<html lang="en" style="background:#eef1f4;">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#eef1f4">
   <title>Family Mesh</title>
 
   <style>
+    :root {
+      --bg: #eef1f4;
+      --surface: #ffffff;
+      --surface-2: #f5f7fa;
+      --text: #1a1f24;
+      --muted: #6b7480;
+      --border: #e3e7ec;
+      --green: #22c55e;
+      --green-strong: #15803d;
+      --green-soft: #e7f8ee;
+      --blue: #3b82f6;
+      --amber: #f59e0b;
+      --amber-soft: #fdf1dd;
+      --radius: 20px;
+      --shadow: 0 1px 2px rgba(16,24,40,.04), 0 10px 26px rgba(16,24,40,.06);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      background: var(--bg);
+    }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #111;
-      color: white;
       margin: 0;
-      padding: 30px 20px;
-      text-align: center;
+      padding: 20px 16px 40px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
     }
 
-    h1 {
-      margin-bottom: 5px;
+    .app {
+      max-width: 460px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
 
-    #status {
-      margin: 25px 0;
-      font-size: 20px;
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
     }
 
-    button {
+    .stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* ---------- Identity card ---------- */
+    .identity-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px;
+      border-radius: 999px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--text);
+    }
+
+    .hub-badge {
+      padding: 9px 18px;
+      border-radius: 999px;
+      background: #3a3f45;
+      color: #f3e6c4;
+      border: 1px solid #c9a24b;
+      font-weight: 700;
+      letter-spacing: .06em;
+      font-size: 13px;
+    }
+
+    .identity h1 {
+      margin: 18px 0 4px;
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      margin: 0 0 20px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    /* ---------- Battery card ---------- */
+    .battery-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .battery-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 16px;
+      color: var(--text);
+    }
+
+    .battery-head svg { display: block; }
+
+    .battery-value {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--green-strong);
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+
+    /* ---------- Section headers ---------- */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 8px 4px 0;
+    }
+
+    .section-header::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ---------- Buttons ---------- */
+    .btn {
       display: block;
       width: 100%;
-      max-width: 420px;
-      margin: 15px auto;
-      padding: 20px;
-      font-size: 21px;
+      padding: 16px 18px;
+      font-size: 16px;
       font-weight: 600;
       border-radius: 14px;
-      border: none;
+      border: 1px solid transparent;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform .05s ease, box-shadow .2s ease, background .2s ease;
     }
 
-    #connect {
-      background: #eee;
+    .btn:active { transform: translateY(1px); }
+    .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    .btn-connect {
+      background: linear-gradient(180deg, #29ca66, #16a34a);
+      color: #fff;
+      font-size: 17px;
+      padding: 18px;
+      box-shadow: 0 6px 16px rgba(22,163,74,.28);
+    }
+    .btn-connect:hover:not(:disabled) { box-shadow: 0 8px 22px rgba(22,163,74,.34); }
+
+    .btn-ghost {
+      background: var(--surface);
+      border-color: var(--border);
+      color: var(--text);
+    }
+    .btn-ghost:hover:not(:disabled) { background: var(--surface-2); }
+
+    .btn-green {
+      background: var(--green-soft);
+      color: var(--green-strong);
+      border-color: #bfe9cd;
+    }
+    .btn-green:hover:not(:disabled) { background: #dbf3e4; }
+
+    .btn-amber {
+      background: var(--amber-soft);
+      color: #b45309;
+      border-color: #f4d9a6;
+    }
+    .btn-amber:hover:not(:disabled) { background: #fbe8ca; }
+
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
     }
 
-    #advert {
-      background: #5ad66f;
+    /* ---------- Map ---------- */
+    .map-controls {
+      display: flex;
+      gap: 10px;
     }
 
-    #flood {
-      background: #ffb347;
+    .chip-btn {
+      flex: 1;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .chip-btn:hover { background: var(--surface-2); }
+
+    #closeMap {
+      background: rgba(255,255,255,.14) !important;
+      color: #fff !important;
+      border: 1px solid rgba(255,255,255,.28) !important;
+      border-radius: 10px !important;
+      cursor: pointer;
     }
 
-    button:disabled {
-      opacity: .35;
+    /* ---------- Room ---------- */
+    #roomPostText {
+      width: 100%;
+      min-height: 92px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 15px;
+      font-family: inherit;
+      background: var(--surface-2);
+      color: var(--text);
+      resize: vertical;
+    }
+    #roomPostText:focus {
+      outline: none;
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px var(--green-soft);
     }
 
-    #log {
-      margin-top: 30px;
+    /* ---------- Status text + results ---------- */
+    .muted {
+      color: var(--muted);
       font-size: 14px;
-      color: #aaa;
-      text-align: left;
-      max-width: 420px;
-      margin-left: auto;
-      margin-right: auto;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .card h3 { font-size: 16px; font-weight: 700; margin: 6px 0; }
+    .card small { color: var(--muted); }
+
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 13px;
+    }
+
+    .log {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 13px;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      line-height: 1.55;
+      word-break: break-word;
     }
   </style>
 </head>
 
 <body>
 
-<h1>WellsNet</h1>
-<div>Simple MeshCore Controller</div>
+<main class="app">
 
-<div id="status">🔴 Not connected</div>
+  <!-- Identity -->
+  <section class="card identity">
+    <div class="identity-top">
+      <div id="status" class="status-pill">🔴 Not connected</div>
+      <div class="hub-badge">HUB</div>
+    </div>
 
-<div id="batteryStatus">
-  🔋 --
-</div>
+    <h1>WellsNet</h1>
+    <p class="subtitle">Simple MeshCore Controller</p>
 
-<button id="connect">CONNECT TO RADIO</button>
+    <button id="connect" class="btn btn-connect">CONNECT TO RADIO</button>
+  </section>
 
+  <!-- Battery -->
+  <section class="card battery-card">
+    <div class="battery-head">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="2" y="7" width="17" height="10" rx="3" stroke="#15803d" stroke-width="1.8"/>
+        <rect x="4" y="9" width="9" height="6" rx="1.5" fill="#22c55e"/>
+        <rect x="21" y="10" width="2" height="4" rx="1" fill="#15803d"/>
+      </svg>
+      <span>Battery</span>
+    </div>
+    <div id="batteryStatus" class="battery-value">🔋 --</div>
+  </section>
 
+  <!-- Network actions -->
+  <div class="section-header">Network</div>
+  <section class="card">
+    <div class="btn-row">
+      <button id="advert" class="btn btn-green" disabled>ADVERTISE LOCALLY</button>
+      <button id="flood" class="btn btn-amber" disabled>FLOOD ADVERTISE</button>
+    </div>
+  </section>
 
-<button id="mapRepeaters" disabled>
-  SHOW REPEATER MAP
-</button>
+  <!-- Repeaters -->
+  <div class="section-header">Repeaters</div>
+  <section class="card stack">
+    <button id="repeaters" class="btn btn-ghost" disabled>FIND REPEATERS</button>
+    <button id="mapRepeaters" class="btn btn-ghost" disabled>SHOW REPEATER MAP</button>
 
-<div id="gpsStatus"></div>
+    <div id="gpsStatus" class="muted"></div>
 
-<div id="mapPanel"
-     style="
-       display:none;
-       position:relative;
-       margin-top:15px;
-       padding:10px;
-       background:#222;
-       border:1px solid #555;
-       border-radius:10px;
-     ">
+    <div id="mapPanel"
+         style="
+           display:none;
+           position:relative;
+           padding:10px;
+           background:#20242b;
+           border:1px solid #3a4048;
+           border-radius:14px;
+         ">
 
-  <button id="closeMap"
-          style="
-            position:absolute;
-            right:8px;
-            top:8px;
-            z-index:10;
-            width:40px;
-            height:40px;
-            font-size:22px;
-            padding:0;
-          ">
-    ✕
-  </button>
+      <button id="closeMap"
+              style="
+                position:absolute;
+                right:8px;
+                top:8px;
+                z-index:10;
+                width:40px;
+                height:40px;
+                font-size:22px;
+                padding:0;
+              ">
+        ✕
+      </button>
 
-  <svg id="gaMap"
-       viewBox="0 0 500 500"
-       style="
-         width:100%;
-         max-width:500px;
-         display:block;
-         margin:auto;
-       ">
-  </svg>
+      <svg id="gaMap"
+           viewBox="0 0 500 500"
+           style="
+             width:100%;
+             max-width:500px;
+             display:block;
+             margin:auto;
+           ">
+      </svg>
 
-  <div id="nearestRepeaters"></div>
+      <div id="nearestRepeaters" style="color:#e6e9ee;"></div>
 
-</div>
+    </div>
 
-<div style="margin-top:10px;">
-  <button id="zoomIn">+</button>
-  <button id="zoomOut">−</button>
-  <button id="resetMap">RESET</button>
-</div>
+    <div class="map-controls">
+      <button id="zoomIn" class="chip-btn">+</button>
+      <button id="zoomOut" class="chip-btn">−</button>
+      <button id="resetMap" class="chip-btn">RESET</button>
+    </div>
 
+    <div id="repeatersList"></div>
+  </section>
 
+  <!-- Check-in room -->
+  <div class="section-header">Check-in Room</div>
+  <section class="card stack">
+    <button id="room" class="btn btn-ghost" disabled>CHECK IN ROOM</button>
+    <button id="readRoom" class="btn btn-ghost" disabled>READ ROOM</button>
 
-<button id="advert" disabled>
-  ADVERTISE LOCALLY
-</button>
+    <textarea id="roomPostText"
+              placeholder="Type check-in message..."></textarea>
 
-<button id="flood" disabled>
-  FLOOD ADVERTISE
-</button>
+    <button id="sendRoomPost" class="btn btn-connect" disabled>SEND TO ROOM</button>
 
-<button id="repeaters" disabled>
-  FIND REPEATERS
-</button>
+    <div id="sendRoomStatus" class="muted"></div>
+    <div id="roomMessages"></div>
+    <div id="roomStatus" class="muted"></div>
+  </section>
 
-<button id="room" disabled>
-  CHECK IN ROOM
-</button>
+  <div id="log" class="log">Ready.</div>
 
-<button id="readRoom" disabled>
-  READ ROOM
-</button>
-
-<textarea id="roomPostText"
-          placeholder="Type check-in message..."
-          style="width:100%;max-width:420px;height:80px;margin-top:15px;"></textarea>
-
-<button id="sendRoomPost" disabled>
-  SEND TO ROOM
-</button>
-
-<div id="sendRoomStatus"></div>
-
-<div id="roomMessages"></div>
-
-<div id="roomStatus"></div>
-
-<div id="repeatersList"></div>
-
-
-<div id="log">Ready.</div>
+</main>
 
 
 <script type="module">
@@ -413,7 +640,7 @@ function showDiscoveryResults() {
   discoveredRepeaters.forEach((r, i) => {
 
     html +=
-      "<div style='padding:12px;border-bottom:1px solid #444;text-align:left;'>" +
+      "<div style='padding:12px;border-bottom:1px solid #e3e7ec;text-align:left;'>" +
       "<strong>Repeater " + (i + 1) + "</strong>" +
       "<br>Radio SNR: " + r.localSnr + " dB" +
       "<br>Repeater heard us: " + r.remoteSnr + " dB" +
@@ -886,7 +1113,7 @@ function displayRoomPosts() {
     html +=
       "<div style='" +
       "padding:12px;" +
-      "border-bottom:1px solid #444;" +
+      "border-bottom:1px solid #e3e7ec;" +
       "text-align:left;" +
       "'>";
 
@@ -1521,7 +1748,7 @@ mapRepeatersBtn.onclick = async () => {
             html += `
               <div style="
                 padding:12px;
-                border-bottom:1px solid #444;
+                border-bottom:1px solid #3a4048;
                 text-align:left;
               ">
 
