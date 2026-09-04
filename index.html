@@ -1620,30 +1620,14 @@ function installBatteryListener() {
       const frame =
         new Uint8Array(event.target.value.buffer);
 
-      // RESP_CODE_BATT_AND_STORAGE
       if (frame[0] !== 0x0C)
         return;
 
-      if (frame.length < 3)
-        return;
-
-      const millivolts =
-        frame[1] |
-        (frame[2] << 8);
-
-      const volts =
-        millivolts / 1000;
+      console.log("BATTERY FRAME:", Array.from(frame));
 
       batteryStatus.innerHTML =
-        "🔋 " +
-        volts.toFixed(2) +
-        " V";
-
-      console.log(
-        "Radio battery:",
-        millivolts,
-        "mV"
-      );
+        "Battery frame: " +
+        Array.from(frame).join(", ");
 
     }
   );
