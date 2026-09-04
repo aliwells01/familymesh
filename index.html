@@ -1,175 +1,484 @@
 <!doctype html>
-<html>
+<html lang="en" style="background:#070b12;">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Family Mesh</title>
+  <meta name="theme-color" content="#070b12">
+  <title>WellsNet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
   <style>
+    :root {
+      --bg: #070b12;
+      --surface: #101a2b;
+      --surface-2: #0c1524;
+      --surface-3: #16223a;
+      --text: #eaf0f9;
+      --muted: #8a97ab;
+      --border: #1e2b41;
+      --green: #22c55e;
+      --green-2: #16a34a;
+      --blue: #3b82f6;
+      --blue-soft: #1c2c48;
+      --amber: #f59e0b;
+      --radius: 22px;
+      --shadow: 0 1px 2px rgba(0,0,0,.35), 0 18px 40px rgba(0,0,0,.45);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { background: var(--bg); }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #111;
-      color: white;
       margin: 0;
-      padding: 30px 20px;
+      padding: 22px 14px 40px;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      background:
+        radial-gradient(120% 80% at 50% -10%, rgba(59,130,246,.12), transparent 55%),
+        radial-gradient(90% 60% at 50% 110%, rgba(34,197,94,.08), transparent 55%),
+        var(--bg);
+      background-attachment: fixed;
+      min-height: 100vh;
+    }
+
+    .app {
+      max-width: 460px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* ---------- Header ---------- */
+    .app-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 6px 4px 2px;
+    }
+
+    .brand { flex: 1; text-align: center; padding-left: 40px; }
+
+    .logo {
+      margin: 0;
+      font-size: 40px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      color: var(--text);
+    }
+    .logo-accent { color: var(--blue); }
+
+    .tagline {
+      margin: 8px 0 0;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .gear {
+      flex: 0 0 auto;
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--blue);
+    }
+    .gear svg { display: block; }
+
+    /* ---------- Status pills ---------- */
+    .status-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .stat-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 10px;
+      border-radius: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--text);
+      min-width: 0;
+      justify-content: center;
       text-align: center;
+      line-height: 1.2;
+    }
+    .stat-pill svg { flex: 0 0 auto; display: block; }
+    .stat-mesh { color: var(--green); }
+    .stat-mesh span { color: var(--text); }
+
+    /* ---------- Section labels ---------- */
+    .card-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--muted);
     }
 
-    h1 {
-      margin-bottom: 5px;
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
     }
-
-    #status {
-      margin: 25px 0;
+    .card-title {
+      margin: 0;
       font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: var(--text);
+    }
+    .today-chip {
+      padding: 7px 14px;
+      border-radius: 999px;
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
     }
 
-    button {
+    /* ---------- Buttons ---------- */
+    .btn {
       display: block;
       width: 100%;
-      max-width: 420px;
-      margin: 15px auto;
-      padding: 20px;
-      font-size: 21px;
-      font-weight: 600;
-      border-radius: 14px;
-      border: none;
-    }
-
-    #connect {
-      background: #eee;
-    }
-
-    #advert {
-      background: #5ad66f;
-    }
-
-    #flood {
-      background: #ffb347;
-    }
-
-    button:disabled {
-      opacity: .35;
-    }
-
-    #log {
-      margin-top: 30px;
+      padding: 15px 16px;
       font-size: 14px;
-      color: #aaa;
-      text-align: left;
-      max-width: 420px;
-      margin-left: auto;
-      margin-right: auto;
+      font-weight: 700;
+      letter-spacing: .01em;
+      border-radius: 16px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform .05s ease, box-shadow .2s ease, background .2s ease, opacity .2s ease;
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+    .btn-connect {
+      background: linear-gradient(180deg, #2ee06e, #16a34a);
+      color: #04240f;
+      font-size: 16px;
+      padding: 17px;
+      box-shadow: 0 10px 26px rgba(22,163,74,.35);
+    }
+    .btn-connect:hover:not(:disabled) { box-shadow: 0 12px 30px rgba(22,163,74,.45); }
+
+    .btn-soft-green {
+      background: rgba(34,197,94,.12);
+      color: #55e08b;
+      border-color: rgba(34,197,94,.35);
+    }
+    .btn-soft-green:hover:not(:disabled) { background: rgba(34,197,94,.2); }
+
+    .btn-soft-amber {
+      background: rgba(245,158,11,.12);
+      color: #f7c069;
+      border-color: rgba(245,158,11,.35);
+    }
+    .btn-soft-amber:hover:not(:disabled) { background: rgba(245,158,11,.2); }
+
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* ---------- Segmented controls ---------- */
+    .seg {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 6px;
+    }
+    .seg-btn {
+      padding: 12px 10px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background .2s ease, color .2s ease;
+    }
+    .seg-btn:not(:disabled):hover { background: var(--surface-3); color: var(--text); }
+    .seg-btn:not(:disabled) { color: var(--text); }
+    .seg-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ---------- Map ---------- */
+    .map-controls { display: flex; gap: 8px; }
+    .chip-btn {
+      flex: 1;
+      padding: 11px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .chip-btn:hover { background: var(--surface-3); }
+
+    #closeMap {
+      background: rgba(255,255,255,.14) !important;
+      color: #fff !important;
+      border: 1px solid rgba(255,255,255,.28) !important;
+      border-radius: 10px !important;
+      cursor: pointer;
+    }
+
+    /* ---------- Composer ---------- */
+    .composer {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+    }
+    #roomPostText {
+      flex: 1;
+      min-height: 52px;
+      max-height: 140px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 15px 16px;
+      font-size: 15px;
+      font-family: inherit;
+      background: var(--surface-2);
+      color: var(--text);
+      resize: none;
+      line-height: 1.4;
+    }
+    #roomPostText::placeholder { color: var(--muted); }
+    #roomPostText:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(59,130,246,.25);
+    }
+    .send-btn {
+      flex: 0 0 auto;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(180deg, #2ee06e, #16a34a);
+      color: #04240f;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(22,163,74,.4);
+      -webkit-tap-highlight-color: transparent;
+      transition: transform .05s ease, opacity .2s ease;
+    }
+    .send-btn:active { transform: translateY(1px); }
+    .send-btn:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+    .send-btn svg { display: block; }
+
+    /* ---------- Messages / results ---------- */
+    .messages { display: block; }
+
+    .muted {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .card h3 { font-size: 15px; font-weight: 700; margin: 4px 0; color: var(--text); }
+    .card small { color: var(--muted); }
+    .card strong { color: var(--text); }
+
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .log {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 13px;
+      color: var(--muted);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 16px;
+      line-height: 1.55;
+      word-break: break-word;
     }
   </style>
 </head>
 
 <body>
 
-<h1>Family Mesh</h1>
-<div>Simple MeshCore Controller</div>
+<main class="app">
 
-<div id="status">🔴 Not connected</div>
+  <!-- Header -->
+  <header class="app-header">
+    <div class="brand">
+      <h1 class="logo">Wells<span class="logo-accent">Net</span></h1>
+      <p class="tagline">Family Connected. Anywhere.</p>
+    </div>
+    <div class="gear" aria-hidden="true">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </div>
+  </header>
 
-<div id="batteryStatus">
-  🔋 --
-</div>
+  <!-- Status pills -->
+  <div class="status-row">
+    <div id="status" class="stat-pill">🔴 Not connected</div>
+    <div id="batteryStatus" class="stat-pill">🔋 --</div>
+    <div class="stat-pill stat-mesh">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4.9 19.1a10 10 0 0 1 0-14.2"/>
+        <path d="M7.8 16.2a6 6 0 0 1 0-8.4"/>
+        <path d="M19.1 4.9a10 10 0 0 1 0 14.2"/>
+        <path d="M16.2 7.8a6 6 0 0 1 0 8.4"/>
+        <circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/>
+      </svg>
+      <span>Mesh</span>
+    </div>
+  </div>
 
-<button id="connect">CONNECT TO RADIO</button>
+  <!-- Connect -->
+  <button id="connect" class="btn btn-connect">CONNECT TO RADIO</button>
 
+  <!-- Network -->
+  <section class="card">
+    <div class="card-label">Network</div>
+    <div class="btn-row">
+      <button id="advert" class="btn btn-soft-green" disabled>ADVERTISE LOCALLY</button>
+      <button id="flood" class="btn btn-soft-amber" disabled>FLOOD ADVERTISE</button>
+    </div>
+  </section>
 
+  <!-- Repeaters / Map -->
+  <section class="card">
+    <div class="card-head">
+      <h2 class="card-title">Repeater Map</h2>
+    </div>
 
-<button id="mapRepeaters" disabled>
-  SHOW REPEATER MAP
-</button>
+    <div class="seg">
+      <button id="repeaters" class="seg-btn" disabled>Find Repeaters</button>
+      <button id="mapRepeaters" class="seg-btn" disabled>Show Map</button>
+    </div>
 
-<div id="gpsStatus"></div>
+    <div id="gpsStatus" class="muted"></div>
 
-<div id="mapPanel"
-     style="
-       display:none;
-       position:relative;
-       margin-top:15px;
-       padding:10px;
-       background:#222;
-       border:1px solid #555;
-       border-radius:10px;
-     ">
+    <div id="mapPanel"
+         style="
+           display:none;
+           position:relative;
+           padding:10px;
+           background:#0b1220;
+           border:1px solid #1e2b41;
+           border-radius:16px;
+         ">
 
-  <button id="closeMap"
-          style="
-            position:absolute;
-            right:8px;
-            top:8px;
-            z-index:10;
-            width:40px;
-            height:40px;
-            font-size:22px;
-            padding:0;
-          ">
-    ✕
-  </button>
+      <button id="closeMap"
+              style="
+                position:absolute;
+                right:8px;
+                top:8px;
+                z-index:10;
+                width:40px;
+                height:40px;
+                font-size:22px;
+                padding:0;
+              ">
+        ✕
+      </button>
 
-  <svg id="gaMap"
-       viewBox="0 0 500 500"
-       style="
-         width:100%;
-         max-width:500px;
-         display:block;
-         margin:auto;
-       ">
-  </svg>
+      <svg id="gaMap"
+           viewBox="0 0 500 500"
+           style="
+             width:100%;
+             max-width:500px;
+             display:block;
+             margin:auto;
+           ">
+      </svg>
 
-  <div id="nearestRepeaters"></div>
+      <div id="nearestRepeaters" style="color:#eaf0f9;"></div>
 
-</div>
+    </div>
 
-<div style="margin-top:10px;">
-  <button id="zoomIn">+</button>
-  <button id="zoomOut">−</button>
-  <button id="resetMap">RESET</button>
-</div>
+    <div class="map-controls">
+      <button id="zoomIn" class="chip-btn">+</button>
+      <button id="zoomOut" class="chip-btn">−</button>
+      <button id="resetMap" class="chip-btn">RESET</button>
+    </div>
 
+    <div id="repeatersList"></div>
+  </section>
 
+  <!-- Family Messages / Check-in room -->
+  <section class="card">
+    <div class="card-head">
+      <h2 class="card-title">Family Messages</h2>
+      <span class="today-chip">Check-in</span>
+    </div>
 
-<button id="advert" disabled>
-  ADVERTISE LOCALLY
-</button>
+    <div class="seg">
+      <button id="room" class="seg-btn" disabled>Check In Room</button>
+      <button id="readRoom" class="seg-btn" disabled>Read Room</button>
+    </div>
 
-<button id="flood" disabled>
-  FLOOD ADVERTISE
-</button>
+    <div id="roomMessages" class="messages"></div>
+    <div id="roomStatus" class="muted"></div>
 
-<button id="repeaters" disabled>
-  FIND REPEATERS
-</button>
+    <div class="composer">
+      <textarea id="roomPostText" placeholder="Type a message..."></textarea>
+      <button id="sendRoomPost" class="send-btn" disabled aria-label="Send message">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M22 2 11 13"/>
+          <path d="M22 2 15 22l-4-9-9-4 20-7z"/>
+        </svg>
+      </button>
+    </div>
+    <div id="sendRoomStatus" class="muted"></div>
+  </section>
 
-<button id="room" disabled>
-  CHECK IN ROOM
-</button>
+  <div id="log" class="log">Ready.</div>
 
-<button id="readRoom" disabled>
-  READ ROOM
-</button>
-
-<textarea id="roomPostText"
-          placeholder="Type check-in message..."
-          style="width:100%;max-width:420px;height:80px;margin-top:15px;"></textarea>
-
-<button id="sendRoomPost" disabled>
-  SEND TO ROOM
-</button>
-
-<div id="sendRoomStatus"></div>
-
-<div id="roomMessages"></div>
-
-<div id="roomStatus"></div>
-
-<div id="repeatersList"></div>
-
-
-<div id="log">Ready.</div>
+</main>
 
 
 <script type="module">
@@ -413,7 +722,7 @@ function showDiscoveryResults() {
   discoveredRepeaters.forEach((r, i) => {
 
     html +=
-      "<div style='padding:12px;border-bottom:1px solid #444;text-align:left;'>" +
+      "<div style='padding:12px;border-bottom:1px solid #e3e7ec;text-align:left;'>" +
       "<strong>Repeater " + (i + 1) + "</strong>" +
       "<br>Radio SNR: " + r.localSnr + " dB" +
       "<br>Repeater heard us: " + r.remoteSnr + " dB" +
@@ -886,7 +1195,7 @@ function displayRoomPosts() {
     html +=
       "<div style='" +
       "padding:12px;" +
-      "border-bottom:1px solid #444;" +
+      "border-bottom:1px solid #e3e7ec;" +
       "text-align:left;" +
       "'>";
 
@@ -1521,7 +1830,7 @@ mapRepeatersBtn.onclick = async () => {
             html += `
               <div style="
                 padding:12px;
-                border-bottom:1px solid #444;
+                border-bottom:1px solid #3a4048;
                 text-align:left;
               ">
 
