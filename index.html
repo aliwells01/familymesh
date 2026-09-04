@@ -1,41 +1,48 @@
 <!doctype html>
-<html lang="en" style="background:#eef1f4;">
+<html lang="en" style="background:#070b12;">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#eef1f4">
-  <title>Family Mesh</title>
+  <meta name="theme-color" content="#070b12">
+  <title>WellsNet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --bg: #eef1f4;
-      --surface: #ffffff;
-      --surface-2: #f5f7fa;
-      --text: #1a1f24;
-      --muted: #6b7480;
-      --border: #e3e7ec;
+      --bg: #070b12;
+      --surface: #101a2b;
+      --surface-2: #0c1524;
+      --surface-3: #16223a;
+      --text: #eaf0f9;
+      --muted: #8a97ab;
+      --border: #1e2b41;
       --green: #22c55e;
-      --green-strong: #15803d;
-      --green-soft: #e7f8ee;
+      --green-2: #16a34a;
       --blue: #3b82f6;
+      --blue-soft: #1c2c48;
       --amber: #f59e0b;
-      --amber-soft: #fdf1dd;
-      --radius: 20px;
-      --shadow: 0 1px 2px rgba(16,24,40,.04), 0 10px 26px rgba(16,24,40,.06);
+      --radius: 22px;
+      --shadow: 0 1px 2px rgba(0,0,0,.35), 0 18px 40px rgba(0,0,0,.45);
     }
 
     * { box-sizing: border-box; }
 
-    html, body {
-      background: var(--bg);
-    }
+    html, body { background: var(--bg); }
 
     body {
       margin: 0;
-      padding: 20px 16px 40px;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 22px 14px 40px;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       color: var(--text);
       -webkit-font-smoothing: antialiased;
+      background:
+        radial-gradient(120% 80% at 50% -10%, rgba(59,130,246,.12), transparent 55%),
+        radial-gradient(90% 60% at 50% 110%, rgba(34,197,94,.08), transparent 55%),
+        var(--bg);
+      background-attachment: fixed;
+      min-height: 100vh;
     }
 
     .app {
@@ -43,187 +50,209 @@
       margin: 0 auto;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
     }
 
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 20px;
+      padding: 16px;
       box-shadow: var(--shadow);
-    }
-
-    .stack {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
     }
 
-    /* ---------- Identity card ---------- */
-    .identity-top {
+    /* ---------- Header ---------- */
+    .app-header {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
       gap: 12px;
+      padding: 6px 4px 2px;
     }
 
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 9px 16px;
-      border-radius: 999px;
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      font-weight: 600;
-      font-size: 15px;
-      color: var(--text);
-    }
+    .brand { flex: 1; text-align: center; padding-left: 40px; }
 
-    .hub-badge {
-      padding: 9px 18px;
-      border-radius: 999px;
-      background: #3a3f45;
-      color: #f3e6c4;
-      border: 1px solid #c9a24b;
-      font-weight: 700;
-      letter-spacing: .06em;
-      font-size: 13px;
-    }
-
-    .identity h1 {
-      margin: 18px 0 4px;
-      font-size: 30px;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-    }
-
-    .subtitle {
-      margin: 0 0 20px;
-      color: var(--muted);
-      font-size: 15px;
-    }
-
-    /* ---------- Battery card ---------- */
-    .battery-card {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-    }
-
-    .battery-head {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 600;
-      font-size: 16px;
-      color: var(--text);
-    }
-
-    .battery-head svg { display: block; }
-
-    .battery-value {
-      font-size: 32px;
-      font-weight: 800;
-      color: var(--green-strong);
-      font-variant-numeric: tabular-nums;
+    .logo {
+      margin: 0;
+      font-size: 40px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
       line-height: 1;
+      color: var(--text);
     }
+    .logo-accent { color: var(--blue); }
 
-    /* ---------- Section headers ---------- */
-    .section-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: .14em;
+    .tagline {
+      margin: 8px 0 0;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .18em;
       text-transform: uppercase;
       color: var(--muted);
-      margin: 8px 4px 0;
     }
 
-    .section-header::after {
-      content: "";
-      flex: 1;
-      height: 1px;
-      background: var(--border);
+    .gear {
+      flex: 0 0 auto;
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--blue);
+    }
+    .gear svg { display: block; }
+
+    /* ---------- Status pills ---------- */
+    .status-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .stat-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 10px;
+      border-radius: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--text);
+      min-width: 0;
+      justify-content: center;
+      text-align: center;
+      line-height: 1.2;
+    }
+    .stat-pill svg { flex: 0 0 auto; display: block; }
+    .stat-mesh { color: var(--green); }
+    .stat-mesh span { color: var(--text); }
+
+    /* ---------- Section labels ---------- */
+    .card-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .card-title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: var(--text);
+    }
+    .today-chip {
+      padding: 7px 14px;
+      border-radius: 999px;
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
     }
 
     /* ---------- Buttons ---------- */
     .btn {
       display: block;
       width: 100%;
-      padding: 16px 18px;
-      font-size: 16px;
-      font-weight: 600;
-      border-radius: 14px;
+      padding: 15px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .01em;
+      border-radius: 16px;
       border: 1px solid transparent;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
-      transition: transform .05s ease, box-shadow .2s ease, background .2s ease;
+      transition: transform .05s ease, box-shadow .2s ease, background .2s ease, opacity .2s ease;
     }
-
     .btn:active { transform: translateY(1px); }
-    .btn:disabled { opacity: .4; cursor: not-allowed; }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
 
     .btn-connect {
-      background: linear-gradient(180deg, #29ca66, #16a34a);
-      color: #fff;
-      font-size: 17px;
-      padding: 18px;
-      box-shadow: 0 6px 16px rgba(22,163,74,.28);
+      background: linear-gradient(180deg, #2ee06e, #16a34a);
+      color: #04240f;
+      font-size: 16px;
+      padding: 17px;
+      box-shadow: 0 10px 26px rgba(22,163,74,.35);
     }
-    .btn-connect:hover:not(:disabled) { box-shadow: 0 8px 22px rgba(22,163,74,.34); }
+    .btn-connect:hover:not(:disabled) { box-shadow: 0 12px 30px rgba(22,163,74,.45); }
 
-    .btn-ghost {
-      background: var(--surface);
-      border-color: var(--border);
-      color: var(--text);
+    .btn-soft-green {
+      background: rgba(34,197,94,.12);
+      color: #55e08b;
+      border-color: rgba(34,197,94,.35);
     }
-    .btn-ghost:hover:not(:disabled) { background: var(--surface-2); }
+    .btn-soft-green:hover:not(:disabled) { background: rgba(34,197,94,.2); }
 
-    .btn-green {
-      background: var(--green-soft);
-      color: var(--green-strong);
-      border-color: #bfe9cd;
+    .btn-soft-amber {
+      background: rgba(245,158,11,.12);
+      color: #f7c069;
+      border-color: rgba(245,158,11,.35);
     }
-    .btn-green:hover:not(:disabled) { background: #dbf3e4; }
-
-    .btn-amber {
-      background: var(--amber-soft);
-      color: #b45309;
-      border-color: #f4d9a6;
-    }
-    .btn-amber:hover:not(:disabled) { background: #fbe8ca; }
+    .btn-soft-amber:hover:not(:disabled) { background: rgba(245,158,11,.2); }
 
     .btn-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    /* ---------- Map ---------- */
-    .map-controls {
-      display: flex;
       gap: 10px;
     }
 
+    /* ---------- Segmented controls ---------- */
+    .seg {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 6px;
+    }
+    .seg-btn {
+      padding: 12px 10px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background .2s ease, color .2s ease;
+    }
+    .seg-btn:not(:disabled):hover { background: var(--surface-3); color: var(--text); }
+    .seg-btn:not(:disabled) { color: var(--text); }
+    .seg-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ---------- Map ---------- */
+    .map-controls { display: flex; gap: 8px; }
     .chip-btn {
       flex: 1;
-      padding: 12px 14px;
+      padding: 11px 12px;
       border-radius: 12px;
       border: 1px solid var(--border);
-      background: var(--surface);
+      background: var(--surface-2);
       color: var(--text);
       font-weight: 700;
       font-size: 15px;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
     }
-    .chip-btn:hover { background: var(--surface-2); }
+    .chip-btn:hover { background: var(--surface-3); }
 
     #closeMap {
       background: rgba(255,255,255,.14) !important;
@@ -233,26 +262,54 @@
       cursor: pointer;
     }
 
-    /* ---------- Room ---------- */
+    /* ---------- Composer ---------- */
+    .composer {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+    }
     #roomPostText {
-      width: 100%;
-      min-height: 92px;
+      flex: 1;
+      min-height: 52px;
+      max-height: 140px;
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 14px;
+      border-radius: 18px;
+      padding: 15px 16px;
       font-size: 15px;
       font-family: inherit;
       background: var(--surface-2);
       color: var(--text);
-      resize: vertical;
+      resize: none;
+      line-height: 1.4;
     }
+    #roomPostText::placeholder { color: var(--muted); }
     #roomPostText:focus {
       outline: none;
-      border-color: var(--green);
-      box-shadow: 0 0 0 3px var(--green-soft);
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(59,130,246,.25);
     }
+    .send-btn {
+      flex: 0 0 auto;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(180deg, #2ee06e, #16a34a);
+      color: #04240f;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(22,163,74,.4);
+      -webkit-tap-highlight-color: transparent;
+      transition: transform .05s ease, opacity .2s ease;
+    }
+    .send-btn:active { transform: translateY(1px); }
+    .send-btn:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+    .send-btn svg { display: block; }
 
-    /* ---------- Status text + results ---------- */
+    /* ---------- Messages / results ---------- */
+    .messages { display: block; }
+
     .muted {
       color: var(--muted);
       font-size: 14px;
@@ -260,23 +317,25 @@
       word-break: break-word;
     }
 
-    .card h3 { font-size: 16px; font-weight: 700; margin: 6px 0; }
+    .card h3 { font-size: 15px; font-weight: 700; margin: 4px 0; color: var(--text); }
     .card small { color: var(--muted); }
+    .card strong { color: var(--text); }
 
     pre {
       white-space: pre-wrap;
       word-break: break-word;
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
       font-size: 13px;
+      color: var(--text);
     }
 
     .log {
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
       font-size: 13px;
       color: var(--muted);
-      background: var(--surface);
+      background: var(--surface-2);
       border: 1px solid var(--border);
-      border-radius: 14px;
+      border-radius: 16px;
       padding: 14px 16px;
       line-height: 1.55;
       word-break: break-word;
@@ -288,46 +347,58 @@
 
 <main class="app">
 
-  <!-- Identity -->
-  <section class="card identity">
-    <div class="identity-top">
-      <div id="status" class="status-pill">🔴 Not connected</div>
-      <div class="hub-badge">HUB</div>
+  <!-- Header -->
+  <header class="app-header">
+    <div class="brand">
+      <h1 class="logo">Wells<span class="logo-accent">Net</span></h1>
+      <p class="tagline">Family Connected. Anywhere.</p>
     </div>
-
-    <h1>WellsNet</h1>
-    <p class="subtitle">Simple MeshCore Controller</p>
-
-    <button id="connect" class="btn btn-connect">CONNECT TO RADIO</button>
-  </section>
-
-  <!-- Battery -->
-  <section class="card battery-card">
-    <div class="battery-head">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <rect x="2" y="7" width="17" height="10" rx="3" stroke="#15803d" stroke-width="1.8"/>
-        <rect x="4" y="9" width="9" height="6" rx="1.5" fill="#22c55e"/>
-        <rect x="21" y="10" width="2" height="4" rx="1" fill="#15803d"/>
+    <div class="gear" aria-hidden="true">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
       </svg>
-      <span>Battery</span>
     </div>
-    <div id="batteryStatus" class="battery-value">🔋 --</div>
-  </section>
+  </header>
 
-  <!-- Network actions -->
-  <div class="section-header">Network</div>
+  <!-- Status pills -->
+  <div class="status-row">
+    <div id="status" class="stat-pill">🔴 Not connected</div>
+    <div id="batteryStatus" class="stat-pill">🔋 --</div>
+    <div class="stat-pill stat-mesh">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4.9 19.1a10 10 0 0 1 0-14.2"/>
+        <path d="M7.8 16.2a6 6 0 0 1 0-8.4"/>
+        <path d="M19.1 4.9a10 10 0 0 1 0 14.2"/>
+        <path d="M16.2 7.8a6 6 0 0 1 0 8.4"/>
+        <circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/>
+      </svg>
+      <span>Mesh</span>
+    </div>
+  </div>
+
+  <!-- Connect -->
+  <button id="connect" class="btn btn-connect">CONNECT TO RADIO</button>
+
+  <!-- Network -->
   <section class="card">
+    <div class="card-label">Network</div>
     <div class="btn-row">
-      <button id="advert" class="btn btn-green" disabled>ADVERTISE LOCALLY</button>
-      <button id="flood" class="btn btn-amber" disabled>FLOOD ADVERTISE</button>
+      <button id="advert" class="btn btn-soft-green" disabled>ADVERTISE LOCALLY</button>
+      <button id="flood" class="btn btn-soft-amber" disabled>FLOOD ADVERTISE</button>
     </div>
   </section>
 
-  <!-- Repeaters -->
-  <div class="section-header">Repeaters</div>
-  <section class="card stack">
-    <button id="repeaters" class="btn btn-ghost" disabled>FIND REPEATERS</button>
-    <button id="mapRepeaters" class="btn btn-ghost" disabled>SHOW REPEATER MAP</button>
+  <!-- Repeaters / Map -->
+  <section class="card">
+    <div class="card-head">
+      <h2 class="card-title">Repeater Map</h2>
+    </div>
+
+    <div class="seg">
+      <button id="repeaters" class="seg-btn" disabled>Find Repeaters</button>
+      <button id="mapRepeaters" class="seg-btn" disabled>Show Map</button>
+    </div>
 
     <div id="gpsStatus" class="muted"></div>
 
@@ -336,9 +407,9 @@
            display:none;
            position:relative;
            padding:10px;
-           background:#20242b;
-           border:1px solid #3a4048;
-           border-radius:14px;
+           background:#0b1220;
+           border:1px solid #1e2b41;
+           border-radius:16px;
          ">
 
       <button id="closeMap"
@@ -365,7 +436,7 @@
            ">
       </svg>
 
-      <div id="nearestRepeaters" style="color:#e6e9ee;"></div>
+      <div id="nearestRepeaters" style="color:#eaf0f9;"></div>
 
     </div>
 
@@ -378,20 +449,31 @@
     <div id="repeatersList"></div>
   </section>
 
-  <!-- Check-in room -->
-  <div class="section-header">Check-in Room</div>
-  <section class="card stack">
-    <button id="room" class="btn btn-ghost" disabled>CHECK IN ROOM</button>
-    <button id="readRoom" class="btn btn-ghost" disabled>READ ROOM</button>
+  <!-- Family Messages / Check-in room -->
+  <section class="card">
+    <div class="card-head">
+      <h2 class="card-title">Family Messages</h2>
+      <span class="today-chip">Check-in</span>
+    </div>
 
-    <textarea id="roomPostText"
-              placeholder="Type check-in message..."></textarea>
+    <div class="seg">
+      <button id="room" class="seg-btn" disabled>Check In Room</button>
+      <button id="readRoom" class="seg-btn" disabled>Read Room</button>
+    </div>
 
-    <button id="sendRoomPost" class="btn btn-connect" disabled>SEND TO ROOM</button>
-
-    <div id="sendRoomStatus" class="muted"></div>
-    <div id="roomMessages"></div>
+    <div id="roomMessages" class="messages"></div>
     <div id="roomStatus" class="muted"></div>
+
+    <div class="composer">
+      <textarea id="roomPostText" placeholder="Type a message..."></textarea>
+      <button id="sendRoomPost" class="send-btn" disabled aria-label="Send message">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M22 2 11 13"/>
+          <path d="M22 2 15 22l-4-9-9-4 20-7z"/>
+        </svg>
+      </button>
+    </div>
+    <div id="sendRoomStatus" class="muted"></div>
   </section>
 
   <div id="log" class="log">Ready.</div>
