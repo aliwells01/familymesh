@@ -156,10 +156,10 @@
     }
 
     .status-icon.battery {
-      border: 2px solid #7ba8c3;
+      border: 1px solid #7ba8c3;
       border-radius: 5px;
-      width: 23px;
-      height: 34px;
+      width: 15px;
+      height: 22px;
       position: relative;
       padding: 3px;
     }
@@ -167,8 +167,8 @@
     .status-icon.battery::before {
       content: "";
       position: absolute;
-      width: 9px;
-      height: 3px;
+      width: 6px;
+      height: 2px;
       border-radius: 2px 2px 0 0;
       background: #7ba8c3;
       left: 5px;
@@ -187,7 +187,7 @@
     .status-icon.mesh {
       color: var(--green);
       background: rgba(53,214,122,.08);
-      font-size: 25px;
+      font-size: 15px;
     }
 
     .status-copy {
@@ -562,11 +562,11 @@
       }
 
       .status-value {
-        font-size: 15px;
+        font-size: 13px;
       }
 
       .status-sub {
-        font-size: 11px;
+        font-size: 10px;
       }
 
       .map-shell {
@@ -586,9 +586,8 @@
 
     <header class="brand">
       <div>
-        <h1 class="brand-title">Wells<span>Link</span></h1>
-        <div class="tagline">Family connected. Anywhere.</div>
-      </div>
+        <h1 class="brand-title">WellsLink</h1>
+     
       <div class="gear" aria-hidden="true">⚙</div>
     </header>
 
@@ -597,7 +596,7 @@
         <div class="status-icon radio"></div>
         <div class="status-copy">
           <div id="status" class="status-value disconnected">Not connected</div>
-          <div id="radioDeviceLabel" class="status-sub">T1000</div>
+          <div id="radioDeviceLabel" class="status-sub">RadioName</div>
         </div>
       </div>
 
@@ -605,7 +604,7 @@
         <div class="status-icon battery"></div>
         <div class="status-copy">
           <div id="batteryStatus" class="status-value">--%</div>
-          <div id="batteryVolts" class="status-sub">-- V</div>
+        
         </div>
       </div>
 
