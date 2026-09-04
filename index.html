@@ -80,16 +80,44 @@
 
 <div id="gpsStatus"></div>
 
-<svg id="gaMap"
-     viewBox="0 0 500 620"
+<div id="mapPanel"
      style="
-       width:100%;
-       max-width:420px;
-       background:#222;
+       display:none;
+       position:relative;
        margin-top:15px;
+       padding:10px;
+       background:#222;
        border:1px solid #555;
+       border-radius:10px;
      ">
-</svg>
+
+  <button id="closeMap"
+          style="
+            position:absolute;
+            right:8px;
+            top:8px;
+            z-index:10;
+            width:40px;
+            height:40px;
+            font-size:22px;
+            padding:0;
+          ">
+    ✕
+  </button>
+
+  <svg id="gaMap"
+       viewBox="0 0 500 500"
+       style="
+         width:100%;
+         max-width:500px;
+         display:block;
+         margin:auto;
+       ">
+  </svg>
+
+  <div id="nearestRepeaters"></div>
+
+</div>
 
 <div style="margin-top:10px;">
   <button id="zoomIn">+</button>
@@ -97,7 +125,7 @@
   <button id="resetMap">RESET</button>
 </div>
 
-<div id="nearestRepeaters"></div>
+
 
 <button id="advert" disabled>
   ADVERTISE LOCALLY
@@ -170,6 +198,12 @@ const roomMessages = document.getElementById("roomMessages");
 
 const LOCAL_RADIUS_MILES = 5;
 
+const mapPanel =
+  document.getElementById("mapPanel");
+
+const closeMapBtn =
+  document.getElementById("closeMap");
+
 let roomPosts = [];
 
 const roomPostText =
@@ -212,6 +246,12 @@ function applyMapView() {
     `${mapView.x} ${mapView.y} ${mapView.width} ${mapView.height}`
   );
 }
+
+closeMapBtn.onclick = () => {
+
+  mapPanel.style.display = "none";
+
+};
 
 zoomInBtn.onclick = () => {
 
@@ -1316,6 +1356,8 @@ mapRepeatersBtn.onclick = async () => {
 
   try {
 
+    mapPanel.style.display = "none";
+
     gpsStatus.innerHTML =
       "Reading repeater locations...";
 
@@ -1428,6 +1470,7 @@ mapRepeatersBtn.onclick = async () => {
           userLon,
           repeaters
         );
+        mapPanel.style.display = "block";
 
 
         let html =
