@@ -91,6 +91,12 @@
      ">
 </svg>
 
+<div style="margin-top:10px;">
+  <button id="zoomIn">+</button>
+  <button id="zoomOut">−</button>
+  <button id="resetMap">RESET</button>
+</div>
+
 <div id="nearestRepeaters"></div>
 
 <button id="advert" disabled>
@@ -186,6 +192,73 @@ const gaMap =
 
 const nearestRepeaters =
   document.getElementById("nearestRepeaters");
+
+const zoomInBtn = document.getElementById("zoomIn");
+const zoomOutBtn = document.getElementById("zoomOut");
+const resetMapBtn = document.getElementById("resetMap");
+
+let mapView = {
+  x: 0,
+  y: 0,
+  width: 500,
+  height: 620
+};
+
+function applyMapView() {
+  gaMap.setAttribute(
+    "viewBox",
+    `${mapView.x} ${mapView.y} ${mapView.width} ${mapView.height}`
+  );
+}
+
+zoomInBtn.onclick = () => {
+
+  const factor = 0.75;
+
+  const newWidth = mapView.width * factor;
+  const newHeight = mapView.height * factor;
+
+  mapView.x += (mapView.width - newWidth) / 2;
+  mapView.y += (mapView.height - newHeight) / 2;
+
+  mapView.width = newWidth;
+  mapView.height = newHeight;
+
+  applyMapView();
+};
+
+
+zoomOutBtn.onclick = () => {
+
+  const factor = 1.33;
+
+  const newWidth = mapView.width * factor;
+  const newHeight = mapView.height * factor;
+
+  mapView.x -= (newWidth - mapView.width) / 2;
+  mapView.y -= (newHeight - mapView.height) / 2;
+
+  mapView.width = Math.min(newWidth, 500);
+  mapView.height = Math.min(newHeight, 620);
+
+  if (mapView.width === 500) mapView.x = 0;
+  if (mapView.height === 620) mapView.y = 0;
+
+  applyMapView();
+};
+
+
+resetMapBtn.onclick = () => {
+
+  mapView = {
+    x: 0,
+    y: 0,
+    width: 500,
+    height: 620
+  };
+
+  applyMapView();
+};
 
 
 function message(text) {
