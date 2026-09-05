@@ -1883,29 +1883,19 @@ await requestNextMessage();
 
       // RESP_CODE_NO_MORE_MESSAGES
       if (frame[0] === 10) {
+        roomRequestPending = false;
+          roomSyncInProgress = false;
+          startLiveRoomPolling();
 
-  roomRequestPending = false;
-  roomSyncInProgress = false;
+          if (roomSyncTimer) {
+            clearTimeout(roomSyncTimer);
+            roomSyncTimer = null;
+          }
 
-  if (roomSyncTimer) {
-    clearTimeout(roomSyncTimer);
-    roomSyncTimer = null;
-  }
-
-  if (familyStatus) {
-    familyStatus.textContent =
-      "Check-In Connected";
-  }
-
-  sendRoomPostBtn.disabled = false;
-
-  // Start live polling if it isn't already running
-  if (!liveRoomPollTimer) {
-    startLiveRoomPolling();
-  }
-
-  return;
-}
+          if (familyStatus) {
+            familyStatus.textContent =
+              "Check-In Connected";
+          }
 
 sendRoomPostBtn.disabled = false;
         message(
