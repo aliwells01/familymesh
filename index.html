@@ -972,6 +972,11 @@ const FAMILY_STATUS_PREFIX = "WLLOC|";
 let familyLocations = {};
 let myPosition = null;
 
+let roomSyncInProgress = false;
+let roomRequestPending = false;
+let roomSyncTimer = null;
+
+
 mapTab.onclick = () => {
 
   mapPanel.style.display = "block";
@@ -1459,7 +1464,7 @@ await resetContactPath(room);
 
 message("Room path reset to flood.");
 
-sendRoomPostBtn.disabled = false;
+sendRoomPostBtn.disabled = true;
 
 roomStatus.innerHTML =
   "📡 Connecting to " + room.advName + "...";
@@ -1566,10 +1571,33 @@ function decodeText(bytes) {
 }
 
 async function requestNextMessage() {
-  // CMD_SYNC_NEXT_MESSAGE = 0x0A
-  await connection.sendToRadioFrame(
-    new Uint8Array([0x0A])
-  );
+
+  // Never have two NEXT_MESSAGE requests in flight.
+  if (roomRequestPending) {
+    return;
+  }
+
+  roomRequestPending = true;
+
+  console.log("ROOM SYNC: requesting next message");
+
+  try {
+
+    await connection.sendToRadioFrame(
+      new Uint8Array([0x0A])
+    );
+
+  } catch (err) {
+
+    roomRequestPending = false;
+
+    console.error(
+      "ROOM SYNC request failed:",
+      err
+    );
+
+    throw err;
+  }
 }
 
 function installRoomMessageListener() {
@@ -1584,14 +1612,19 @@ function installRoomMessageListener() {
 
       // PUSH_CODE_MSG_WAITING
       // Radio says there is a queued message waiting.
-      if (frame[0] === 0x83) {
+        if (frame[0] === 0x83) {
 
-        console.log("Message waiting");
+          console.log("ROOM: message waiting");
 
-        await requestNextMessage();
+          roomSyncInProgress = true;
 
-        return;
-      }
+          // Only request if one isn't already outstanding.
+          if (!roomRequestPending) {
+            await requestNextMessage();
+          }
+
+          return;
+        }
 
 
       /*
@@ -1614,6 +1647,21 @@ function installRoomMessageListener() {
       */
 
       if (frame[0] === 16) {
+
+
+        roomRequestPending = false;
+        roomSyncInProgress = true;
+        if (familyStatus) {
+  familyStatus.textContent =
+    "Check-In Connected";
+}
+
+sendRoomPostBtn.disabled = false;
+
+if (roomSyncTimer) {
+  clearTimeout(roomSyncTimer);
+  roomSyncTimer = null;
+}
 
         const snr =
           (frame[1] << 24 >> 24) / 4;
@@ -1795,8 +1843,13 @@ function installRoomMessageListener() {
           */
 
 
-          // Keep draining the room queue.
-          await requestNextMessage();
+          // Give the companion a moment before asking
+// for the next retained post.
+await new Promise(resolve =>
+  setTimeout(resolve, 150)
+);
+
+await requestNextMessage();
 
           return;
         }
@@ -1829,7 +1882,20 @@ function installRoomMessageListener() {
 
       // RESP_CODE_NO_MORE_MESSAGES
       if (frame[0] === 10) {
+        roomRequestPending = false;
+roomSyncInProgress = false;
 
+if (roomSyncTimer) {
+  clearTimeout(roomSyncTimer);
+  roomSyncTimer = null;
+}
+
+if (familyStatus) {
+  familyStatus.textContent =
+    "Check-In Connected";
+}
+
+sendRoomPostBtn.disabled = false;
         message(
           "✅ Room message sync complete."
         );
