@@ -753,7 +753,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin8</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin9</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -2148,16 +2148,25 @@
        const frame =
         new Uint8Array(event.target.value.buffer);
 
-      console.log(
-        "ROOM RX:",
-        Array.from(frame)
-      );
+      const code = frame[0];
 
-      roomMessages.innerHTML = `
-        <div class="empty-chat">
-          RX: ${Array.from(frame).join(", ")}
-        </div>
-      `;
+      // Ignore RF log traffic completely.
+      if (code !== 0x88) {
+
+        console.log(
+          "ROOM RX:",
+          code,
+          Array.from(frame)
+        );
+
+        roomMessages.innerHTML = `
+          <div class="empty-chat">
+            RX code: ${code} (0x${code.toString(16).padStart(2, "0")})
+            <br><br>
+            ${Array.from(frame).join(", ")}
+          </div>
+        `;
+      }
 
         // PUSH_CODE_LOGIN_SUCCESS
         // PUSH_CODE_LOGIN_SUCCESS
