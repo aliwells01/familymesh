@@ -753,7 +753,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin2</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin3</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -2121,27 +2121,45 @@
         console.log("RX:", frame);
 
         // PUSH_CODE_LOGIN_SUCCESS
-        if (frame[0] === 0x85) {
+        // PUSH_CODE_LOGIN_SUCCESS
+          if (frame[0] === 0x85) {
 
-          if (roomConnectTimer) {
-            clearTimeout(roomConnectTimer);
-            roomConnectTimer = null;
+            if (roomConnectTimer) {
+              clearTimeout(roomConnectTimer);
+              roomConnectTimer = null;
+            }
+
+            const permissions = frame[1];
+
+            roomStatus.innerHTML = "";
+
+            if (familyStatus) {
+              familyStatus.textContent =
+                "Check-In Connected";
+            }
+
+            roomMessages.innerHTML = `
+              <div class="empty-chat">
+                Loading family messages...
+              </div>
+            `;
+
+            message("Room login successful.");
+
+            sendRoomPostBtn.disabled = false;
+
+            // Start pulling retained room messages.
+            roomRequestPending = false;
+
+            requestNextMessage().catch(err => {
+              console.error(
+                "Initial room message request failed:",
+                err
+              );
+            });
+
+            return;
           }
-
-          const permissions = frame[1];
-
-          roomStatus.innerHTML = "";
-
-          if (familyStatus) {
-            familyStatus.textContent = "Check-In Connected";
-          }
-
-          message("Room login successful.");
-
-          sendRoomPostBtn.disabled = false;
-
-          return;
-        }
 
 
         // PUSH_CODE_LOGIN_FAIL
