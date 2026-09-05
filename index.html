@@ -753,7 +753,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin6</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin7</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -1953,7 +1953,7 @@
             text
           });
 
-
+          saveRoomPosts();
           displayRoomPosts();
 
 
@@ -2001,12 +2001,12 @@
             startLiveRoomPolling();
           }.  */
 
-          if (roomPosts.length === 0) {
+         /*  if (roomPosts.length === 0) {
 
             roomMessages.innerHTML =
             '<div class="empty-chat">No family messages yet.</div>';
 
-          }
+          } */
 
           renderFamilyStatus();
 
@@ -2017,6 +2017,36 @@
       );
     }
 
+
+
+
+            function saveRoomPosts() {
+          localStorage.setItem(
+            "meshkin_room_posts",
+            JSON.stringify(roomPosts)
+          );
+        }
+
+        function loadRoomPosts() {
+          try {
+            const saved =
+              JSON.parse(
+                localStorage.getItem(
+                  "meshkin_room_posts"
+                ) || "[]"
+              );
+
+            if (Array.isArray(saved)) {
+              roomPosts = saved;
+              displayRoomPosts();
+            }
+          } catch (err) {
+            console.error(
+              "Could not load saved room posts:",
+              err
+            );
+          }
+        }
 
   // ==================== CHECK-IN CHAT DISPLAY ====================
     function displayRoomPosts() {
@@ -3378,7 +3408,7 @@ const password =
 
     await connection.sendToRadioFrame(frame);
   }
-
+  loadRoomPosts();
   </script>
   </body>
 </html>
