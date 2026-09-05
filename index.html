@@ -1883,43 +1883,29 @@ await requestNextMessage();
 
       // RESP_CODE_NO_MORE_MESSAGES
       if (frame[0] === 10) {
-        roomRequestPending = false;
-roomSyncInProgress = false;
 
-if (roomSyncTimer) {
-  clearTimeout(roomSyncTimer);
-  roomSyncTimer = null;
+  roomRequestPending = false;
+  roomSyncInProgress = false;
+
+  if (roomSyncTimer) {
+    clearTimeout(roomSyncTimer);
+    roomSyncTimer = null;
+  }
+
+  if (familyStatus) {
+    familyStatus.textContent =
+      "Check-In Connected";
+  }
+
+  sendRoomPostBtn.disabled = false;
+
+  // Start live polling if it isn't already running
+  if (!liveRoomPollTimer) {
+    startLiveRoomPolling();
+  }
+
+  return;
 }
-
-if (familyStatus) {
-  familyStatus.textContent =
-    "Check-In Connected";
-}
-
-sendRoomPostBtn.disabled = false;
-        message(
-          "✅ Room message sync complete."
-        );
-
-
-        if (roomPosts.length === 0) {
-
-          roomMessages.innerHTML =
-            '<div class="empty-chat">No family messages yet.</div>';
-
-        }
-
-
-        /*
-          Refresh Family display after all
-          room history has been processed.
-        */
-
-        renderFamilyStatus();
-
-
-        return;
-      }
 
     }
   );
@@ -3170,6 +3156,38 @@ async function sendLocationCheckIn() {
 
   }
 }
+
+function startLiveRoomPolling() {
+
+  if (liveRoomPollTimer) {
+    clearInterval(liveRoomPollTimer);
+  }
+
+  liveRoomPollTimer = setInterval(async () => {
+
+    if (!connection || !currentRoom) {
+      return;
+    }
+
+    // Don't interfere with an existing request
+    if (roomRequestPending) {
+      return;
+    }
+
+    try {
+      await requestNextMessage();
+    }
+    catch (err) {
+      console.log(
+        "Live room poll failed:",
+        err
+      );
+    }
+
+  }, 3000);
+}
+
+
 
 async function sendRoomText(text) {
 
