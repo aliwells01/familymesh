@@ -1884,18 +1884,17 @@ await requestNextMessage();
       // RESP_CODE_NO_MORE_MESSAGES
       if (frame[0] === 10) {
         roomRequestPending = false;
-          roomSyncInProgress = false;
-          startLiveRoomPolling();
+roomSyncInProgress = false;
 
-          if (roomSyncTimer) {
-            clearTimeout(roomSyncTimer);
-            roomSyncTimer = null;
-          }
+if (roomSyncTimer) {
+  clearTimeout(roomSyncTimer);
+  roomSyncTimer = null;
+}
 
-          if (familyStatus) {
-            familyStatus.textContent =
-              "Check-In Connected";
-          }
+if (familyStatus) {
+  familyStatus.textContent =
+    "Check-In Connected";
+}
 
 sendRoomPostBtn.disabled = false;
         message(
@@ -3218,35 +3217,7 @@ async function sendRoomText(text) {
 
   await connection.sendToRadioFrame(frame);
 }
-function startLiveRoomPolling() {
 
-  if (liveRoomPollTimer) {
-    clearInterval(liveRoomPollTimer);
-  }
-
-  liveRoomPollTimer = setInterval(async () => {
-
-    if (!connection || !currentRoom) {
-      return;
-    }
-
-    // Don't interfere with an existing request
-    if (roomRequestPending) {
-      return;
-    }
-
-    try {
-      await requestNextMessage();
-    }
-    catch (err) {
-      console.log(
-        "Live room poll failed:",
-        err
-      );
-    }
-
-  }, 3000);
-}
   </script>
 </body>
 </html>
