@@ -1562,30 +1562,36 @@
         password
         */
 
+       // MeshCore CMD_SEND_LOGIN = 26 decimal = 0x1A
+        //
+        // Layout:
+        // byte 0      command
+        // bytes 1-32  room public key
+        // bytes 33+   password
+
         const frame =
-        new Uint8Array(
-        1 +               // command
-        32 +              // room public key
-        4 +               // sync_since
-        password.length
-        );
+          new Uint8Array(
+            1 +
+            32 +
+            password.length
+          );
 
         let pos = 0;
 
-        frame[pos++] = 0x39;
+        frame[pos++] = 0x1A;
 
-        // Room public key
         frame.set(publicKey, pos);
         pos += 32;
 
-        // sync_since = 0
-        frame[pos++] = 0x00;
-        frame[pos++] = 0x00;
-        frame[pos++] = 0x00;
-        frame[pos++] = 0x00;
-
-        // password
         frame.set(password, pos);
+
+        console.log(
+          "ROOM: sending proper MeshCore login",
+          {
+            room: room.advName,
+            frameLength: frame.length
+          }
+        );
 
         await connection.sendToRadioFrame(frame);
 
