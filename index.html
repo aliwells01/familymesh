@@ -753,7 +753,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin1</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -1299,11 +1299,11 @@
 
           // Let the room setup finish before asking
           // the radio for contacts again for the map.
-          setTimeout(() => {
+         /*  setTimeout(() => {
             if (!mapRepeatersBtn.disabled) {
               mapRepeatersBtn.click();
             }
-          }, 5000);
+          }, 5000); */
 
         });
 
@@ -1480,6 +1480,21 @@
     roomBtn.onclick = async () => {
 
       try {
+
+        // Clean start for every Check-In attempt.
+          roomRequestPending = false;
+          roomSyncInProgress = false;
+
+          if (liveRoomPollTimer) {
+            clearInterval(liveRoomPollTimer);
+            liveRoomPollTimer = null;
+          }
+
+          if (roomConnectTimer) {
+            clearTimeout(roomConnectTimer);
+            roomConnectTimer = null;
+          }
+
 
         roomStatus.innerHTML = "Connecting to family room...";
         if (familyStatus) familyStatus.textContent = "Checking...";
@@ -1904,10 +1919,10 @@
 
             // Give the companion a moment before asking
             // for the next retained post.
-            await new Promise(resolve =>
+           /*  await new Promise(resolve =>
             setTimeout(resolve, 150)
             );
-
+ */
             await requestNextMessage();
 
             return;
@@ -1971,10 +1986,10 @@
           /*
           Once the initial backlog is finished,
           begin checking periodically for new posts.
-          */
+         
           if (!liveRoomPollTimer) {
             startLiveRoomPolling();
-          }
+          }.  */
 
           if (roomPosts.length === 0) {
 
