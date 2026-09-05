@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
     <meta name="theme-color" content="#06131f">
-    <title>WellsLink</title>
+    <title>MeshKin</title>
 
     <!-- ==================== STYLES / VISUAL DESIGN ==================== -->
   <style>
@@ -753,7 +753,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin9</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin1</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -959,8 +959,6 @@
     const familyList =
     document.getElementById("familyList");
 
-    let liveRoomPollTimer = null;
-
     let mapView = {
       x: 0,
       y: 0,
@@ -994,9 +992,8 @@
     let familyLocations = {};
     let myPosition = null;
 
-    let roomSyncInProgress = false;
+    // True while a CMD_SYNC_NEXT_MESSAGE request is awaiting a response.
     let roomRequestPending = false;
-    let roomSyncTimer = null;
 
 
   // ==================== MAP / LIST / FAMILY TAB CONTROLS ====================
@@ -1325,13 +1322,7 @@
           readRoomBtn.disabled = true;
           mapRepeatersBtn.disabled = true;
 
-          if (liveRoomPollTimer) {
-            clearInterval(liveRoomPollTimer);
-            liveRoomPollTimer = null;
-          }
-
           roomRequestPending = false;
-          roomSyncInProgress = false;
 
           if (roomConnectTimer) {
             clearTimeout(roomConnectTimer);
@@ -1476,161 +1467,109 @@
 
     };
 
-  // ==================== CHECK-IN ROOM CONNECTION / HISTORY REQUEST ====================
+  // ==================== CHECK-IN ROOM CONNECTION ====================
     roomBtn.onclick = async () => {
 
       try {
+        // Start each Check-In attempt from a known local state.
+        roomRequestPending = false;
 
-        // Clean start for every Check-In attempt.
-          roomRequestPending = false;
-          roomSyncInProgress = false;
-
-          if (liveRoomPollTimer) {
-            clearInterval(liveRoomPollTimer);
-            liveRoomPollTimer = null;
-          }
-
-          if (roomConnectTimer) {
-            clearTimeout(roomConnectTimer);
-            roomConnectTimer = null;
-          }
-
+        if (roomConnectTimer) {
+          clearTimeout(roomConnectTimer);
+          roomConnectTimer = null;
+        }
 
         roomStatus.innerHTML = "Connecting to family room...";
         if (familyStatus) familyStatus.textContent = "Checking...";
 
         roomMessages.innerHTML = `
-        <div class="empty-chat">
-        Trying to reach the family check-in room...
-        </div>
+          <div class="empty-chat">
+            Trying to reach the family check-in room...
+          </div>
         `;
 
         message("Looking for check-in room...");
 
+        // Find the saved MeshCore room contact.
         const contacts = await connection.getContacts();
-
         const room = contacts.find(c =>
-        c.advName === CHECKIN_ROOM_NAME &&
-        c.type === 3
-
+          c.advName === CHECKIN_ROOM_NAME &&
+          c.type === 3
         );
-        currentRoom = room;
 
         if (!room) {
           throw new Error(
-          "Room '" + CHECKIN_ROOM_NAME + "' not found."
+            "Room '" + CHECKIN_ROOM_NAME + "' not found."
           );
         }
 
-        message("Resetting room path to flood...");
+        currentRoom = room;
 
+        // Always discard any learned direct route before Check-In so the
+        // companion can use flood routing again when the radio has moved.
+        message("Resetting room path to flood...");
         await resetContactPath(room);
 
-        await new Promise(resolve =>
-          setTimeout(resolve, 500)
+        // Give the companion a moment to apply the path reset before login.
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        const publicKey = Uint8Array.from(
+          Object.values(room.publicKey)
         );
 
-        message("Room path reset to flood.");
+        const password =
+          new TextEncoder().encode(CHECKIN_ROOM_PASSWORD);
+
+        /*
+          CMD_SEND_LOGIN = 0x1A
+
+          byte 0      command
+          bytes 1-32  full room public key
+          bytes 33+   room password
+
+          The companion handles the room sync state internally.
+        */
+        const frame = new Uint8Array(
+          1 + 32 + password.length
+        );
+
+        frame[0] = 0x1A;
+        frame.set(publicKey, 1);
+        frame.set(password, 33);
 
         sendRoomPostBtn.disabled = true;
 
         roomStatus.innerHTML =
-        "📡 Connecting to " + room.advName + "...";
+          "📡 Connecting to " + room.advName + "...";
 
+        message("Sending Check-In room login...");
+        await connection.sendToRadioFrame(frame);
 
-
-
-        roomStatus.innerHTML =
-        "📡 Connecting to " + room.advName + "...";
-
-        message("Requesting full retained room history...");
-
-        const publicKey = Uint8Array.from(
-        Object.values(room.publicKey)
-        );
-
-        const password =
-        new TextEncoder().encode(CHECKIN_ROOM_PASSWORD);
-
-        /*
-        CMD_SEND_ANON_REQ = 57 = 0x39
-
-        Companion adds the sender timestamp itself.
-
-        We provide:
-        sync_since = 0
-        password
-        */
-
-       // MeshCore CMD_SEND_LOGIN = 26 decimal = 0x1A
-      // Request the room and force retained history from the beginning.
-      // Standard MeshCore room login.
-      // CMD_SEND_LOGIN = 0x1A
-
-      const frame =
-        new Uint8Array(
-          1 +
-          32 +
-          password.length
-        );
-
-      let pos = 0;
-
-      frame[pos++] = 0x1A;
-
-      // Full room public key
-      frame.set(publicKey, pos);
-      pos += 32;
-
-      // Room password
-      frame.set(password, pos);
-
-      console.log(
-        "ROOM: sending login",
-        {
-          room: room.advName,
-          frameLength: frame.length
-        }
-      );
-
-      await connection.sendToRadioFrame(frame);
-
-        if (roomConnectTimer) {
-          clearTimeout(roomConnectTimer);
-        }
-
+        // If neither LOGIN_SUCCESS nor a room message arrives, show failure.
         roomConnectTimer = setTimeout(() => {
-
           if (familyStatus) {
             familyStatus.textContent = "Check-In Not Connected";
           }
 
           roomMessages.innerHTML = `
-          <div class="empty-chat">
-          <strong>Family check-in room could not be reached.</strong>
-          <br><br>
-          Try again, or move closer to a repeater and retry.
-          </div>
+            <div class="empty-chat">
+              <strong>Family check-in room could not be reached.</strong>
+              <br><br>
+              Try again, or move closer to a repeater and retry.
+            </div>
           `;
 
           roomStatus.innerHTML = "";
-
+          sendRoomPostBtn.disabled = true;
         }, 8000);
 
-      }
-
-      catch(err) {
-
+      } catch (err) {
         console.error(err);
-
-        roomStatus.innerHTML =
-        "❌ " + String(err);
-
+        roomStatus.innerHTML = "❌ " + String(err);
         message("Room error: " + err);
-
       }
-
     };
+
   // ==================== ROOM MESSAGE DECODING HELPERS ====================
     function readUint32LE(bytes, offset) {
       return (
@@ -1647,406 +1586,187 @@
 
   // ==================== ROOM MESSAGE QUEUE / SYNC ====================
     async function requestNextMessage() {
-
-      // Never have two NEXT_MESSAGE requests in flight.
-      if (roomRequestPending) {
-        return;
-      }
+      // The companion queue is read one message at a time. Do not overlap
+      // NEXT_MESSAGE requests.
+      if (roomRequestPending) return;
 
       roomRequestPending = true;
 
-      console.log("ROOM SYNC: requesting next message");
-
       try {
-
         await connection.sendToRadioFrame(
-        new Uint8Array([0x0A])
+          new Uint8Array([0x0A])
         );
-
       } catch (err) {
-
         roomRequestPending = false;
-
-        console.error(
-        "ROOM SYNC request failed:",
-        err
-        );
-
+        console.error("ROOM SYNC request failed:", err);
         throw err;
       }
     }
 
+
   // ==================== INCOMING CHECK-IN ROOM MESSAGES ====================
     function installRoomMessageListener() {
-
       connection.txCharacteristic.addEventListener(
-      "characteristicvaluechanged",
-      async (event) => {
-
-        const frame =
-        new Uint8Array(event.target.value.buffer);
-
-
-        // PUSH_CODE_MSG_WAITING
-        // Radio says there is a queued message waiting.
-        if (frame[0] === 0x83) {
-
-          console.log("ROOM: message waiting");
-
-          roomSyncInProgress = true;
-
-          // Only request if one isn't already outstanding.
-          if (!roomRequestPending) {
-            await requestNextMessage();
-          }
-
-          return;
-        }
-
-
-        /*
-        RESP_CODE_CONTACT_MSG_RECV_V3 = 16
-
-        layout:
-
-        0      response code
-        1      SNR * 4
-        2-3    reserved
-        4-9    sender public-key prefix
-        10     path length
-        11     text type
-        12-15  timestamp
-        16...  message
-
-        Room posts use SIGNED_PLAIN and include
-        an additional four-byte author prefix before
-        the actual text.
-        */
-
-        if (frame[0] === 16) {
-
-
-          roomRequestPending = false;
-          roomSyncInProgress = true;
-
-          if (roomConnectTimer) {
-            clearTimeout(roomConnectTimer);
-            roomConnectTimer = null;
-          }
-
-
-          if (familyStatus) {
-            familyStatus.textContent =
-            "Check-In Connected";
-          }
-
-          sendRoomPostBtn.disabled = false;
-
-          if (roomSyncTimer) {
-            clearTimeout(roomSyncTimer);
-            roomSyncTimer = null;
-          }
-
-          const snr =
-          (frame[1] << 24 >> 24) / 4;
-
-          const senderPrefix =
-          bytesToHex(frame.slice(4, 10));
-
-          const pathLen =
-          frame[10];
-
-          const txtType =
-          frame[11];
-
-          const timestamp =
-          readUint32LE(frame, 12);
-
-          let textStart = 16;
-
-          let authorPrefix = null;
-
-
-          /*
-          Signed room posts contain an extra
-          4-byte author public-key prefix.
-          */
-          if (txtType === 2) {
-
-            authorPrefix =
-            bytesToHex(
-            frame.slice(16, 20)
-            );
-
-            textStart = 20;
-          }
-
-
-          const text =
-          decodeText(
-          frame.slice(textStart)
-          );
-
-
-          console.log(
-          "ROOM MESSAGE:",
-          {
-            senderPrefix,
-            authorPrefix,
-            timestamp,
-            snr,
-            pathLen,
-            txtType,
-            text
-          }
-          );
-
-
-          /*
-          =========================================
-          WELLSLINK FAMILY LOCATION RECORD
-          =========================================
-
-          Location records look like:
-
-          WLLOC|timestamp|latitude|longitude
-
-          They are stored for the Family tab but
-          are NOT displayed as chat messages.
-          */
-
-          if (
-          text.startsWith(
-          FAMILY_STATUS_PREFIX
-          )
-          ) {
-
-            const parts =
-            text.split("|");
-
-            if (parts.length >= 4) {
-
-              const locationTimestamp =
-              Number(parts[1]);
-
-              const lat =
-              Number(parts[2]);
-
-              const lon =
-              Number(parts[3]);
-
-
-              /*
-              For signed room posts authorPrefix
-              identifies the actual radio that
-              created the post.
-              */
-
-              const member =
-              getFamilyMember(
-              authorPrefix
-              );
-
-
-              if (
-              member &&
-              Number.isFinite(
-              locationTimestamp
-              ) &&
-              Number.isFinite(lat) &&
-              Number.isFinite(lon)
-              ) {
-
-                const existing =
-                familyLocations[
-                member.keyPrefix
-                ];
-
-
-                /*
-                Only replace the stored location
-                if this check-in is newer.
-                */
-
-                if (
-                !existing ||
-                locationTimestamp >
-                existing.timestamp
-                ) {
-
-                  familyLocations[
-                  member.keyPrefix
-                  ] = {
-                    timestamp:
-                    locationTimestamp,
-
-                    lat: lat,
-                    lon: lon
-                  };
-
-
-                  console.log(
-                  "Family location updated:",
-                  member.name,
-                  familyLocations[
-                  member.keyPrefix
-                  ]
-                  );
-                }
-
-
-                /*
-                Refresh the Family tab.
-                */
-
-                renderFamilyStatus();
-
-              } else {
-
-                console.log(
-                "Location record received but family member could not be identified:",
-                {
-                  authorPrefix,
-                  text
-                }
-                );
-
-              }
-
+        "characteristicvaluechanged",
+        async (event) => {
+          const frame =
+            new Uint8Array(event.target.value.buffer);
+
+          // PUSH_CODE_MSG_WAITING = 0x83
+          // The companion has at least one queued message ready to read.
+          if (frame[0] === 0x83) {
+            if (!roomRequestPending) {
+              await requestNextMessage();
             }
-
-
-            /*
-            IMPORTANT:
-
-            This is a machine-generated WellsLink
-            location record.
-
-            Do NOT add it to roomPosts, otherwise
-            it would appear in Family Messages.
-            */
-
-
-            // Give the companion a moment before asking
-            // for the next retained post.
-           /*  await new Promise(resolve =>
-            setTimeout(resolve, 150)
-            );
- */
-            await requestNextMessage();
-
             return;
           }
 
-
           /*
-          =========================================
-          NORMAL FAMILY MESSAGE
-          =========================================
+            RESP_CODE_CONTACT_MSG_RECV_V3 = 16
+
+            0      response code
+            1      SNR * 4
+            2-3    reserved
+            4-9    sender public-key prefix
+            10     path length
+            11     text type
+            12-15  timestamp
+            16...  message
+
+            Signed room posts (txtType === 2) include an additional
+            four-byte author public-key prefix before the text.
           */
+          if (frame[0] === 16) {
+            roomRequestPending = false;
 
-          roomPosts.push({
-            senderPrefix,
-            authorPrefix,
-            timestamp,
-            snr,
-            text
-          });
+            // Receiving a room message proves the room is reachable.
+            if (roomConnectTimer) {
+              clearTimeout(roomConnectTimer);
+              roomConnectTimer = null;
+            }
 
-          saveRoomPosts();
-          displayRoomPosts();
+            if (familyStatus) {
+              familyStatus.textContent = "Check-In Connected";
+            }
 
+            sendRoomPostBtn.disabled = false;
 
-          // Keep draining the queue
-          await requestNextMessage();
+            const snr =
+              (frame[1] << 24 >> 24) / 4;
 
-          return;
+            const senderPrefix =
+              bytesToHex(frame.slice(4, 10));
+
+            const pathLen = frame[10];
+            const txtType = frame[11];
+            const timestamp = readUint32LE(frame, 12);
+
+            let textStart = 16;
+            let authorPrefix = null;
+
+            if (txtType === 2) {
+              authorPrefix =
+                bytesToHex(frame.slice(16, 20));
+              textStart = 20;
+            }
+
+            const text =
+              decodeText(frame.slice(textStart));
+
+            console.log("ROOM MESSAGE:", {
+              senderPrefix,
+              authorPrefix,
+              timestamp,
+              snr,
+              pathLen,
+              txtType,
+              text
+            });
+
+            // Machine-generated location records update the Family tab but
+            // are intentionally hidden from the visible Check-In conversation.
+            if (text.startsWith(FAMILY_STATUS_PREFIX)) {
+              const parts = text.split("|");
+
+              if (parts.length >= 4) {
+                const locationTimestamp = Number(parts[1]);
+                const lat = Number(parts[2]);
+                const lon = Number(parts[3]);
+                const member = getFamilyMember(authorPrefix);
+
+                if (
+                  member &&
+                  Number.isFinite(locationTimestamp) &&
+                  Number.isFinite(lat) &&
+                  Number.isFinite(lon)
+                ) {
+                  const existing =
+                    familyLocations[member.keyPrefix];
+
+                  if (
+                    !existing ||
+                    locationTimestamp > existing.timestamp
+                  ) {
+                    familyLocations[member.keyPrefix] = {
+                      timestamp: locationTimestamp,
+                      lat,
+                      lon
+                    };
+                  }
+
+                  renderFamilyStatus();
+                }
+              }
+
+              await requestNextMessage();
+              return;
+            }
+
+            // Normal visible room message.
+            roomPosts.push({
+              senderPrefix,
+              authorPrefix,
+              timestamp,
+              snr,
+              text
+            });
+
+            displayRoomPosts();
+
+            // Continue draining until the companion reports NO_MORE_MESSAGES.
+            await requestNextMessage();
+            return;
+          }
+
+          // RESP_CODE_NO_MORE_MESSAGES = 0x0A
+          if (frame[0] === 10) {
+            roomRequestPending = false;
+
+            if (roomConnectTimer) {
+              clearTimeout(roomConnectTimer);
+              roomConnectTimer = null;
+            }
+
+            if (familyStatus) {
+              familyStatus.textContent = "Check-In Connected";
+            }
+
+            sendRoomPostBtn.disabled = false;
+
+            if (roomPosts.length === 0) {
+              roomMessages.innerHTML =
+                '<div class="empty-chat">No family messages received.</div>';
+            } else {
+              displayRoomPosts();
+            }
+
+            renderFamilyStatus();
+            return;
+          }
         }
-
-
-        // RESP_CODE_NO_MORE_MESSAGES
-        // RESP_CODE_NO_MORE_MESSAGES
-        if (frame[0] === 10) {
-
-          console.log("ROOM: no more messages");
-
-          roomRequestPending = false;
-          roomSyncInProgress = false;
-
-          // IMPORTANT:
-          // We have received a valid response from the room,
-          // so the room IS connected.
-          if (roomConnectTimer) {
-            clearTimeout(roomConnectTimer);
-            roomConnectTimer = null;
-          }
-
-          if (roomSyncTimer) {
-            clearTimeout(roomSyncTimer);
-            roomSyncTimer = null;
-          }
-
-          if (familyStatus) {
-            familyStatus.textContent =
-            "Check-In Connected";
-          }
-
-          sendRoomPostBtn.disabled = false;
-
-          /*
-          Once the initial backlog is finished,
-          begin checking periodically for new posts.
-         
-          if (!liveRoomPollTimer) {
-            startLiveRoomPolling();
-          }.  */
-
-         /*  if (roomPosts.length === 0) {
-
-            roomMessages.innerHTML =
-            '<div class="empty-chat">No family messages yet.</div>';
-
-          } */
-
-          renderFamilyStatus();
-
-          return;
-        }
-
-      }
       );
     }
 
-
-
-
-            function saveRoomPosts() {
-          localStorage.setItem(
-            "meshkin_room_posts",
-            JSON.stringify(roomPosts)
-          );
-        }
-
-        function loadRoomPosts() {
-          try {
-            const saved =
-              JSON.parse(
-                localStorage.getItem(
-                  "meshkin_room_posts"
-                ) || "[]"
-              );
-
-            if (Array.isArray(saved)) {
-              roomPosts = saved;
-              displayRoomPosts();
-            }
-          } catch (err) {
-            console.error(
-              "Could not load saved room posts:",
-              err
-            );
-          }
-        }
 
   // ==================== CHECK-IN CHAT DISPLAY ====================
     function displayRoomPosts() {
@@ -2140,50 +1860,23 @@
 
   // ==================== ROOM LOGIN SUCCESS / FAILURE EVENTS ====================
     function installRoomListener() {
-
       connection.txCharacteristic.addEventListener(
-      "characteristicvaluechanged",
-      (event) => {
+        "characteristicvaluechanged",
+        (event) => {
+          const frame =
+            new Uint8Array(event.target.value.buffer);
 
-       const frame =
-        new Uint8Array(event.target.value.buffer);
-
-      const code = frame[0];
-
-      // Ignore RF log traffic completely.
-      if (code !== 0x88) {
-
-        console.log(
-          "ROOM RX:",
-          code,
-          Array.from(frame)
-        );
-
-        roomMessages.innerHTML = `
-          <div class="empty-chat">
-            RX code: ${code} (0x${code.toString(16).padStart(2, "0")})
-            <br><br>
-            ${Array.from(frame).join(", ")}
-          </div>
-        `;
-      }
-
-        // PUSH_CODE_LOGIN_SUCCESS
-        // PUSH_CODE_LOGIN_SUCCESS
+          // PUSH_CODE_LOGIN_SUCCESS = 0x85
           if (frame[0] === 0x85) {
-
             if (roomConnectTimer) {
               clearTimeout(roomConnectTimer);
               roomConnectTimer = null;
             }
 
-            const permissions = frame[1];
-
             roomStatus.innerHTML = "";
 
             if (familyStatus) {
-              familyStatus.textContent =
-                "Check-In Connected";
+              familyStatus.textContent = "Check-In Connected";
             }
 
             roomMessages.innerHTML = `
@@ -2193,15 +1886,10 @@
             `;
 
             message("Room login successful.");
-
             sendRoomPostBtn.disabled = false;
 
+            // Ask the companion for the first queued room message.
             roomRequestPending = false;
-
-            console.log(
-              "ROOM: login successful - requesting first message"
-            );
-
             requestNextMessage().catch(err => {
               console.error(
                 "Initial room message request failed:",
@@ -2212,32 +1900,28 @@
             return;
           }
 
+          // PUSH_CODE_LOGIN_FAIL = 0x86
+          if (frame[0] === 0x86) {
+            if (roomConnectTimer) {
+              clearTimeout(roomConnectTimer);
+              roomConnectTimer = null;
+            }
 
-        // PUSH_CODE_LOGIN_FAIL
-        if (frame[0] === 0x86) {
+            if (familyStatus) {
+              familyStatus.textContent = "Check-In Not Connected";
+            }
 
-          if (roomConnectTimer) {
-            clearTimeout(roomConnectTimer);
-            roomConnectTimer = null;
+            roomMessages.innerHTML = `
+              <div class="empty-chat">
+                <strong>Family check-in room could not be reached.</strong>
+                <br><br>
+                Try again, or move closer to a repeater and retry.
+              </div>
+            `;
+
+            sendRoomPostBtn.disabled = true;
           }
-
-          if (familyStatus) {
-            familyStatus.textContent = "Check-In Not Connected";
-          }
-
-          roomMessages.innerHTML = `
-          <div class="empty-chat">
-          <strong>Family check-in room could not be reached.</strong>
-          <br><br>
-          Try again, or move closer to a repeater and retry.
-          </div>
-          `;
-
-          sendRoomPostBtn.disabled = true;
-
         }
-
-      }
       );
     }
 
@@ -2683,7 +2367,7 @@
 
         // Distance from us to family member
         const distance =
-        haversineMiles(
+        distanceMiles(
         userLat,
         userLon,
         data.lat,
@@ -2697,7 +2381,7 @@
 
 
         const bearing =
-        calculateBearing(
+        bearingDegrees(
         userLat,
         userLon,
         data.lat,
@@ -3235,7 +2919,7 @@
         ) {
 
           const distance =
-          haversineMiles(
+          distanceMiles(
           myPosition.lat,
           myPosition.lon,
           data.lat,
@@ -3243,7 +2927,7 @@
           );
 
           const bearing =
-          calculateBearing(
+          bearingDegrees(
           myPosition.lat,
           myPosition.lon,
           data.lat,
@@ -3345,88 +3029,46 @@
     }
   }
 
-  // ==================== LIVE ROOM POLLING ====================
-  function startLiveRoomPolling() {
-
-    if (liveRoomPollTimer) {
-      clearInterval(liveRoomPollTimer);
-    }
-
-    liveRoomPollTimer = setInterval(async () => {
-
-      if (!connection || !currentRoom) {
-        return;
-      }
-
-      // Don't interfere with an existing request
-      if (roomRequestPending) {
-        return;
-      }
-
-      try {
-        await requestNextMessage();
-      }
-      catch (err) {
-        console.log(
-        "Live room poll failed:",
-        err
-        );
-      }
-
-    }, 3000);
-  }
-
-
-
   // ==================== LOW-LEVEL ROOM TEXT TRANSMISSION ====================
   async function sendRoomText(text) {
-
-    if (!currentRoom)
-    throw new Error("No room selected");
+    if (!currentRoom) {
+      throw new Error("No room selected");
+    }
 
     const textBytes =
-    new TextEncoder().encode(text);
+      new TextEncoder().encode(text);
 
     const publicKey =
-  Uint8Array.from(
-    Object.values(room.publicKey)
-  );
-
-const password =
-  new TextEncoder().encode(
-    CHECKIN_ROOM_PASSWORD
-  );
-
-    // CMD_SEND_ANON_REQ = 0x39
-    // Force sync_since = 0 so we get retained history.
-    const frame =
-      new Uint8Array(
-        1 +
-        32 +
-        4 +
-        password.length
+      Uint8Array.from(
+        Object.values(currentRoom.publicKey)
       );
 
-    let pos = 0;
+    const timestamp =
+      Math.floor(Date.now() / 1000);
 
-    frame[pos++] = 0x39;
+    const frame =
+      new Uint8Array(13 + textBytes.length);
 
-    // Full room public key
-    frame.set(publicKey, pos);
-    pos += 32;
+    // CMD_SEND_TXT_MSG
+    frame[0] = 0x02;
+    frame[1] = 0x00;
+    frame[2] = 0x00;
 
-    // sync_since = 0
-    frame[pos++] = 0x00;
-    frame[pos++] = 0x00;
-    frame[pos++] = 0x00;
-    frame[pos++] = 0x00;
+    frame.set(
+      uint32ToLEBytes(timestamp),
+      3
+    );
 
-    // Room password
-    frame.set(password, pos);
+    frame.set(
+      publicKey.slice(0, 6),
+      7
+    );
+
+    frame.set(textBytes, 13);
 
     await connection.sendToRadioFrame(frame);
   }
-  loadRoomPosts();
+
   </script>
   </body>
 </html>
