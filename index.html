@@ -753,7 +753,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin1</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin2</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -1525,6 +1525,10 @@
         message("Resetting room path to flood...");
 
         await resetContactPath(room);
+
+        await new Promise(resolve =>
+          setTimeout(resolve, 500)
+        );
 
         message("Room path reset to flood.");
 
