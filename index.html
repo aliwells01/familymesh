@@ -1293,6 +1293,19 @@ connection.on("disconnected", () => {
   readRoomBtn.disabled = true;
   mapRepeatersBtn.disabled = true;
 
+  if (liveRoomPollTimer) {
+  clearInterval(liveRoomPollTimer);
+  liveRoomPollTimer = null;
+  }
+
+  roomRequestPending = false;
+  roomSyncInProgress = false;
+
+  if (roomConnectTimer) {
+    clearTimeout(roomConnectTimer);
+    roomConnectTimer = null;
+  }
+
 });
 
   }
@@ -1471,7 +1484,7 @@ roomStatus.innerHTML =
   "📡 Connecting to " + room.advName + "...";
 
 
-sendRoomPostBtn.disabled = false;
+
 
    roomStatus.innerHTML =
   "📡 Connecting to " + room.advName + "...";
@@ -1652,6 +1665,13 @@ function installRoomMessageListener() {
 
         roomRequestPending = false;
         roomSyncInProgress = true;
+        
+        if (roomConnectTimer) {
+          clearTimeout(roomConnectTimer);
+          roomConnectTimer = null;
+        }
+
+
         if (familyStatus) {
   familyStatus.textContent =
     "Check-In Connected";
@@ -1882,44 +1902,53 @@ await requestNextMessage();
 
 
       // RESP_CODE_NO_MORE_MESSAGES
-      if (frame[0] === 10) {
-                roomRequestPending = false;
-        roomSyncInProgress = false;
+      // RESP_CODE_NO_MORE_MESSAGES
+if (frame[0] === 10) {
 
-        if (roomSyncTimer) {
-          clearTimeout(roomSyncTimer);
-          roomSyncTimer = null;
-        }
+  console.log("ROOM: no more messages");
 
-        if (familyStatus) {
-          familyStatus.textContent =
-            "Check-In Connected";
-        }
+  roomRequestPending = false;
+  roomSyncInProgress = false;
 
-sendRoomPostBtn.disabled = false;
-        message(
-          "✅ Room message sync complete."
-        );
+  // IMPORTANT:
+  // We have received a valid response from the room,
+  // so the room IS connected.
+  if (roomConnectTimer) {
+    clearTimeout(roomConnectTimer);
+    roomConnectTimer = null;
+  }
 
+  if (roomSyncTimer) {
+    clearTimeout(roomSyncTimer);
+    roomSyncTimer = null;
+  }
 
-        if (roomPosts.length === 0) {
+  if (familyStatus) {
+    familyStatus.textContent =
+      "Check-In Connected";
+  }
 
-          roomMessages.innerHTML =
-            '<div class="empty-chat">No family messages yet.</div>';
+  sendRoomPostBtn.disabled = false;
 
-        }
+  /*
+    Once the initial backlog is finished,
+    begin checking periodically for new posts.
+  */
+  if (!liveRoomPollTimer) {
+    startLiveRoomPolling();
+  }
 
+  if (roomPosts.length === 0) {
 
-        /*
-          Refresh Family display after all
-          room history has been processed.
-        */
+    roomMessages.innerHTML =
+      '<div class="empty-chat">No family messages yet.</div>';
 
-        renderFamilyStatus();
+  }
 
+  renderFamilyStatus();
 
-        return;
-      }
+  return;
+}
 
     }
   );
@@ -2495,10 +2524,10 @@ function addFamilyToMap(
   radiusMiles
 ) {
 
-  if (!familyMembers || !familyLocations)
-    return;
+  if (!FAMILY || !familyLocations)
+  return;
 
-  familyMembers.forEach(member => {
+    FAMILY.forEach(member => {
 
     const data =
       familyLocations[member.keyPrefix];
