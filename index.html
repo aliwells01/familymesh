@@ -1,12 +1,14 @@
 <!doctype html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#06131f">
-  <title>WellsLink</title>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <meta name="theme-color" content="#06131f">
+    <title>WellsLink</title>
 
+    <!-- ==================== STYLES / VISUAL DESIGN ==================== -->
   <style>
+  /* ---------- Theme variables ---------- */
     :root {
       --bg: #020b13;
       --panel: #071827;
@@ -36,8 +38,8 @@
       min-height: 100vh;
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
       background:
-        radial-gradient(circle at 50% -10%, rgba(39, 121, 180, .22), transparent 32rem),
-        linear-gradient(180deg, #05121d 0%, #020a12 100%);
+      radial-gradient(circle at 50% -10%, rgba(39, 121, 180, .22), transparent 32rem),
+      linear-gradient(180deg, #05121d 0%, #020a12 100%);
       color: var(--text);
     }
 
@@ -53,41 +55,42 @@
       width: min(100%, 760px);
       margin: 0 auto;
       padding:
-        max(5px, env(safe-area-inset-top))
+      max(5px, env(safe-area-inset-top))
       5px
-        max(5px, env(safe-area-inset-bottom));
+      max(5px, env(safe-area-inset-bottom));
     }
 
-   .brand {
-  font-size: 34px;
-  font-weight: 800;
-  letter-spacing: -1.5px;
-  line-height: 1;
-}
+  /* ---------- Header / branding ---------- */
+    .brand {
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      line-height: 1;
+    }
 
-.brand-mesh {
-  color: #ffffff;
-}
+    .brand-mesh {
+      color: #ffffff;
+    }
 
-.brand-kin {
-  background: linear-gradient(
-    135deg,
-    #39b9ff,
-    #087cff
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: transparent;
-}
+    .brand-kin {
+      background: linear-gradient(
+      135deg,
+      #39b9ff,
+      #087cff
+      );
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+    }
 
-.tagline {
-  margin-top: 7px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 2.1px;
-  color: #6f8798;
-}
+    .tagline {
+      margin-top: 7px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2.1px;
+      color: #6f8798;
+    }
 
     .gear {
       position: absolute;
@@ -105,6 +108,7 @@
       padding: 0;
     }
 
+  /* ---------- Top connection / mesh / battery status ---------- */
     .status-strip {
       display: grid;
       grid-template-columns: 1.2fr 1.5fr 0.8fr;
@@ -223,15 +227,16 @@
       overflow: hidden;
     }
 
+  /* ---------- Local map panel ---------- */
     .map-shell {
       height: min(43vh, 390px);
       min-height: 290px;
       position: relative;
       background:
-        radial-gradient(circle at 50% 52%, rgba(18,121,210,.18), transparent 24%),
-        linear-gradient(135deg, rgba(38,74,93,.20) 1px, transparent 1px) 0 0/38px 38px,
-        linear-gradient(45deg, rgba(31,65,84,.16) 1px, transparent 1px) 0 0/38px 38px,
-        #071b2a;
+      radial-gradient(circle at 50% 52%, rgba(18,121,210,.18), transparent 24%),
+      linear-gradient(135deg, rgba(38,74,93,.20) 1px, transparent 1px) 0 0/38px 38px,
+      linear-gradient(45deg, rgba(31,65,84,.16) 1px, transparent 1px) 0 0/38px 38px,
+      #071b2a;
     }
 
     .map-shell::before,
@@ -244,9 +249,9 @@
 
     .map-shell::before {
       background:
-        linear-gradient(18deg, transparent 39%, rgba(91,127,147,.30) 40%, rgba(91,127,147,.30) 41%, transparent 42%),
-        linear-gradient(132deg, transparent 44%, rgba(91,127,147,.20) 45%, rgba(91,127,147,.20) 46%, transparent 47%),
-        linear-gradient(82deg, transparent 52%, rgba(91,127,147,.18) 53%, rgba(91,127,147,.18) 54%, transparent 55%);
+      linear-gradient(18deg, transparent 39%, rgba(91,127,147,.30) 40%, rgba(91,127,147,.30) 41%, transparent 42%),
+      linear-gradient(132deg, transparent 44%, rgba(91,127,147,.20) 45%, rgba(91,127,147,.20) 46%, transparent 47%),
+      linear-gradient(82deg, transparent 52%, rgba(91,127,147,.18) 53%, rgba(91,127,147,.18) 54%, transparent 55%);
       opacity: .7;
     }
 
@@ -349,6 +354,7 @@
       backdrop-filter: blur(8px);
     }
 
+  /* ---------- Check-In chat panel ---------- */
     .messages {
       margin-top: 3px;
       display: flex;
@@ -551,1087 +557,1113 @@
         padding-right: 10px;
       }
 
-      .brand {
-        padding-bottom: 15px;
-      }
+  /* ---------- Header / branding ---------- */
+    .brand {
+      padding-bottom: 15px;
+    }
 
-      .status-card {
-        padding: 13px 8px;
-        gap: 7px;
-      }
+    .status-card {
+      padding: 13px 8px;
+      gap: 7px;
+    }
 
-      .status-value {
-        font-size: 13px;
-      }
+    .status-value {
+      font-size: 13px;
+    }
 
-      .status-sub {
-        font-size: 10px;
-      }
+    .status-sub {
+      font-size: 10px;
+    }
 
-      .map-shell {
-        min-height: 270px;
-        height: 39vh;
-      }
+  /* ---------- Local map panel ---------- */
+    .map-shell {
+      min-height: 270px;
+      height: 39vh;
+    }
 
-      .messages {
-        min-height: 250px;
-      }
+  /* ---------- Check-In chat panel ---------- */
+    .messages {
+      min-height: 250px;
+    }
     }
 
 
-.segmented button {
-  border: 0;
-  background: transparent;
-  color: #8faec5;
-  min-width: 50px;
-  padding: 4px 6px;
-  border-radius: 12px;
-  font-weight: 650;
-  font-size: 12px;
-  margin: 0;
-}
+  /* ---------- Map / List / Family tabs ---------- */
+    .segmented button {
+      border: 0;
+      background: transparent;
+      color: #8faec5;
+      min-width: 50px;
+      padding: 4px 6px;
+      border-radius: 12px;
+      font-weight: 650;
+      font-size: 12px;
+      margin: 0;
+    }
 
-.segmented button.active {
-  color: #fff;
-  background: linear-gradient(180deg, #1081de, #0960bd);
-  box-shadow: 0 6px 18px rgba(10,126,238,.28);
-}
+    .segmented button.active {
+      color: #fff;
+      background: linear-gradient(180deg, #1081de, #0960bd);
+      box-shadow: 0 6px 18px rgba(10,126,238,.28);
+    }
 
-#localRepeaterList {
-  position: absolute;
-  inset: 50px 14px 14px;
-  z-index: 2;
-  overflow-y: auto;
-  background: rgba(4,18,29,.92);
-  border-radius: 14px;
-  padding: 6px 14px;
-}
+    #localRepeaterList {
+      position: absolute;
+      inset: 50px 14px 14px;
+      z-index: 2;
+      overflow-y: auto;
+      background: rgba(4,18,29,.92);
+      border-radius: 14px;
+      padding: 6px 14px;
+    }
 
-.repeater-list-row {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  gap: 16px;
-  align-items: center;
-  padding: 15px 4px;
-  border-bottom: 1px solid rgba(99,147,178,.18);
-}
+    .repeater-list-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 16px;
+      align-items: center;
+      padding: 15px 4px;
+      border-bottom: 1px solid rgba(99,147,178,.18);
+    }
 
-.repeater-list-row:last-child {
-  border-bottom: 0;
-}
+    .repeater-list-row:last-child {
+      border-bottom: 0;
+    }
 
-.repeater-list-name {
-  font-weight: 650;
-  color: #fff;
-  text-align: left;
-}
+    .repeater-list-name {
+      font-weight: 650;
+      color: #fff;
+      text-align: left;
+    }
 
-.repeater-list-distance {
-  color: #b7cfdf;
-  white-space: nowrap;
-}
+    .repeater-list-distance {
+      color: #b7cfdf;
+      white-space: nowrap;
+    }
 
-.repeater-list-direction {
-  color: #63baff;
-  font-weight: 700;
-  min-width: 28px;
-  text-align: right;
-}
+    .repeater-list-direction {
+      color: #63baff;
+      font-weight: 700;
+      min-width: 28px;
+      text-align: right;
+    }
 
-.repeater-empty {
-  padding: 40px 12px;
-  text-align: center;
-  color: #8faec5;
-}
+    .repeater-empty {
+      padding: 40px 12px;
+      text-align: center;
+      color: #8faec5;
+    }
 
-#familyList {
-  position: absolute;
-  inset: 50px 14px 14px;
-  z-index: 2;
-  overflow-y: auto;
-  background: rgba(4,18,29,.92);
-  border-radius: 14px;
-  padding: 6px 14px;
-}
+  /* ---------- Family status list ---------- */
+    #familyList {
+      position: absolute;
+      inset: 50px 14px 14px;
+      z-index: 2;
+      overflow-y: auto;
+      background: rgba(4,18,29,.92);
+      border-radius: 14px;
+      padding: 6px 14px;
+    }
 
-.family-row {
-  display: grid;
-  grid-template-columns: 12px 1fr auto;
-  gap: 12px;
-  align-items: center;
-  padding: 5px 4px;
-  border-bottom: 1px solid rgba(99,147,178,.18);
-}
+    .family-row {
+      display: grid;
+      grid-template-columns: 12px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 5px 4px;
+      border-bottom: 1px solid rgba(99,147,178,.18);
+    }
 
-.family-row:last-child {
-  border-bottom: 0;
-}
+    .family-row:last-child {
+      border-bottom: 0;
+    }
 
-.family-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #536674;
-}
+    .family-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #536674;
+    }
 
-.family-dot.family-known {
-  background: #42d77d;
-  box-shadow: 0 0 8px rgba(66,215,125,.45);
-}
+    .family-dot.family-known {
+      background: #42d77d;
+      box-shadow: 0 0 8px rgba(66,215,125,.45);
+    }
 
-.family-info {
-  min-width: 0;
-}
+    .family-info {
+      min-width: 0;
+    }
 
-.family-name {
-  color: #fff;
-  font-weight: 650;
-  text-align: left;
-}
+    .family-name {
+      color: #fff;
+      font-weight: 650;
+      text-align: left;
+    }
 
-.family-time {
-  color: #8faec5;
-  font-size: 10px;
-  margin-top: 1px;
-  text-align: left;
-}
+    .family-time {
+      color: #8faec5;
+      font-size: 10px;
+      margin-top: 1px;
+      text-align: left;
+    }
 
-.family-location {
-  color: #63baff;
-  font-weight: 650;
-  font-size: 12px;
-  white-space: nowrap;
-  text-align: right;
-}
+    .family-location {
+      color: #63baff;
+      font-weight: 650;
+      font-size: 12px;
+      white-space: nowrap;
+      text-align: right;
+    }
 
-.family-map-dot {
-  fill: #ff9f43;
-  stroke: #ffd09b;
-  stroke-width: 2;
-  filter: drop-shadow(0 0 6px rgba(255,159,67,.65));
-}
+    .family-map-dot {
+      fill: #ff9f43;
+      stroke: #ffd09b;
+      stroke-width: 2;
+      filter: drop-shadow(0 0 6px rgba(255,159,67,.65));
+    }
 
-.family-map-label {
-  fill: #ffffff;
-  font-size: 13px;
-  font-weight: 700;
-  paint-order: stroke;
-  stroke: #07131d;
-  stroke-width: 3px;
-  stroke-linejoin: round;
-}
+    .family-map-label {
+      fill: #ffffff;
+      font-size: 13px;
+      font-weight: 700;
+      paint-order: stroke;
+      stroke: #07131d;
+      stroke-width: 3px;
+      stroke-linejoin: round;
+    }
 
-.family-map-detail {
-  fill: #ffb86c;
-  font-size: 10px;
-  font-weight: 600;
-  paint-order: stroke;
-  stroke: #07131d;
-  stroke-width: 3px;
-  stroke-linejoin: round;
-}
+    .family-map-detail {
+      fill: #ffb86c;
+      font-size: 10px;
+      font-weight: 600;
+      paint-order: stroke;
+      stroke: #07131d;
+      stroke-width: 3px;
+      stroke-linejoin: round;
+    }
 
 
   </style>
-</head>
+  </head>
 
-<body>
-  <main class="app">
+  <!-- ==================== APP MARKUP / USER INTERFACE ==================== -->
+  <body>
+    <main class="app">
 
-    <header class="brand">
-      
-           <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin</span>
-      
+      <!-- Header / MeshKin branding -->
+      <header class="brand">
 
-      <div class="gear" aria-hidden="true">⚙</div>
-    </header>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin</span>
 
-    <section class="status-strip" aria-label="Radio status">
-      <div class="status-card" id="radioStatusCard" role="button" tabindex="0" aria-label="Connect to radio">
-        <div class="status-icon radio"></div>
-        <div class="status-copy">
-          <div id="status" class="status-value disconnected">Not connected</div>
-          <div id="radioDeviceLabel" class="status-sub" >RadioName</div>
+
+        <div class="gear" aria-hidden="true">⚙</div>
+      </header>
+
+      <!-- Radio, mesh and battery status -->
+      <section class="status-strip" aria-label="Radio status">
+        <div class="status-card" id="radioStatusCard" role="button" tabindex="0" aria-label="Connect to radio">
+          <div class="status-icon radio"></div>
+          <div class="status-copy">
+            <div id="status" class="status-value disconnected">Not connected</div>
+            <div id="radioDeviceLabel" class="status-sub" >RadioName</div>
+          </div>
         </div>
-      </div>
 
 
 
-      <div class="status-card">
-        <div class="status-icon mesh">⌁</div>
-        <div class="status-copy">
-          <div id="meshReadyMain" class="status-value">Mesh Ready</div>
-          <div id="meshReadySub" class="status-sub">not checked yet</div>
+        <div class="status-card">
+          <div class="status-icon mesh">⌁</div>
+          <div class="status-copy">
+            <div id="meshReadyMain" class="status-value">Mesh Ready</div>
+            <div id="meshReadySub" class="status-sub">not checked yet</div>
+          </div>
         </div>
-      </div>
 
-      <div class="status-card">
-        <div class="status-icon battery"></div>
-        <div class="status-copy">
-          <div id="batteryStatus" class="status-value">--%</div>
-        
+        <div class="status-card">
+          <div class="status-icon battery"></div>
+          <div class="status-copy">
+            <div id="batteryStatus" class="status-value">--%</div>
+
+          </div>
         </div>
-      </div>
 
-    </section>
+      </section>
 
-    <section class="section-panel map-shell" aria-label="Nearby repeater map">
-      <div class="map-topbar">
-        <div class="segmented">
-          <button id="mapTab" class="active" type="button">Map</button>
-          <button id="listTab" type="button">List</button>
-          <button id="familyTab" type="button">Family</button>
+      <!-- Map / repeater list / family location panel -->
+      <section class="section-panel map-shell" aria-label="Nearby repeater map">
+        <div class="map-topbar">
+          <div class="segmented">
+            <button id="mapTab" class="active" type="button">Map</button>
+            <button id="listTab" type="button">List</button>
+            <button id="familyTab" type="button">Family</button>
+          </div>
+          <div class="locate" aria-hidden="true">↻</div>
         </div>
-        <div class="locate" aria-hidden="true">↻</div>
-      </div>
 
-      <div id="mapPanel">
-        <svg id="gaMap" viewBox="0 0 500 500"></svg>
-        <div id="nearestRepeaters"></div>
-      </div>
-
-      <div id="localRepeaterList" style="display:none;"></div>
-      <div id="familyList" style="display:none;"></div>
-
-      <div id="gpsStatus">Waiting for radio connection…</div>
-      <div class="map-radius">5 mile radius</div>
-    </section>
-
-    <section class="section-panel messages" aria-label="Family messages">
-      <div class="messages-head">
-        <h2 class="messages-title">Check-In</h2>
-        <div class="room-pill">
-          <span class="room-dot"></span>
-          <span id="familyStatus">Waiting</span>
+        <div id="mapPanel">
+          <svg id="gaMap" viewBox="0 0 500 500"></svg>
+          <div id="nearestRepeaters"></div>
         </div>
+
+        <div id="localRepeaterList" style="display:none;"></div>
+        <div id="familyList" style="display:none;"></div>
+
+        <div id="gpsStatus">Waiting for radio connection…</div>
+        <div class="map-radius">5 mile radius</div>
+      </section>
+
+      <!-- Check-In room messages and composer -->
+      <section class="section-panel messages" aria-label="Family messages">
+        <div class="messages-head">
+          <h2 class="messages-title">Check-In</h2>
+          <div class="room-pill">
+            <span class="room-dot"></span>
+            <span id="familyStatus">Waiting</span>
+          </div>
+        </div>
+
+        <div id="roomMessages">
+          <div class="empty-chat">Waiting to connect to the family check-in room...</div>
+        </div>
+
+        <div class="composer">
+          <textarea id="roomPostText" placeholder="Type a message..." rows="1"></textarea>
+          <button id="sendRoomPost" disabled aria-label="Send message">➤</button>
+        </div>
+        <div id="sendRoomStatus"></div>
+      </section>
+
+      <!-- Working MeshCore controls kept in the DOM but hidden from the family interface. -->
+      <div class="technical">
+        <button id="connect">CONNECT TO RADIO</button>
+        <button id="mapRepeaters" disabled>SHOW REPEATER MAP</button>
+        <button id="advert" disabled>ADVERTISE LOCALLY</button>
+        <button id="flood" disabled>FLOOD ADVERTISE</button>
+        <button id="repeaters" disabled>FIND REPEATERS</button>
+        <button id="room" disabled>CHECK IN ROOM</button>
+        <button id="readRoom" disabled>READ ROOM</button>
+        <button id="closeMap">CLOSE MAP</button>
+        <button id="zoomIn">+</button>
+        <button id="zoomOut">−</button>
+        <button id="resetMap">RESET</button>
       </div>
 
-      <div id="roomMessages">
-        <div class="empty-chat">Waiting to connect to the family check-in room...</div>
-      </div>
+      <div id="roomStatus"></div>
+      <div id="repeatersList"></div>
+      <div id="log">Ready.</div>
 
-      <div class="composer">
-        <textarea id="roomPostText" placeholder="Type a message..." rows="1"></textarea>
-        <button id="sendRoomPost" disabled aria-label="Send message">➤</button>
-      </div>
-      <div id="sendRoomStatus"></div>
-    </section>
+    </main>
 
-    <!-- Working MeshCore controls kept in the DOM but hidden from the family interface. -->
-    <div class="technical">
-      <button id="connect">CONNECT TO RADIO</button>
-      <button id="mapRepeaters" disabled>SHOW REPEATER MAP</button>
-      <button id="advert" disabled>ADVERTISE LOCALLY</button>
-      <button id="flood" disabled>FLOOD ADVERTISE</button>
-      <button id="repeaters" disabled>FIND REPEATERS</button>
-      <button id="room" disabled>CHECK IN ROOM</button>
-      <button id="readRoom" disabled>READ ROOM</button>
-      <button id="closeMap">CLOSE MAP</button>
-      <button id="zoomIn">+</button>
-      <button id="zoomOut">−</button>
-      <button id="resetMap">RESET</button>
-    </div>
-
-    <div id="roomStatus"></div>
-    <div id="repeatersList"></div>
-    <div id="log">Ready.</div>
-
-  </main>
-
+    <!-- ==================== MESHKIN APPLICATION LOGIC ==================== -->
   <script type="module">
 
 
-import {
-  WebBleConnection
-} from "https://esm.sh/@liamcottle/meshcore.js";
+  // ==================== IMPORTS ====================
+    import {
+      WebBleConnection
+    } from "https://esm.sh/@liamcottle/meshcore.js";
 
 
-let connection = null;
-let discoveryTag = null;
-let discoveredRepeaters = [];
-let discoveryTimer = null;
-let roomConnectTimer = null;
+  // ==================== GLOBAL STATE / CONNECTION STATE ====================
+    let connection = null;
+    let discoveryTag = null;
+    let discoveredRepeaters = [];
+    let discoveryTimer = null;
+    let roomConnectTimer = null;
 
-const status = document.getElementById("status");
-const log = document.getElementById("log");
-const connectBtn = document.getElementById("connect");
-const advertBtn = document.getElementById("advert");
-const floodBtn = document.getElementById("flood");
+  // ==================== DOM REFERENCES ====================
+    const status = document.getElementById("status");
+    const log = document.getElementById("log");
+    const connectBtn = document.getElementById("connect");
+    const advertBtn = document.getElementById("advert");
+    const floodBtn = document.getElementById("flood");
 
-const repeatersBtn = document.getElementById("repeaters");
-const repeatersList = document.getElementById("repeatersList");
+    const repeatersBtn = document.getElementById("repeaters");
+    const repeatersList = document.getElementById("repeatersList");
 
-const roomBtn = document.getElementById("room");
-const roomStatus = document.getElementById("roomStatus");
-const CHECKIN_ROOM_NAME = "GhostPacketCheckIn";
-const CHECKIN_ROOM_PASSWORD = "177345";
+    const roomBtn = document.getElementById("room");
+    const roomStatus = document.getElementById("roomStatus");
+    const CHECKIN_ROOM_NAME = "GhostPacketCheckIn";
+    const CHECKIN_ROOM_PASSWORD = "177345";
 
-const readRoomBtn = document.getElementById("readRoom");
-const roomMessages = document.getElementById("roomMessages");
+    const readRoomBtn = document.getElementById("readRoom");
+    const roomMessages = document.getElementById("roomMessages");
 
-const LOCAL_RADIUS_MILES = 5;
+    const LOCAL_RADIUS_MILES = 5;
 
-const mapPanel =
-  document.getElementById("mapPanel");
+    const mapPanel =
+    document.getElementById("mapPanel");
 
-const closeMapBtn =
-  document.getElementById("closeMap");
+    const closeMapBtn =
+    document.getElementById("closeMap");
 
-let roomPosts = [];
+    let roomPosts = [];
 
-const roomPostText =
-  document.getElementById("roomPostText");
+    const roomPostText =
+    document.getElementById("roomPostText");
 
-const sendRoomPostBtn =
-  document.getElementById("sendRoomPost");
+    const sendRoomPostBtn =
+    document.getElementById("sendRoomPost");
 
-const sendRoomStatus =
-  document.getElementById("sendRoomStatus");
+    const sendRoomStatus =
+    document.getElementById("sendRoomStatus");
 
-let currentRoom = null;
+    let currentRoom = null;
 
-const mapRepeatersBtn =
-  document.getElementById("mapRepeaters");
+    const mapRepeatersBtn =
+    document.getElementById("mapRepeaters");
 
-const gpsStatus =
-  document.getElementById("gpsStatus");
+    const gpsStatus =
+    document.getElementById("gpsStatus");
 
-const gaMap =
-  document.getElementById("gaMap");
+    const gaMap =
+    document.getElementById("gaMap");
 
-const nearestRepeaters =
-  document.getElementById("nearestRepeaters");
+    const nearestRepeaters =
+    document.getElementById("nearestRepeaters");
 
-const zoomInBtn = document.getElementById("zoomIn");
-const zoomOutBtn = document.getElementById("zoomOut");
-const resetMapBtn = document.getElementById("resetMap");
+    const zoomInBtn = document.getElementById("zoomIn");
+    const zoomOutBtn = document.getElementById("zoomOut");
+    const resetMapBtn = document.getElementById("resetMap");
 
-const batteryStatus =
-  document.getElementById("batteryStatus");
+    const batteryStatus =
+    document.getElementById("batteryStatus");
 
-const radioDeviceLabel =
-  document.getElementById("radioDeviceLabel");
+    const radioDeviceLabel =
+    document.getElementById("radioDeviceLabel");
 
-const batteryVolts =
-  document.getElementById("batteryVolts");
+    const batteryVolts =
+    document.getElementById("batteryVolts");
 
-const meshReadyMain =
-  document.getElementById("meshReadyMain");
+    const meshReadyMain =
+    document.getElementById("meshReadyMain");
 
-const meshReadySub =
-  document.getElementById("meshReadySub");
+    const meshReadySub =
+    document.getElementById("meshReadySub");
 
-const familyStatus =
-  document.getElementById("familyStatus");
+    const familyStatus =
+    document.getElementById("familyStatus");
 
-const mapTab =
-  document.getElementById("mapTab");
+    const mapTab =
+    document.getElementById("mapTab");
 
-const listTab =
-  document.getElementById("listTab");
+    const listTab =
+    document.getElementById("listTab");
 
-const localRepeaterList =
-  document.getElementById("localRepeaterList");
+    const localRepeaterList =
+    document.getElementById("localRepeaterList");
 
-const familyTab =
-  document.getElementById("familyTab");
+    const familyTab =
+    document.getElementById("familyTab");
 
-const familyList =
-  document.getElementById("familyList");
+    const familyList =
+    document.getElementById("familyList");
 
-let liveRoomPollTimer = null;
+    let liveRoomPollTimer = null;
 
-let mapView = {
-  x: 0,
-  y: 0,
-  width: 500,
-  height: 620
-};
+    let mapView = {
+      x: 0,
+      y: 0,
+      width: 500,
+      height: 620
+    };
 
 
-const FAMILY = [
-  {
-    name: "GhostPacketCC",
-    keyPrefix: "a053028f4203"
-  },
-  {
-    name: "GhostPacketD1",
-    keyPrefix: "083ffcb7b742"
-  },
-  {
-    name: "GhostPacketI8",
-    keyPrefix: "a3926318273e"
-  },
-  {
-    name: "GhostPacketPT",
-    keyPrefix: "774c66e368b4"
-  }
-];
+  // ==================== FAMILY RADIO IDENTITIES ====================
+    const FAMILY = [
+    {
+      name: "GhostPacketCC",
+      keyPrefix: "a053028f4203"
+    },
+    {
+      name: "GhostPacketD1",
+      keyPrefix: "083ffcb7b742"
+    },
+    {
+      name: "GhostPacketI8",
+      keyPrefix: "a3926318273e"
+    },
+    {
+      name: "GhostPacketPT",
+      keyPrefix: "774c66e368b4"
+    }
+    ];
 
-const FAMILY_STATUS_PREFIX = "WLLOC|";
+    const FAMILY_STATUS_PREFIX = "WLLOC|";
 
-let familyLocations = {};
-let myPosition = null;
+    let familyLocations = {};
+    let myPosition = null;
 
-let roomSyncInProgress = false;
-let roomRequestPending = false;
-let roomSyncTimer = null;
+    let roomSyncInProgress = false;
+    let roomRequestPending = false;
+    let roomSyncTimer = null;
 
 
-mapTab.onclick = () => {
+  // ==================== MAP / LIST / FAMILY TAB CONTROLS ====================
+    mapTab.onclick = () => {
 
-  mapPanel.style.display = "block";
-  localRepeaterList.style.display = "none";
-  familyList.style.display = "none";
+      mapPanel.style.display = "block";
+      localRepeaterList.style.display = "none";
+      familyList.style.display = "none";
 
-  mapTab.classList.add("active");
-  listTab.classList.remove("active");
-  familyTab.classList.remove("active");
-};
+      mapTab.classList.add("active");
+      listTab.classList.remove("active");
+      familyTab.classList.remove("active");
+    };
 
 
-listTab.onclick = () => {
+    listTab.onclick = () => {
 
-  mapPanel.style.display = "none";
-  localRepeaterList.style.display = "block";
-  familyList.style.display = "none";
+      mapPanel.style.display = "none";
+      localRepeaterList.style.display = "block";
+      familyList.style.display = "none";
 
-  listTab.classList.add("active");
-  mapTab.classList.remove("active");
-  familyTab.classList.remove("active");
-};
+      listTab.classList.add("active");
+      mapTab.classList.remove("active");
+      familyTab.classList.remove("active");
+    };
 
 
-familyTab.onclick = () => {
+    familyTab.onclick = () => {
 
-  mapPanel.style.display = "none";
-  localRepeaterList.style.display = "none";
-  familyList.style.display = "block";
+      mapPanel.style.display = "none";
+      localRepeaterList.style.display = "none";
+      familyList.style.display = "block";
 
-  familyTab.classList.add("active");
-  mapTab.classList.remove("active");
-  listTab.classList.remove("active");
+      familyTab.classList.add("active");
+      mapTab.classList.remove("active");
+      listTab.classList.remove("active");
 
-  renderFamilyStatus();
-};
+      renderFamilyStatus();
+    };
 
-function applyMapView() {
-  gaMap.setAttribute(
-    "viewBox",
-    `${mapView.x} ${mapView.y} ${mapView.width} ${mapView.height}`
-  );
-}
+  // ==================== MAP VIEW / ZOOM CONTROLS ====================
+    function applyMapView() {
+      gaMap.setAttribute(
+      "viewBox",
+      `${mapView.x} ${mapView.y} ${mapView.width} ${mapView.height}`
+      );
+    }
 
-closeMapBtn.onclick = () => {
+    closeMapBtn.onclick = () => {
 
-  mapPanel.style.display = "none";
+      mapPanel.style.display = "none";
 
-};
+    };
 
-zoomInBtn.onclick = () => {
+    zoomInBtn.onclick = () => {
 
-  const factor = 0.75;
+      const factor = 0.75;
 
-  const newWidth = mapView.width * factor;
-  const newHeight = mapView.height * factor;
+      const newWidth = mapView.width * factor;
+      const newHeight = mapView.height * factor;
 
-  mapView.x += (mapView.width - newWidth) / 2;
-  mapView.y += (mapView.height - newHeight) / 2;
+      mapView.x += (mapView.width - newWidth) / 2;
+      mapView.y += (mapView.height - newHeight) / 2;
 
-  mapView.width = newWidth;
-  mapView.height = newHeight;
+      mapView.width = newWidth;
+      mapView.height = newHeight;
 
-  applyMapView();
-};
+      applyMapView();
+    };
 
 
-zoomOutBtn.onclick = () => {
+    zoomOutBtn.onclick = () => {
 
-  const factor = 1.33;
+      const factor = 1.33;
 
-  const newWidth = mapView.width * factor;
-  const newHeight = mapView.height * factor;
+      const newWidth = mapView.width * factor;
+      const newHeight = mapView.height * factor;
 
-  mapView.x -= (newWidth - mapView.width) / 2;
-  mapView.y -= (newHeight - mapView.height) / 2;
+      mapView.x -= (newWidth - mapView.width) / 2;
+      mapView.y -= (newHeight - mapView.height) / 2;
 
-  mapView.width = Math.min(newWidth, 500);
-  mapView.height = Math.min(newHeight, 620);
+      mapView.width = Math.min(newWidth, 500);
+      mapView.height = Math.min(newHeight, 620);
 
-  if (mapView.width === 500) mapView.x = 0;
-  if (mapView.height === 620) mapView.y = 0;
+      if (mapView.width === 500) mapView.x = 0;
+      if (mapView.height === 620) mapView.y = 0;
 
-  applyMapView();
-};
+      applyMapView();
+    };
 
 
-resetMapBtn.onclick = () => {
+    resetMapBtn.onclick = () => {
 
-  mapView = {
-    x: 0,
-    y: 0,
-    width: 500,
-    height: 620
-  };
+      mapView = {
+        x: 0,
+        y: 0,
+        width: 500,
+        height: 620
+      };
 
-  applyMapView();
-};
+      applyMapView();
+    };
 
 
-function message(text) {
-  log.innerHTML = text;
-}
+  // ==================== GENERAL HELPERS ====================
+    function message(text) {
+      log.innerHTML = text;
+    }
 
 
-function uint32ToLE(value) {
-  return [
-    value & 0xff,
-    (value >> 8) & 0xff,
-    (value >> 16) & 0xff,
-    (value >> 24) & 0xff
-  ];
-}
+    function uint32ToLE(value) {
+      return [
+      value & 0xff,
+      (value >> 8) & 0xff,
+      (value >> 16) & 0xff,
+      (value >> 24) & 0xff
+      ];
+    }
 
-function bytesToHex(bytes) {
-  return Array.from(bytes)
-    .map(b => b.toString(16).padStart(2, "0"))
-    .join("");
-}
+    function bytesToHex(bytes) {
+      return Array.from(bytes)
+      .map(b => b.toString(16).padStart(2, "0"))
+      .join("");
+    }
 
 
-function installDiscoveryListener() {
+  // ==================== ZERO-HOP REPEATER DISCOVERY ====================
+    function installDiscoveryListener() {
 
-  connection.txCharacteristic.addEventListener(
-    "characteristicvaluechanged",
-    (event) => {
+      connection.txCharacteristic.addEventListener(
+      "characteristicvaluechanged",
+      (event) => {
 
-      const frame = new Uint8Array(event.target.value.buffer);
+        const frame = new Uint8Array(event.target.value.buffer);
 
-      // 0x8E = PUSH_CODE_CONTROL_DATA
-      if (frame[0] !== 0x8E) return;
+        // 0x8E = PUSH_CODE_CONTROL_DATA
+        if (frame[0] !== 0x8E) return;
 
-      const localSnr = (frame[1] << 24 >> 24) / 4;
-      const localRssi = frame[2] << 24 >> 24;
+        const localSnr = (frame[1] << 24 >> 24) / 4;
+        const localRssi = frame[2] << 24 >> 24;
 
-      const pathLen = frame[3];
+        const pathLen = frame[3];
 
-      const payloadStart = 4 + pathLen;
-      const payload = frame.slice(payloadStart);
+        const payloadStart = 4 + pathLen;
+        const payload = frame.slice(payloadStart);
 
-      if (payload.length < 6) return;
+        if (payload.length < 6) return;
 
-      // upper nibble 0x90 = DISCOVER_RESP
-      const responseType = payload[0] & 0xF0;
+        // upper nibble 0x90 = DISCOVER_RESP
+        const responseType = payload[0] & 0xF0;
 
-      if (responseType !== 0x90) return;
+        if (responseType !== 0x90) return;
 
-      // lower nibble is node type
-      const nodeType = payload[0] & 0x0F;
+        // lower nibble is node type
+        const nodeType = payload[0] & 0x0F;
 
-      // 2 = repeater
-      if (nodeType !== 2) return;
+        // 2 = repeater
+        if (nodeType !== 2) return;
 
-      const remoteSnr = (payload[1] << 24 >> 24) / 4;
+        const remoteSnr = (payload[1] << 24 >> 24) / 4;
 
-      const responseTag =
+        const responseTag =
         payload[2] |
         (payload[3] << 8) |
         (payload[4] << 16) |
         (payload[5] << 24);
 
-      // only accept replies to OUR discovery request
-      if ((responseTag >>> 0) !== (discoveryTag >>> 0)) return;
+        // only accept replies to OUR discovery request
+        if ((responseTag >>> 0) !== (discoveryTag >>> 0)) return;
 
-      const pubKey = payload.slice(6);
+        const pubKey = payload.slice(6);
 
-      const pubKeyHex = bytesToHex(pubKey);
+        const pubKeyHex = bytesToHex(pubKey);
 
-      // avoid duplicate responders
-      if (discoveredRepeaters.some(r => r.pubKey === pubKeyHex)) {
+        // avoid duplicate responders
+        if (discoveredRepeaters.some(r => r.pubKey === pubKeyHex)) {
+          return;
+        }
+
+        discoveredRepeaters.push({
+          pubKey: pubKeyHex,
+          localSnr,
+          localRssi,
+          remoteSnr
+        });
+
+        showDiscoveryResults();
+      }
+      );
+    }
+    function showDiscoveryResults() {
+
+      if (discoveredRepeaters.length === 0) {
+        meshReadyMain.textContent = "Checking...";
+        meshReadySub.textContent = "listening nearby";
+        repeatersList.innerHTML = "";
         return;
       }
 
-      discoveredRepeaters.push({
-        pubKey: pubKeyHex,
-        localSnr,
-        localRssi,
-        remoteSnr
+      let html =
+      "<h3>✅ " +
+      discoveredRepeaters.length +
+      " nearby repeater" +
+      (discoveredRepeaters.length === 1 ? "" : "s") +
+      " found</h3>";
+
+      discoveredRepeaters.forEach((r, i) => {
+
+        html +=
+        "<div style='padding:12px;border-bottom:1px solid #444;text-align:left;'>" +
+        "<strong>Repeater " + (i + 1) + "</strong>" +
+        "<br>Radio SNR: " + r.localSnr + " dB" +
+        "<br>Repeater heard us: " + r.remoteSnr + " dB" +
+        "<br>RSSI: " + r.localRssi + " dBm" +
+        "<br><small>" + r.pubKey.substring(0, 16) + "...</small>" +
+        "</div>";
       });
 
-      showDiscoveryResults();
-    }
-  );
-}
-function showDiscoveryResults() {
-
-  if (discoveredRepeaters.length === 0) {
-    meshReadyMain.textContent = "Checking...";
-    meshReadySub.textContent = "listening nearby";
-    repeatersList.innerHTML = "";
-    return;
-  }
-
-  let html =
-    "<h3>✅ " +
-    discoveredRepeaters.length +
-    " nearby repeater" +
-    (discoveredRepeaters.length === 1 ? "" : "s") +
-    " found</h3>";
-
-  discoveredRepeaters.forEach((r, i) => {
-
-    html +=
-      "<div style='padding:12px;border-bottom:1px solid #444;text-align:left;'>" +
-      "<strong>Repeater " + (i + 1) + "</strong>" +
-      "<br>Radio SNR: " + r.localSnr + " dB" +
-      "<br>Repeater heard us: " + r.remoteSnr + " dB" +
-      "<br>RSSI: " + r.localRssi + " dBm" +
-      "<br><small>" + r.pubKey.substring(0, 16) + "...</small>" +
-      "</div>";
-  });
-
-  repeatersList.innerHTML = "";
-  meshReadyMain.textContent = "Mesh Ready";
-  meshReadySub.textContent =
-    discoveredRepeaters.length +
-    " repeater" +
-    (discoveredRepeaters.length === 1 ? "" : "s") +
-    " heard";
-}
-
-connectBtn.onclick = async () => {
-
-  try {
-
-    status.innerHTML = "Connecting";
-    status.className = "status-value connecting";
-    message("Opening Bluetooth selector...");
-
-   connection = await WebBleConnection.open();
-
-if (!connection) {
-  throw new Error("No Bluetooth device selected");
-}
-
-connection.on("connected", async () => {
-
-  status.innerHTML = "Connected";
-  status.className = "status-value connected";
-  message("MeshCore radio connected.");
-
-  const connectedRadioName =
-    connection.device?.name ||
-    connection.bluetoothDevice?.name ||
-    connection.gatt?.device?.name ||
-    "MeshCore Radio";
-
-  radioDeviceLabel.textContent = connectedRadioName;
-
-  message("MeshCore radio connected.");
-
-
-
-
-
-  advertBtn.disabled = false;
-  floodBtn.disabled = false;
-
-  connectBtn.innerHTML = "CONNECTED";
-  connectBtn.disabled = true;
-
-  repeatersBtn.disabled = false;
-
-  mapRepeatersBtn.disabled = false;
-
-installDiscoveryListener();
-installRoomListener();
-installRoomMessageListener();
-installBatteryListener();
-
-message("Announcing node to mesh...");
-
-try {
-  await connection.sendFloodAdvert();
-  message("Node announced to mesh.");
-} catch (err) {
-  console.error("Flood advert failed:", err);
-}
-
-// document.getElementById("radioName").textContent = radioName;
-
-await requestBattery();
-
-  roomBtn.disabled = false;
-  readRoomBtn.disabled = false;
-
-// Connect to the important thing first: Check-In.
-setTimeout(() => {
-  if (!roomBtn.disabled) {
-    roomBtn.click();
-  }
-}, 500);
-
-// Let the room setup finish before asking
-// the radio for contacts again for the map.
-setTimeout(() => {
-  if (!mapRepeatersBtn.disabled) {
-    mapRepeatersBtn.click();
-  }
-}, 5000);
-
-});
-
-connection.on("disconnected", () => {
-
-  status.innerHTML = "Disconnected";
-  status.className = "status-value disconnected";
-
-  advertBtn.disabled = true;
-  floodBtn.disabled = true;
-
-  connectBtn.innerHTML = "CONNECT TO RADIO";
-  connectBtn.disabled = false;
-
-  message("Radio disconnected.");
-
-  repeatersBtn.disabled = true;
-  roomBtn.disabled = true;
-  readRoomBtn.disabled = true;
-  mapRepeatersBtn.disabled = true;
-
-  if (liveRoomPollTimer) {
-  clearInterval(liveRoomPollTimer);
-  liveRoomPollTimer = null;
-  }
-
-  roomRequestPending = false;
-  roomSyncInProgress = false;
-
-  if (roomConnectTimer) {
-    clearTimeout(roomConnectTimer);
-    roomConnectTimer = null;
-  }
-
-});
-
-  }
-  catch(err) {
-
-    console.error(err);
-
-    status.innerHTML = "Connection failed";
-    status.className = "status-value disconnected";
-    message("Error: " + err);
-
-  }
-
-};
-
-
-advertBtn.onclick = async () => {
-
-  try {
-
-    message("Sending local advert...");
-
-    await connection.sendZeroHopAdvert();
-
-    message("✅ Local advert sent.");
-
-  }
-  catch(err) {
-
-    console.error(err);
-    message("Advert error: " + err);
-
-  }
-
-};
-
-
-floodBtn.onclick = async () => {
-
-  try {
-
-    message("Sending flood advert...");
-
-    await connection.sendFloodAdvert();
-
-    message("✅ Flood advert sent.");
-
-  }
-  catch(err) {
-
-    console.error(err);
-    message("Flood advert error: " + err);
-
-  }
-
-};
-
-repeatersBtn.onclick = async () => {
-
-  try {
-
-    discoveredRepeaters = [];
-
-    repeatersList.innerHTML = "";
-    meshReadyMain.textContent = "Checking...";
-    meshReadySub.textContent = "zero-hop scan";
-    message("Sending zero-hop repeater discovery...");
-
-    // random 32-bit discovery tag
-    discoveryTag =
-      Math.floor(Math.random() * 0xFFFFFFFF) >>> 0;
-
-    /*
-      Companion command:
-
-      byte 0 = 0x37   CMD_SEND_CONTROL_DATA
-      byte 1 = 0x00   flags
-      byte 2 = 0x80   NODE_DISCOVER_REQ
-      byte 3 = 0x04   filter bit for ADV_TYPE_REPEATER (type 2)
-      bytes 4-7 = random discovery tag
-      bytes 8-11 = "since", zero
-    */
-
-    const frame = new Uint8Array([
-      0x37,
-      0x00,
-      0x80,
-      0x04,
-      ...uint32ToLE(discoveryTag),
-      0x00, 0x00, 0x00, 0x00
-    ]);
-
-    await connection.sendToRadioFrame(frame);
-
-    message("📡 Discovery transmitted. Listening...");
-
-    if (discoveryTimer) {
-      clearTimeout(discoveryTimer);
+      repeatersList.innerHTML = "";
+      meshReadyMain.textContent = "Mesh Ready";
+      meshReadySub.textContent =
+      discoveredRepeaters.length +
+      " repeater" +
+      (discoveredRepeaters.length === 1 ? "" : "s") +
+      " heard";
     }
 
-    discoveryTimer = setTimeout(() => {
+  // ==================== BLUETOOTH RADIO CONNECTION ====================
+    connectBtn.onclick = async () => {
 
-      if (discoveredRepeaters.length === 0) {
+      try {
 
-        repeatersList.innerHTML = "";
-        meshReadyMain.textContent = "No direct link";
-        meshReadySub.textContent = "use nearest repeater";
-        message("Discovery finished — no repeater heard.");
+        status.innerHTML = "Connecting";
+        status.className = "status-value connecting";
+        message("Opening Bluetooth selector...");
 
-      } else {
+        connection = await WebBleConnection.open();
 
-        message(
-          "✅ Discovery finished — " +
-          discoveredRepeaters.length +
-          " repeater(s) heard."
-        );
+        if (!connection) {
+          throw new Error("No Bluetooth device selected");
+        }
+
+        connection.on("connected", async () => {
+
+          status.innerHTML = "Connected";
+          status.className = "status-value connected";
+          message("MeshCore radio connected.");
+
+          const connectedRadioName =
+          connection.device?.name ||
+          connection.bluetoothDevice?.name ||
+          connection.gatt?.device?.name ||
+          "MeshCore Radio";
+
+          radioDeviceLabel.textContent = connectedRadioName;
+
+          message("MeshCore radio connected.");
+
+
+
+
+
+          advertBtn.disabled = false;
+          floodBtn.disabled = false;
+
+          connectBtn.innerHTML = "CONNECTED";
+          connectBtn.disabled = true;
+
+          repeatersBtn.disabled = false;
+
+          mapRepeatersBtn.disabled = false;
+
+          installDiscoveryListener();
+          installRoomListener();
+          installRoomMessageListener();
+          installBatteryListener();
+
+          message("Announcing node to mesh...");
+
+          try {
+            await connection.sendFloodAdvert();
+            message("Node announced to mesh.");
+          } catch (err) {
+            console.error("Flood advert failed:", err);
+          }
+
+          // document.getElementById("radioName").textContent = radioName;
+
+          await requestBattery();
+
+          roomBtn.disabled = false;
+          readRoomBtn.disabled = false;
+
+          // Connect to the important thing first: Check-In.
+          setTimeout(() => {
+            if (!roomBtn.disabled) {
+              roomBtn.click();
+            }
+          }, 500);
+
+          // Let the room setup finish before asking
+          // the radio for contacts again for the map.
+          setTimeout(() => {
+            if (!mapRepeatersBtn.disabled) {
+              mapRepeatersBtn.click();
+            }
+          }, 5000);
+
+        });
+
+        connection.on("disconnected", () => {
+
+          status.innerHTML = "Disconnected";
+          status.className = "status-value disconnected";
+
+          advertBtn.disabled = true;
+          floodBtn.disabled = true;
+
+          connectBtn.innerHTML = "CONNECT TO RADIO";
+          connectBtn.disabled = false;
+
+          message("Radio disconnected.");
+
+          repeatersBtn.disabled = true;
+          roomBtn.disabled = true;
+          readRoomBtn.disabled = true;
+          mapRepeatersBtn.disabled = true;
+
+          if (liveRoomPollTimer) {
+            clearInterval(liveRoomPollTimer);
+            liveRoomPollTimer = null;
+          }
+
+          roomRequestPending = false;
+          roomSyncInProgress = false;
+
+          if (roomConnectTimer) {
+            clearTimeout(roomConnectTimer);
+            roomConnectTimer = null;
+          }
+
+        });
+
+      }
+      catch(err) {
+
+        console.error(err);
+
+        status.innerHTML = "Connection failed";
+        status.className = "status-value disconnected";
+        message("Error: " + err);
 
       }
 
-    }, 7000);
+    };
 
-  }
 
-  catch(err) {
+  // ==================== NODE ADVERTISING ====================
+    advertBtn.onclick = async () => {
 
-    console.error(err);
+      try {
 
-    repeatersList.innerHTML =
-      "<pre>" + String(err) + "</pre>";
+        message("Sending local advert...");
 
-    message("Discovery error: " + err);
+        await connection.sendZeroHopAdvert();
 
-  }
+        message("✅ Local advert sent.");
 
-};
+      }
+      catch(err) {
 
-roomBtn.onclick = async () => {
+        console.error(err);
+        message("Advert error: " + err);
 
-  try {
+      }
 
-    roomStatus.innerHTML = "Connecting to family room...";
-    if (familyStatus) familyStatus.textContent = "Checking...";
+    };
 
-roomMessages.innerHTML = `
-  <div class="empty-chat">
-    Trying to reach the family check-in room...
-  </div>
-`;
 
-    message("Looking for check-in room...");
+    floodBtn.onclick = async () => {
 
-    const contacts = await connection.getContacts();
+      try {
 
-    const room = contacts.find(c =>
-      c.advName === CHECKIN_ROOM_NAME &&
-      c.type === 3
-      
-    );
-currentRoom = room;
+        message("Sending flood advert...");
 
-if (!room) {
-  throw new Error(
-    "Room '" + CHECKIN_ROOM_NAME + "' not found."
-  );
-}
+        await connection.sendFloodAdvert();
 
-message("Resetting room path to flood...");
+        message("✅ Flood advert sent.");
 
-await resetContactPath(room);
+      }
+      catch(err) {
 
-message("Room path reset to flood.");
+        console.error(err);
+        message("Flood advert error: " + err);
 
-sendRoomPostBtn.disabled = true;
+      }
 
-roomStatus.innerHTML =
-  "📡 Connecting to " + room.advName + "...";
+    };
 
+  // ==================== ACTIVE REPEATER DISCOVERY COMMAND ====================
+    repeatersBtn.onclick = async () => {
 
+      try {
 
+        discoveredRepeaters = [];
 
-   roomStatus.innerHTML =
-  "📡 Connecting to " + room.advName + "...";
+        repeatersList.innerHTML = "";
+        meshReadyMain.textContent = "Checking...";
+        meshReadySub.textContent = "zero-hop scan";
+        message("Sending zero-hop repeater discovery...");
 
-message("Requesting full retained room history...");
+        // random 32-bit discovery tag
+        discoveryTag =
+        Math.floor(Math.random() * 0xFFFFFFFF) >>> 0;
 
-const publicKey = Uint8Array.from(
-  Object.values(room.publicKey)
-);
+        /*
+        Companion command:
 
-const password =
-  new TextEncoder().encode(CHECKIN_ROOM_PASSWORD);
+        byte 0 = 0x37   CMD_SEND_CONTROL_DATA
+        byte 1 = 0x00   flags
+        byte 2 = 0x80   NODE_DISCOVER_REQ
+        byte 3 = 0x04   filter bit for ADV_TYPE_REPEATER (type 2)
+        bytes 4-7 = random discovery tag
+        bytes 8-11 = "since", zero
+        */
 
-/*
-  CMD_SEND_ANON_REQ = 57 = 0x39
+        const frame = new Uint8Array([
+        0x37,
+        0x00,
+        0x80,
+        0x04,
+        ...uint32ToLE(discoveryTag),
+        0x00, 0x00, 0x00, 0x00
+        ]);
 
-  Companion adds the sender timestamp itself.
+        await connection.sendToRadioFrame(frame);
 
-  We provide:
-    sync_since = 0
-    password
-*/
+        message("📡 Discovery transmitted. Listening...");
 
-const frame =
-  new Uint8Array(
-    1 +               // command
-    32 +              // room public key
-    4 +               // sync_since
-    password.length
-  );
+        if (discoveryTimer) {
+          clearTimeout(discoveryTimer);
+        }
 
-let pos = 0;
+        discoveryTimer = setTimeout(() => {
 
-frame[pos++] = 0x39;
+          if (discoveredRepeaters.length === 0) {
 
-// Room public key
-frame.set(publicKey, pos);
-pos += 32;
+            repeatersList.innerHTML = "";
+            meshReadyMain.textContent = "No direct link";
+            meshReadySub.textContent = "use nearest repeater";
+            message("Discovery finished — no repeater heard.");
 
-// sync_since = 0
-frame[pos++] = 0x00;
-frame[pos++] = 0x00;
-frame[pos++] = 0x00;
-frame[pos++] = 0x00;
+          } else {
 
-// password
-frame.set(password, pos);
+            message(
+            "✅ Discovery finished — " +
+            discoveredRepeaters.length +
+            " repeater(s) heard."
+            );
 
-await connection.sendToRadioFrame(frame);
+          }
 
-if (roomConnectTimer) {
-  clearTimeout(roomConnectTimer);
-}
+        }, 7000);
 
-roomConnectTimer = setTimeout(() => {
+      }
 
-  if (familyStatus) {
-    familyStatus.textContent = "Check-In Not Connected";
-  }
+      catch(err) {
 
-  roomMessages.innerHTML = `
-    <div class="empty-chat">
-      <strong>Family check-in room could not be reached.</strong>
-      <br><br>
-      Try again, or move closer to a repeater and retry.
-    </div>
-  `;
+        console.error(err);
 
-  roomStatus.innerHTML = "";
+        repeatersList.innerHTML =
+        "<pre>" + String(err) + "</pre>";
 
-}, 8000);
+        message("Discovery error: " + err);
 
-  }
+      }
 
-  catch(err) {
+    };
 
-    console.error(err);
+  // ==================== CHECK-IN ROOM CONNECTION / HISTORY REQUEST ====================
+    roomBtn.onclick = async () => {
 
-    roomStatus.innerHTML =
-      "❌ " + String(err);
+      try {
 
-    message("Room error: " + err);
+        roomStatus.innerHTML = "Connecting to family room...";
+        if (familyStatus) familyStatus.textContent = "Checking...";
 
-  }
+        roomMessages.innerHTML = `
+        <div class="empty-chat">
+        Trying to reach the family check-in room...
+        </div>
+        `;
 
-};
-function readUint32LE(bytes, offset) {
-  return (
-    bytes[offset] |
-    (bytes[offset + 1] << 8) |
-    (bytes[offset + 2] << 16) |
-    (bytes[offset + 3] << 24)
-  ) >>> 0;
-}
+        message("Looking for check-in room...");
 
-function decodeText(bytes) {
-  return new TextDecoder("utf-8").decode(bytes);
-}
+        const contacts = await connection.getContacts();
 
-async function requestNextMessage() {
+        const room = contacts.find(c =>
+        c.advName === CHECKIN_ROOM_NAME &&
+        c.type === 3
 
-  // Never have two NEXT_MESSAGE requests in flight.
-  if (roomRequestPending) {
-    return;
-  }
+        );
+        currentRoom = room;
 
-  roomRequestPending = true;
+        if (!room) {
+          throw new Error(
+          "Room '" + CHECKIN_ROOM_NAME + "' not found."
+          );
+        }
 
-  console.log("ROOM SYNC: requesting next message");
+        message("Resetting room path to flood...");
 
-  try {
+        await resetContactPath(room);
 
-    await connection.sendToRadioFrame(
-      new Uint8Array([0x0A])
-    );
+        message("Room path reset to flood.");
 
-  } catch (err) {
+        sendRoomPostBtn.disabled = true;
 
-    roomRequestPending = false;
+        roomStatus.innerHTML =
+        "📡 Connecting to " + room.advName + "...";
 
-    console.error(
-      "ROOM SYNC request failed:",
-      err
-    );
 
-    throw err;
-  }
-}
 
-function installRoomMessageListener() {
 
-  connection.txCharacteristic.addEventListener(
-    "characteristicvaluechanged",
-    async (event) => {
+        roomStatus.innerHTML =
+        "📡 Connecting to " + room.advName + "...";
 
-      const frame =
+        message("Requesting full retained room history...");
+
+        const publicKey = Uint8Array.from(
+        Object.values(room.publicKey)
+        );
+
+        const password =
+        new TextEncoder().encode(CHECKIN_ROOM_PASSWORD);
+
+        /*
+        CMD_SEND_ANON_REQ = 57 = 0x39
+
+        Companion adds the sender timestamp itself.
+
+        We provide:
+        sync_since = 0
+        password
+        */
+
+        const frame =
+        new Uint8Array(
+        1 +               // command
+        32 +              // room public key
+        4 +               // sync_since
+        password.length
+        );
+
+        let pos = 0;
+
+        frame[pos++] = 0x39;
+
+        // Room public key
+        frame.set(publicKey, pos);
+        pos += 32;
+
+        // sync_since = 0
+        frame[pos++] = 0x00;
+        frame[pos++] = 0x00;
+        frame[pos++] = 0x00;
+        frame[pos++] = 0x00;
+
+        // password
+        frame.set(password, pos);
+
+        await connection.sendToRadioFrame(frame);
+
+        if (roomConnectTimer) {
+          clearTimeout(roomConnectTimer);
+        }
+
+        roomConnectTimer = setTimeout(() => {
+
+          if (familyStatus) {
+            familyStatus.textContent = "Check-In Not Connected";
+          }
+
+          roomMessages.innerHTML = `
+          <div class="empty-chat">
+          <strong>Family check-in room could not be reached.</strong>
+          <br><br>
+          Try again, or move closer to a repeater and retry.
+          </div>
+          `;
+
+          roomStatus.innerHTML = "";
+
+        }, 8000);
+
+      }
+
+      catch(err) {
+
+        console.error(err);
+
+        roomStatus.innerHTML =
+        "❌ " + String(err);
+
+        message("Room error: " + err);
+
+      }
+
+    };
+  // ==================== ROOM MESSAGE DECODING HELPERS ====================
+    function readUint32LE(bytes, offset) {
+      return (
+      bytes[offset] |
+      (bytes[offset + 1] << 8) |
+      (bytes[offset + 2] << 16) |
+      (bytes[offset + 3] << 24)
+      ) >>> 0;
+    }
+
+    function decodeText(bytes) {
+      return new TextDecoder("utf-8").decode(bytes);
+    }
+
+  // ==================== ROOM MESSAGE QUEUE / SYNC ====================
+    async function requestNextMessage() {
+
+      // Never have two NEXT_MESSAGE requests in flight.
+      if (roomRequestPending) {
+        return;
+      }
+
+      roomRequestPending = true;
+
+      console.log("ROOM SYNC: requesting next message");
+
+      try {
+
+        await connection.sendToRadioFrame(
+        new Uint8Array([0x0A])
+        );
+
+      } catch (err) {
+
+        roomRequestPending = false;
+
+        console.error(
+        "ROOM SYNC request failed:",
+        err
+        );
+
+        throw err;
+      }
+    }
+
+  // ==================== INCOMING CHECK-IN ROOM MESSAGES ====================
+    function installRoomMessageListener() {
+
+      connection.txCharacteristic.addEventListener(
+      "characteristicvaluechanged",
+      async (event) => {
+
+        const frame =
         new Uint8Array(event.target.value.buffer);
 
 
-      // PUSH_CODE_MSG_WAITING
-      // Radio says there is a queued message waiting.
+        // PUSH_CODE_MSG_WAITING
+        // Radio says there is a queued message waiting.
         if (frame[0] === 0x83) {
 
           console.log("ROOM: message waiting");
@@ -1647,7 +1679,7 @@ function installRoomMessageListener() {
         }
 
 
-      /*
+        /*
         RESP_CODE_CONTACT_MSG_RECV_V3 = 16
 
         layout:
@@ -1664,74 +1696,74 @@ function installRoomMessageListener() {
         Room posts use SIGNED_PLAIN and include
         an additional four-byte author prefix before
         the actual text.
-      */
+        */
 
-      if (frame[0] === 16) {
-
-
-        roomRequestPending = false;
-        roomSyncInProgress = true;
-        
-        if (roomConnectTimer) {
-          clearTimeout(roomConnectTimer);
-          roomConnectTimer = null;
-        }
+        if (frame[0] === 16) {
 
 
-        if (familyStatus) {
-  familyStatus.textContent =
-    "Check-In Connected";
-}
+          roomRequestPending = false;
+          roomSyncInProgress = true;
 
-sendRoomPostBtn.disabled = false;
+          if (roomConnectTimer) {
+            clearTimeout(roomConnectTimer);
+            roomConnectTimer = null;
+          }
 
-if (roomSyncTimer) {
-  clearTimeout(roomSyncTimer);
-  roomSyncTimer = null;
-}
 
-        const snr =
+          if (familyStatus) {
+            familyStatus.textContent =
+            "Check-In Connected";
+          }
+
+          sendRoomPostBtn.disabled = false;
+
+          if (roomSyncTimer) {
+            clearTimeout(roomSyncTimer);
+            roomSyncTimer = null;
+          }
+
+          const snr =
           (frame[1] << 24 >> 24) / 4;
 
-        const senderPrefix =
+          const senderPrefix =
           bytesToHex(frame.slice(4, 10));
 
-        const pathLen =
+          const pathLen =
           frame[10];
 
-        const txtType =
+          const txtType =
           frame[11];
 
-        const timestamp =
+          const timestamp =
           readUint32LE(frame, 12);
 
-        let textStart = 16;
+          let textStart = 16;
 
-        let authorPrefix = null;
+          let authorPrefix = null;
 
 
-        /*
+          /*
           Signed room posts contain an extra
           4-byte author public-key prefix.
-        */
-        if (txtType === 2) {
+          */
+          if (txtType === 2) {
 
-          authorPrefix =
+            authorPrefix =
             bytesToHex(
-              frame.slice(16, 20)
+            frame.slice(16, 20)
             );
 
-          textStart = 20;
-        }
+            textStart = 20;
+          }
 
 
-        const text =
+          const text =
           decodeText(
-            frame.slice(textStart)
+          frame.slice(textStart)
           );
 
 
-        console.log(
+          console.log(
           "ROOM MESSAGE:",
           {
             senderPrefix,
@@ -1742,10 +1774,10 @@ if (roomSyncTimer) {
             txtType,
             text
           }
-        );
+          );
 
 
-        /*
+          /*
           =========================================
           WELLSLINK FAMILY LOCATION RECORD
           =========================================
@@ -1756,110 +1788,110 @@ if (roomSyncTimer) {
 
           They are stored for the Family tab but
           are NOT displayed as chat messages.
-        */
+          */
 
-        if (
+          if (
           text.startsWith(
-            FAMILY_STATUS_PREFIX
+          FAMILY_STATUS_PREFIX
           )
-        ) {
+          ) {
 
-          const parts =
+            const parts =
             text.split("|");
 
-          if (parts.length >= 4) {
+            if (parts.length >= 4) {
 
-            const locationTimestamp =
+              const locationTimestamp =
               Number(parts[1]);
 
-            const lat =
+              const lat =
               Number(parts[2]);
 
-            const lon =
+              const lon =
               Number(parts[3]);
 
 
-            /*
+              /*
               For signed room posts authorPrefix
               identifies the actual radio that
               created the post.
-            */
+              */
 
-            const member =
+              const member =
               getFamilyMember(
-                authorPrefix
+              authorPrefix
               );
 
 
-            if (
+              if (
               member &&
               Number.isFinite(
-                locationTimestamp
+              locationTimestamp
               ) &&
               Number.isFinite(lat) &&
               Number.isFinite(lon)
-            ) {
+              ) {
 
-              const existing =
+                const existing =
                 familyLocations[
-                  member.keyPrefix
+                member.keyPrefix
                 ];
 
 
-              /*
+                /*
                 Only replace the stored location
                 if this check-in is newer.
-              */
+                */
 
-              if (
+                if (
                 !existing ||
                 locationTimestamp >
-                  existing.timestamp
-              ) {
+                existing.timestamp
+                ) {
 
-                familyLocations[
+                  familyLocations[
                   member.keyPrefix
-                ] = {
-                  timestamp:
+                  ] = {
+                    timestamp:
                     locationTimestamp,
 
-                  lat: lat,
-                  lon: lon
-                };
+                    lat: lat,
+                    lon: lon
+                  };
 
 
-                console.log(
+                  console.log(
                   "Family location updated:",
                   member.name,
                   familyLocations[
-                    member.keyPrefix
+                  member.keyPrefix
                   ]
-                );
-              }
+                  );
+                }
 
 
-              /*
+                /*
                 Refresh the Family tab.
-              */
+                */
 
-              renderFamilyStatus();
+                renderFamilyStatus();
 
-            } else {
+              } else {
 
-              console.log(
+                console.log(
                 "Location record received but family member could not be identified:",
                 {
                   authorPrefix,
                   text
                 }
-              );
+                );
+
+              }
 
             }
 
-          }
 
-
-          /*
+            /*
             IMPORTANT:
 
             This is a machine-generated WellsLink
@@ -1867,228 +1899,230 @@ if (roomSyncTimer) {
 
             Do NOT add it to roomPosts, otherwise
             it would appear in Family Messages.
+            */
+
+
+            // Give the companion a moment before asking
+            // for the next retained post.
+            await new Promise(resolve =>
+            setTimeout(resolve, 150)
+            );
+
+            await requestNextMessage();
+
+            return;
+          }
+
+
+          /*
+          =========================================
+          NORMAL FAMILY MESSAGE
+          =========================================
           */
 
+          roomPosts.push({
+            senderPrefix,
+            authorPrefix,
+            timestamp,
+            snr,
+            text
+          });
 
-          // Give the companion a moment before asking
-// for the next retained post.
-await new Promise(resolve =>
-  setTimeout(resolve, 150)
-);
 
-await requestNextMessage();
+          displayRoomPosts();
+
+
+          // Keep draining the queue
+          await requestNextMessage();
 
           return;
         }
 
 
-        /*
-          =========================================
-          NORMAL FAMILY MESSAGE
-          =========================================
-        */
+        // RESP_CODE_NO_MORE_MESSAGES
+        // RESP_CODE_NO_MORE_MESSAGES
+        if (frame[0] === 10) {
 
-        roomPosts.push({
-          senderPrefix,
-          authorPrefix,
-          timestamp,
-          snr,
-          text
+          console.log("ROOM: no more messages");
+
+          roomRequestPending = false;
+          roomSyncInProgress = false;
+
+          // IMPORTANT:
+          // We have received a valid response from the room,
+          // so the room IS connected.
+          if (roomConnectTimer) {
+            clearTimeout(roomConnectTimer);
+            roomConnectTimer = null;
+          }
+
+          if (roomSyncTimer) {
+            clearTimeout(roomSyncTimer);
+            roomSyncTimer = null;
+          }
+
+          if (familyStatus) {
+            familyStatus.textContent =
+            "Check-In Connected";
+          }
+
+          sendRoomPostBtn.disabled = false;
+
+          /*
+          Once the initial backlog is finished,
+          begin checking periodically for new posts.
+          */
+          if (!liveRoomPollTimer) {
+            startLiveRoomPolling();
+          }
+
+          if (roomPosts.length === 0) {
+
+            roomMessages.innerHTML =
+            '<div class="empty-chat">No family messages yet.</div>';
+
+          }
+
+          renderFamilyStatus();
+
+          return;
+        }
+
+      }
+      );
+    }
+
+
+  // ==================== CHECK-IN CHAT DISPLAY ====================
+    function displayRoomPosts() {
+
+      let html = "";
+
+      const posts = [...roomPosts].sort((a, b) => a.timestamp - b.timestamp);
+
+      posts.forEach(post => {
+
+        const whenDate = new Date(post.timestamp * 1000);
+        const when = whenDate.toLocaleTimeString([], {
+          hour: "numeric",
+          minute: "2-digit"
         });
 
-
-        displayRoomPosts();
-
-
-        // Keep draining the queue
-        await requestNextMessage();
-
-        return;
-      }
-
-
-      // RESP_CODE_NO_MORE_MESSAGES
-      // RESP_CODE_NO_MORE_MESSAGES
-if (frame[0] === 10) {
-
-  console.log("ROOM: no more messages");
-
-  roomRequestPending = false;
-  roomSyncInProgress = false;
-
-  // IMPORTANT:
-  // We have received a valid response from the room,
-  // so the room IS connected.
-  if (roomConnectTimer) {
-    clearTimeout(roomConnectTimer);
-    roomConnectTimer = null;
-  }
-
-  if (roomSyncTimer) {
-    clearTimeout(roomSyncTimer);
-    roomSyncTimer = null;
-  }
-
-  if (familyStatus) {
-    familyStatus.textContent =
-      "Check-In Connected";
-  }
-
-  sendRoomPostBtn.disabled = false;
-
-  /*
-    Once the initial backlog is finished,
-    begin checking periodically for new posts.
-  */
-  if (!liveRoomPollTimer) {
-    startLiveRoomPolling();
-  }
-
-  if (roomPosts.length === 0) {
-
-    roomMessages.innerHTML =
-      '<div class="empty-chat">No family messages yet.</div>';
-
-  }
-
-  renderFamilyStatus();
-
-  return;
-}
-
-    }
-  );
-}
-
-
-function displayRoomPosts() {
-
-  let html = "";
-
-  const posts = [...roomPosts].sort((a, b) => a.timestamp - b.timestamp);
-
-  posts.forEach(post => {
-
-    const whenDate = new Date(post.timestamp * 1000);
-    const when = whenDate.toLocaleTimeString([], {
-      hour: "numeric",
-      minute: "2-digit"
-    });
-
-    const sender =
-      post.authorPrefix
+        const sender =
+        post.authorPrefix
         ? "Family"
         : "Family";
 
-    html += `
-      <div class="message-row incoming">
+        html += `
+        <div class="message-row incoming">
         <div class="avatar">${sender.substring(0,2).toUpperCase()}</div>
         <div class="message-stack">
-          <div class="message-meta">
-            <span>${sender}</span>
-            <time>${when}</time>
-          </div>
-          <div class="bubble">${escapeHtml(post.text)}</div>
+        <div class="message-meta">
+        <span>${sender}</span>
+        <time>${when}</time>
         </div>
-      </div>
-    `;
-  });
+        <div class="bubble">${escapeHtml(post.text)}</div>
+        </div>
+        </div>
+        `;
+      });
 
-  if (!posts.length) {
-    html = `
-      <div class="empty-chat">
+      if (!posts.length) {
+        html = `
+        <div class="empty-chat">
         No family messages yet.
-      </div>
-    `;
-  }
+        </div>
+        `;
+      }
 
-  roomMessages.innerHTML = html;
-  roomMessages.scrollTop = roomMessages.scrollHeight;
-}
+      roomMessages.innerHTML = html;
+      roomMessages.scrollTop = roomMessages.scrollHeight;
+    }
 
-function escapeHtml(text) {
-  return String(text)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
+    function escapeHtml(text) {
+      return String(text)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+    }
 
-readRoomBtn.onclick = async () => {
+    readRoomBtn.onclick = async () => {
 
-  try {
+      try {
 
-    roomPosts = [];
+        roomPosts = [];
 
-    roomMessages.innerHTML =
-      "<p>Checking room...</p>";
+        roomMessages.innerHTML =
+        "<p>Checking room...</p>";
 
-    message(
-      "Reading room messages..."
-    );
+        message(
+        "Reading room messages..."
+        );
 
-    await requestNextMessage();
+        await requestNextMessage();
 
-  }
+      }
 
-  catch(err) {
+      catch(err) {
 
-    console.error(err);
+        console.error(err);
 
-    roomMessages.innerHTML =
-      "<pre>" +
-      String(err) +
-      "</pre>";
+        roomMessages.innerHTML =
+        "<pre>" +
+        String(err) +
+        "</pre>";
 
-    message(
-      "Read room error: " +
-      err
-    );
+        message(
+        "Read room error: " +
+        err
+        );
 
-  }
+      }
 
-};
+    };
 
-function installRoomListener() {
+  // ==================== ROOM LOGIN SUCCESS / FAILURE EVENTS ====================
+    function installRoomListener() {
 
-  connection.txCharacteristic.addEventListener(
-    "characteristicvaluechanged",
-    (event) => {
+      connection.txCharacteristic.addEventListener(
+      "characteristicvaluechanged",
+      (event) => {
 
-      const frame =
+        const frame =
         new Uint8Array(event.target.value.buffer);
 
-      console.log("RX:", frame);
+        console.log("RX:", frame);
 
-      // PUSH_CODE_LOGIN_SUCCESS
-              if (frame[0] === 0x85) {
+        // PUSH_CODE_LOGIN_SUCCESS
+        if (frame[0] === 0x85) {
 
-              if (roomConnectTimer) {
-                clearTimeout(roomConnectTimer);
-                roomConnectTimer = null;
-              }
+          if (roomConnectTimer) {
+            clearTimeout(roomConnectTimer);
+            roomConnectTimer = null;
+          }
 
-              const permissions = frame[1];
+          const permissions = frame[1];
 
-              roomStatus.innerHTML = "";
+          roomStatus.innerHTML = "";
 
-              if (familyStatus) {
-                familyStatus.textContent = "Check-In Connected";
-              }
+          if (familyStatus) {
+            familyStatus.textContent = "Check-In Connected";
+          }
 
-              message("Room login successful.");
+          message("Room login successful.");
 
-              sendRoomPostBtn.disabled = false;
+          sendRoomPostBtn.disabled = false;
 
-              return;
-            }
+          return;
+        }
 
 
-      // PUSH_CODE_LOGIN_FAIL
-      if (frame[0] === 0x86) {
+        // PUSH_CODE_LOGIN_FAIL
+        if (frame[0] === 0x86) {
 
-                  if (roomConnectTimer) {
+          if (roomConnectTimer) {
             clearTimeout(roomConnectTimer);
             roomConnectTimer = null;
           }
@@ -2098,616 +2132,622 @@ function installRoomListener() {
           }
 
           roomMessages.innerHTML = `
-            <div class="empty-chat">
-              <strong>Family check-in room could not be reached.</strong>
-              <br><br>
-              Try again, or move closer to a repeater and retry.
-            </div>
+          <div class="empty-chat">
+          <strong>Family check-in room could not be reached.</strong>
+          <br><br>
+          Try again, or move closer to a repeater and retry.
+          </div>
           `;
 
           sendRoomPostBtn.disabled = true;
 
+        }
+
       }
-
-    }
-  );
-}
-
-function uint32ToLEBytes(value) {
-  return new Uint8Array([
-    value & 0xff,
-    (value >>> 8) & 0xff,
-    (value >>> 16) & 0xff,
-    (value >>> 24) & 0xff
-  ]);
-}
-
-sendRoomPostBtn.onclick = async () => {
-
-  try {
-
-    const text =
-      roomPostText.value.trim();
-
-    if (!text) {
-      sendRoomStatus.innerHTML =
-        "Type a message first.";
-      return;
-    }
-
-    if (!currentRoom) {
-      throw new Error(
-        "Room has not been selected."
       );
     }
 
-    const roomKey =
-      Uint8Array.from(
+    function uint32ToLEBytes(value) {
+      return new Uint8Array([
+      value & 0xff,
+      (value >>> 8) & 0xff,
+      (value >>> 16) & 0xff,
+      (value >>> 24) & 0xff
+      ]);
+    }
+
+  // ==================== SEND A CHECK-IN ROOM MESSAGE ====================
+    sendRoomPostBtn.onclick = async () => {
+
+      try {
+
+        const text =
+        roomPostText.value.trim();
+
+        if (!text) {
+          sendRoomStatus.innerHTML =
+          "Type a message first.";
+          return;
+        }
+
+        if (!currentRoom) {
+          throw new Error(
+          "Room has not been selected."
+          );
+        }
+
+        const roomKey =
+        Uint8Array.from(
         Object.values(currentRoom.publicKey)
-      );
+        );
 
-    const recipientPrefix =
-      roomKey.slice(0, 6);
+        const recipientPrefix =
+        roomKey.slice(0, 6);
 
-    const textBytes =
-      new TextEncoder().encode(text);
+        const textBytes =
+        new TextEncoder().encode(text);
 
-    const timestamp =
-      Math.floor(Date.now() / 1000);
+        const timestamp =
+        Math.floor(Date.now() / 1000);
 
-    /*
-      CMD_SEND_TXT_MSG
+        /*
+        CMD_SEND_TXT_MSG
 
-      byte 0    = 0x02
-      byte 1    = txt_type 0 = plain text
-      byte 2    = attempt 0
-      bytes 3-6 = timestamp
-      bytes 7-12 = first 6 bytes of room public key
-      bytes 13+ = message
-    */
+        byte 0    = 0x02
+        byte 1    = txt_type 0 = plain text
+        byte 2    = attempt 0
+        bytes 3-6 = timestamp
+        bytes 7-12 = first 6 bytes of room public key
+        bytes 13+ = message
+        */
 
-    const frame =
-      new Uint8Array(
+        const frame =
+        new Uint8Array(
         13 + textBytes.length
-      );
+        );
 
-    frame[0] = 0x02;
-    frame[1] = 0x00;
-    frame[2] = 0x00;
+        frame[0] = 0x02;
+        frame[1] = 0x00;
+        frame[2] = 0x00;
 
-    frame.set(
-      uint32ToLEBytes(timestamp),
-      3
-    );
+        frame.set(
+        uint32ToLEBytes(timestamp),
+        3
+        );
 
-    frame.set(
-      recipientPrefix,
-      7
-    );
+        frame.set(
+        recipientPrefix,
+        7
+        );
 
-    frame.set(
-      textBytes,
-      13
-    );
+        frame.set(
+        textBytes,
+        13
+        );
 
-    sendRoomStatus.innerHTML =
-      "📡 Sending...";
+        sendRoomStatus.innerHTML =
+        "📡 Sending...";
 
-    await connection.sendToRadioFrame(frame);
+        await connection.sendToRadioFrame(frame);
 
-    sendRoomStatus.innerHTML = "Sent";
+        sendRoomStatus.innerHTML = "Sent";
 
-    const sentTime = new Date().toLocaleTimeString([], {
-      hour: "numeric",
-      minute: "2-digit"
-    });
+        const sentTime = new Date().toLocaleTimeString([], {
+          hour: "numeric",
+          minute: "2-digit"
+        });
 
-    const outgoing = document.createElement("div");
-    outgoing.className = "message-row outgoing";
-    outgoing.innerHTML = `
-      <div class="message-stack">
+        const outgoing = document.createElement("div");
+        outgoing.className = "message-row outgoing";
+        outgoing.innerHTML = `
+        <div class="message-stack">
         <div class="message-meta"><time>${sentTime}</time></div>
         <div class="bubble">${escapeHtml(text)}</div>
-      </div>
-    `;
-    roomMessages.appendChild(outgoing);
-    roomMessages.scrollTop = roomMessages.scrollHeight;
+        </div>
+        `;
+        roomMessages.appendChild(outgoing);
+        roomMessages.scrollTop = roomMessages.scrollHeight;
 
-    roomPostText.value = "";
-    setTimeout(() => {
-      sendRoomStatus.innerHTML = "";
-    }, 1800);
+        roomPostText.value = "";
+        setTimeout(() => {
+          sendRoomStatus.innerHTML = "";
+        }, 1800);
 
-  }
+      }
 
-  catch(err) {
+      catch(err) {
 
-    console.error(err);
+        console.error(err);
 
-    sendRoomStatus.innerHTML =
-      "❌ " + String(err);
+        sendRoomStatus.innerHTML =
+        "❌ " + String(err);
 
-  }
+      }
 
-};
+    };
 
-function toRadians(deg) {
-  return deg * Math.PI / 180;
-}
+  // ==================== DISTANCE / BEARING MATH ====================
+    function toRadians(deg) {
+      return deg * Math.PI / 180;
+    }
 
-function toDegrees(rad) {
-  return rad * 180 / Math.PI;
-}
+    function toDegrees(rad) {
+      return rad * 180 / Math.PI;
+    }
 
 
-function distanceMiles(lat1, lon1, lat2, lon2) {
+    function distanceMiles(lat1, lon1, lat2, lon2) {
 
-  const R = 3958.8;
+      const R = 3958.8;
 
-  const dLat =
-    toRadians(lat2 - lat1);
+      const dLat =
+      toRadians(lat2 - lat1);
 
-  const dLon =
-    toRadians(lon2 - lon1);
+      const dLon =
+      toRadians(lon2 - lon1);
 
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRadians(lat1)) *
-    Math.cos(toRadians(lat2)) *
-    Math.sin(dLon / 2) ** 2;
+      const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRadians(lat1)) *
+      Math.cos(toRadians(lat2)) *
+      Math.sin(dLon / 2) ** 2;
 
-  const c =
-    2 *
-    Math.atan2(
+      const c =
+      2 *
+      Math.atan2(
       Math.sqrt(a),
       Math.sqrt(1 - a)
-    );
+      );
 
-  return R * c;
-}
-
-
-function bearingDegrees(lat1, lon1, lat2, lon2) {
-
-  const φ1 = toRadians(lat1);
-  const φ2 = toRadians(lat2);
-
-  const λ1 = toRadians(lon1);
-  const λ2 = toRadians(lon2);
-
-  const y =
-    Math.sin(λ2 - λ1) *
-    Math.cos(φ2);
-
-  const x =
-    Math.cos(φ1) *
-    Math.sin(φ2) -
-    Math.sin(φ1) *
-    Math.cos(φ2) *
-    Math.cos(λ2 - λ1);
-
-  return (
-    toDegrees(Math.atan2(y, x)) + 360
-  ) % 360;
-}
+      return R * c;
+    }
 
 
-function bearingName(deg) {
+    function bearingDegrees(lat1, lon1, lat2, lon2) {
 
-  const directions = [
-    "N",
-    "NE",
-    "E",
-    "SE",
-    "S",
-    "SW",
-    "W",
-    "NW"
-  ];
+      const φ1 = toRadians(lat1);
+      const φ2 = toRadians(lat2);
 
-  return directions[
-    Math.round(deg / 45) % 8
-  ];
-}
+      const λ1 = toRadians(lon1);
+      const λ2 = toRadians(lon2);
 
-const GA_BOUNDS = {
-  north: 35.05,
-  south: 30.35,
-  west: -85.65,
-  east: -80.75
-};
+      const y =
+      Math.sin(λ2 - λ1) *
+      Math.cos(φ2);
 
+      const x =
+      Math.cos(φ1) *
+      Math.sin(φ2) -
+      Math.sin(φ1) *
+      Math.cos(φ2) *
+      Math.cos(λ2 - λ1);
 
-function geoToMap(lat, lon) {
-
-  const x =
-    ((lon - GA_BOUNDS.west) /
-    (GA_BOUNDS.east - GA_BOUNDS.west))
-    * 500;
-
-  const y =
-    ((GA_BOUNDS.north - lat) /
-    (GA_BOUNDS.north - GA_BOUNDS.south))
-    * 620;
-
-  return { x, y };
-}
+      return (
+      toDegrees(Math.atan2(y, x)) + 360
+      ) % 360;
+    }
 
 
-function drawLocalRepeaterMap(userLat, userLon, repeaters) {
+    function bearingName(deg) {
 
-  gaMap.innerHTML = "";
+      const directions = [
+      "N",
+      "NE",
+      "E",
+      "SE",
+      "S",
+      "SW",
+      "W",
+      "NW"
+      ];
 
-  // We will use a simple 500 x 500 local map
-  gaMap.setAttribute("viewBox", "0 0 500 500");
+      return directions[
+      Math.round(deg / 45) % 8
+      ];
+    }
 
-  // Outer 5-mile circle
-  const outerCircle =
-    document.createElementNS(
+  // ==================== MAP COORDINATE HELPERS ====================
+    const GA_BOUNDS = {
+      north: 35.05,
+      south: 30.35,
+      west: -85.65,
+      east: -80.75
+    };
+
+
+    function geoToMap(lat, lon) {
+
+      const x =
+      ((lon - GA_BOUNDS.west) /
+      (GA_BOUNDS.east - GA_BOUNDS.west))
+      * 500;
+
+      const y =
+      ((GA_BOUNDS.north - lat) /
+      (GA_BOUNDS.north - GA_BOUNDS.south))
+      * 620;
+
+      return { x, y };
+    }
+
+
+  // ==================== LOCAL REPEATER RADAR MAP ====================
+    function drawLocalRepeaterMap(userLat, userLon, repeaters) {
+
+      gaMap.innerHTML = "";
+
+      // We will use a simple 500 x 500 local map
+      gaMap.setAttribute("viewBox", "0 0 500 500");
+
+      // Outer 5-mile circle
+      const outerCircle =
+      document.createElementNS(
       "http://www.w3.org/2000/svg",
       "circle"
-    );
+      );
 
-  outerCircle.setAttribute("cx", "250");
-  outerCircle.setAttribute("cy", "250");
-  outerCircle.setAttribute("r", "220");
-  outerCircle.setAttribute("fill", "none");
-  outerCircle.setAttribute("stroke", "#31536d");
-  outerCircle.setAttribute("stroke-width", "2");
+      outerCircle.setAttribute("cx", "250");
+      outerCircle.setAttribute("cy", "250");
+      outerCircle.setAttribute("r", "220");
+      outerCircle.setAttribute("fill", "none");
+      outerCircle.setAttribute("stroke", "#31536d");
+      outerCircle.setAttribute("stroke-width", "2");
 
-  gaMap.appendChild(outerCircle);
+      gaMap.appendChild(outerCircle);
 
 
-  // Half-radius circle
-  const innerCircle =
-    document.createElementNS(
+      // Half-radius circle
+      const innerCircle =
+      document.createElementNS(
       "http://www.w3.org/2000/svg",
       "circle"
-    );
+      );
 
-  innerCircle.setAttribute("cx", "250");
-  innerCircle.setAttribute("cy", "250");
-  innerCircle.setAttribute("r", "110");
-  innerCircle.setAttribute("fill", "none");
-  innerCircle.setAttribute("stroke", "#20394f");
-  innerCircle.setAttribute("stroke-width", "1");
+      innerCircle.setAttribute("cx", "250");
+      innerCircle.setAttribute("cy", "250");
+      innerCircle.setAttribute("r", "110");
+      innerCircle.setAttribute("fill", "none");
+      innerCircle.setAttribute("stroke", "#20394f");
+      innerCircle.setAttribute("stroke-width", "1");
 
-  gaMap.appendChild(innerCircle);
+      gaMap.appendChild(innerCircle);
 
 
-  // North marker
-  const north =
-    document.createElementNS(
+      // North marker
+      const north =
+      document.createElementNS(
       "http://www.w3.org/2000/svg",
       "text"
-    );
+      );
 
-  north.setAttribute("x", "250");
-  north.setAttribute("y", "22");
-  north.setAttribute("text-anchor", "middle");
-  north.setAttribute("fill", "#aaa");
-  north.setAttribute("font-size", "18");
+      north.setAttribute("x", "250");
+      north.setAttribute("y", "22");
+      north.setAttribute("text-anchor", "middle");
+      north.setAttribute("fill", "#aaa");
+      north.setAttribute("font-size", "18");
 
-  north.textContent = "N";
+      north.textContent = "N";
 
-  gaMap.appendChild(north);
+      gaMap.appendChild(north);
 
 
-  // User in center
-  const userCircle =
-    document.createElementNS(
+      // User in center
+      const userCircle =
+      document.createElementNS(
       "http://www.w3.org/2000/svg",
       "circle"
-    );
+      );
 
-  userCircle.setAttribute("cx", "250");
-  userCircle.setAttribute("cy", "250");
-  userCircle.setAttribute("r", "9");
-  userCircle.setAttribute("fill", "#1188ff");
-  userCircle.setAttribute("stroke", "#ffffff");
-  userCircle.setAttribute("stroke-width", "3");
+      userCircle.setAttribute("cx", "250");
+      userCircle.setAttribute("cy", "250");
+      userCircle.setAttribute("r", "9");
+      userCircle.setAttribute("fill", "#1188ff");
+      userCircle.setAttribute("stroke", "#ffffff");
+      userCircle.setAttribute("stroke-width", "3");
 
-  gaMap.appendChild(userCircle);
+      gaMap.appendChild(userCircle);
 
 
-  // Only show repeaters within radius
-  const nearby =
-    repeaters.filter(
+      // Only show repeaters within radius
+      const nearby =
+      repeaters.filter(
       r => r.distance <= LOCAL_RADIUS_MILES
-    );
+      );
 
 
-  nearby.forEach(r => {
+      nearby.forEach(r => {
 
-    /*
-      Convert distance+bearing into map coordinates.
+        /*
+        Convert distance+bearing into map coordinates.
 
-      220 pixels = LOCAL_RADIUS_MILES
-    */
+        220 pixels = LOCAL_RADIUS_MILES
+        */
 
-    const distanceRatio =
-      r.distance / LOCAL_RADIUS_MILES;
+        const distanceRatio =
+        r.distance / LOCAL_RADIUS_MILES;
 
-    const pixelDistance =
-      distanceRatio * 220;
+        const pixelDistance =
+        distanceRatio * 220;
 
-    const angle =
-      toRadians(r.bearing);
+        const angle =
+        toRadians(r.bearing);
 
-    const x =
-      250 +
-      Math.sin(angle) *
-      pixelDistance;
+        const x =
+        250 +
+        Math.sin(angle) *
+        pixelDistance;
 
-    const y =
-      250 -
-      Math.cos(angle) *
-      pixelDistance;
+        const y =
+        250 -
+        Math.cos(angle) *
+        pixelDistance;
 
 
-    const dot =
-      document.createElementNS(
+        const dot =
+        document.createElementNS(
         "http://www.w3.org/2000/svg",
         "circle"
-      );
+        );
 
-    dot.setAttribute("cx", x);
-    dot.setAttribute("cy", y);
-    dot.setAttribute("r", "7");
-    dot.setAttribute("fill", "#35d67a");
-    dot.setAttribute("stroke", "#0e3a2a");
-    dot.setAttribute("stroke-width", "3");
+        dot.setAttribute("cx", x);
+        dot.setAttribute("cy", y);
+        dot.setAttribute("r", "7");
+        dot.setAttribute("fill", "#35d67a");
+        dot.setAttribute("stroke", "#0e3a2a");
+        dot.setAttribute("stroke-width", "3");
 
-    gaMap.appendChild(dot);
+        gaMap.appendChild(dot);
 
 
-    // Repeater label
+        // Repeater label
 
-    const label =
-      document.createElementNS(
+        const label =
+        document.createElementNS(
         "http://www.w3.org/2000/svg",
         "text"
-      );
+        );
 
-    label.setAttribute("x", x + 10);
-    label.setAttribute("y", y - 8);
-    label.setAttribute("fill", "#ffffff");
-    label.setAttribute("font-weight", "600");
-    label.setAttribute("font-size", "12");
+        label.setAttribute("x", x + 10);
+        label.setAttribute("y", y - 8);
+        label.setAttribute("fill", "#ffffff");
+        label.setAttribute("font-weight", "600");
+        label.setAttribute("font-size", "12");
 
-    label.textContent =
-      r.name +
-      " " +
-      r.distance.toFixed(1) +
-      " mi";
+        label.textContent =
+        r.name +
+        " " +
+        r.distance.toFixed(1) +
+        " mi";
 
-    gaMap.appendChild(label);
+        gaMap.appendChild(label);
 
-  });
+      });
 
 
-  // Radius label
+      // Radius label
 
-  const radiusLabel =
-    document.createElementNS(
+      const radiusLabel =
+      document.createElementNS(
       "http://www.w3.org/2000/svg",
       "text"
-    );
+      );
 
-  radiusLabel.setAttribute("x", "250");
-  radiusLabel.setAttribute("y", "488");
-  radiusLabel.setAttribute("text-anchor", "middle");
-  radiusLabel.setAttribute("fill", "#777");
-  radiusLabel.setAttribute("font-size", "12");
+      radiusLabel.setAttribute("x", "250");
+      radiusLabel.setAttribute("y", "488");
+      radiusLabel.setAttribute("text-anchor", "middle");
+      radiusLabel.setAttribute("fill", "#777");
+      radiusLabel.setAttribute("font-size", "12");
 
-  radiusLabel.textContent =
-    LOCAL_RADIUS_MILES +
-    " mile radius";
+      radiusLabel.textContent =
+      LOCAL_RADIUS_MILES +
+      " mile radius";
 
-  gaMap.appendChild(radiusLabel);
+      gaMap.appendChild(radiusLabel);
 
-addFamilyToMap(
-  gaMap,
-  userLat,
-  userLon,
-  250,
-  250,
-  210,
-  LOCAL_RADIUS_MILES
-);
-
-
-}
+      addFamilyToMap(
+      gaMap,
+      userLat,
+      userLon,
+      250,
+      250,
+      210,
+      LOCAL_RADIUS_MILES
+      );
 
 
-function addFamilyToMap(
-  svg,
-  userLat,
-  userLon,
-  centerX,
-  centerY,
-  mapRadius,
-  radiusMiles
-) {
+    }
 
-  if (!FAMILY || !familyLocations)
-  return;
 
-    FAMILY.forEach(member => {
+  // ==================== FAMILY LAST-KNOWN LOCATION MAP OVERLAY ====================
+    function addFamilyToMap(
+    svg,
+    userLat,
+    userLon,
+    centerX,
+    centerY,
+    mapRadius,
+    radiusMiles
+    ) {
 
-    const data =
-      familyLocations[member.keyPrefix];
-
-    if (!data)
+      if (!FAMILY || !familyLocations)
       return;
 
-    if (
-      !Number.isFinite(data.lat) ||
-      !Number.isFinite(data.lon)
-    )
-      return;
+      FAMILY.forEach(member => {
+
+        const data =
+        familyLocations[member.keyPrefix];
+
+        if (!data)
+        return;
+
+        if (
+        !Number.isFinite(data.lat) ||
+        !Number.isFinite(data.lon)
+        )
+        return;
 
 
-    // Distance from us to family member
-    const distance =
-      haversineMiles(
+        // Distance from us to family member
+        const distance =
+        haversineMiles(
         userLat,
         userLon,
         data.lat,
         data.lon
-      );
+        );
 
 
-    // Don't plot outside map radius
-    if (distance > radiusMiles)
-      return;
+        // Don't plot outside map radius
+        if (distance > radiusMiles)
+        return;
 
 
-    const bearing =
-      calculateBearing(
+        const bearing =
+        calculateBearing(
         userLat,
         userLon,
         data.lat,
         data.lon
-      );
+        );
 
 
-    /*
-      Convert bearing + distance to
-      position on radar.
+        /*
+        Convert bearing + distance to
+        position on radar.
 
-      0 degrees = North
-      90 degrees = East
-    */
+        0 degrees = North
+        90 degrees = East
+        */
 
-    const angle =
-      bearing * Math.PI / 180;
+        const angle =
+        bearing * Math.PI / 180;
 
-    const radialDistance =
-      (distance / radiusMiles) *
-      mapRadius;
-
-
-    const x =
-      centerX +
-      Math.sin(angle) *
-      radialDistance;
-
-    const y =
-      centerY -
-      Math.cos(angle) *
-      radialDistance;
+        const radialDistance =
+        (distance / radiusMiles) *
+        mapRadius;
 
 
-    /*
-      Family marker
-    */
+        const x =
+        centerX +
+        Math.sin(angle) *
+        radialDistance;
 
-    const dot =
-      document.createElementNS(
+        const y =
+        centerY -
+        Math.cos(angle) *
+        radialDistance;
+
+
+        /*
+        Family marker
+        */
+
+        const dot =
+        document.createElementNS(
         "http://www.w3.org/2000/svg",
         "circle"
-      );
+        );
 
-    dot.setAttribute("cx", x);
-    dot.setAttribute("cy", y);
-    dot.setAttribute("r", "8");
+        dot.setAttribute("cx", x);
+        dot.setAttribute("cy", y);
+        dot.setAttribute("r", "8");
 
-    dot.setAttribute(
-      "class",
-      "family-map-dot"
-    );
+        dot.setAttribute(
+        "class",
+        "family-map-dot"
+        );
 
-    svg.appendChild(dot);
+        svg.appendChild(dot);
 
 
-    /*
-      Family name
-    */
+        /*
+        Family name
+        */
 
-    const label =
-      document.createElementNS(
+        const label =
+        document.createElementNS(
         "http://www.w3.org/2000/svg",
         "text"
-      );
+        );
 
-    label.setAttribute(
-      "x",
-      x + 12
-    );
+        label.setAttribute(
+        "x",
+        x + 12
+        );
 
-    label.setAttribute(
-      "y",
-      y - 3
-    );
+        label.setAttribute(
+        "y",
+        y - 3
+        );
 
-    label.setAttribute(
-      "class",
-      "family-map-label"
-    );
+        label.setAttribute(
+        "class",
+        "family-map-label"
+        );
 
-    label.textContent =
-      member.name;
+        label.textContent =
+        member.name;
 
-    svg.appendChild(label);
+        svg.appendChild(label);
 
 
-    /*
-      Distance + direction
-    */
+        /*
+        Distance + direction
+        */
 
-    const detail =
-      document.createElementNS(
+        const detail =
+        document.createElementNS(
         "http://www.w3.org/2000/svg",
         "text"
-      );
+        );
 
-    detail.setAttribute(
-      "x",
-      x + 12
-    );
+        detail.setAttribute(
+        "x",
+        x + 12
+        );
 
-    detail.setAttribute(
-      "y",
-      y + 12
-    );
+        detail.setAttribute(
+        "y",
+        y + 12
+        );
 
-    detail.setAttribute(
-      "class",
-      "family-map-detail"
-    );
+        detail.setAttribute(
+        "class",
+        "family-map-detail"
+        );
 
-    detail.textContent =
-      `${distance.toFixed(1)} mi ${bearingName(bearing)}`;
+        detail.textContent =
+        `${distance.toFixed(1)} mi ${bearingName(bearing)}`;
 
-    svg.appendChild(detail);
+        svg.appendChild(detail);
 
-  });
-}
-
-
-mapRepeatersBtn.onclick = async () => {
-
-  try {
-
-    mapPanel.style.display = "block";
-
-    gpsStatus.innerHTML =
-      "Reading repeater locations...";
-
-    const contacts =
-      await connection.getContacts();
+      });
+    }
 
 
-    const repeaters =
-      contacts
+  // ==================== BUILD REPEATER MAP + REPEATER LIST ====================
+    mapRepeatersBtn.onclick = async () => {
+
+      try {
+
+        mapPanel.style.display = "block";
+
+        gpsStatus.innerHTML =
+        "Reading repeater locations...";
+
+        const contacts =
+        await connection.getContacts();
+
+
+        const repeaters =
+        contacts
         .filter(c => {
 
           if (c.type !== 2)
-            return false;
+          return false;
 
           if (!c.advLat || !c.advLon)
-            return false;
+          return false;
 
           return true;
 
@@ -2717,124 +2757,124 @@ mapRepeatersBtn.onclick = async () => {
           return {
 
             name:
-              c.advName ||
-              "Unnamed repeater",
+            c.advName ||
+            "Unnamed repeater",
 
             lat:
-              c.advLat / 1000000,
+            c.advLat / 1000000,
 
             lon:
-              c.advLon / 1000000,
+            c.advLon / 1000000,
 
             lastAdvert:
-              c.lastAdvert
+            c.lastAdvert
 
           };
 
         });
 
 
-    if (repeaters.length === 0) {
+        if (repeaters.length === 0) {
 
-      gpsStatus.innerHTML =
-        "No repeaters with coordinates found.";
+          gpsStatus.innerHTML =
+          "No repeaters with coordinates found.";
 
-      return;
+          return;
 
-    }
-
-
-    gpsStatus.innerHTML =
-      "Getting iPhone location...";
+        }
 
 
-    navigator.geolocation.getCurrentPosition(
+        gpsStatus.innerHTML =
+        "Getting iPhone location...";
 
-      position => {
 
-        const userLat =
+        navigator.geolocation.getCurrentPosition(
+
+        position => {
+
+          const userLat =
           position.coords.latitude;
 
-        const userLon =
+          const userLon =
           position.coords.longitude;
 
 
-        repeaters.forEach(r => {
+          repeaters.forEach(r => {
 
-          r.distance =
+            r.distance =
             distanceMiles(
-              userLat,
-              userLon,
-              r.lat,
-              r.lon
+            userLat,
+            userLon,
+            r.lat,
+            r.lon
             );
 
-          r.bearing =
+            r.bearing =
             bearingDegrees(
-              userLat,
-              userLon,
-              r.lat,
-              r.lon
+            userLat,
+            userLon,
+            r.lat,
+            r.lon
             );
 
-        });
+          });
 
 
-        repeaters.sort(
+          repeaters.sort(
           (a, b) =>
-            a.distance - b.distance
-        );
+          a.distance - b.distance
+          );
 
 
-        const nearbyRepeaters =
+          const nearbyRepeaters =
           repeaters.filter(
-            r => r.distance <= LOCAL_RADIUS_MILES
+          r => r.distance <= LOCAL_RADIUS_MILES
           );
 
           let listHtml = "";
 
-if (nearbyRepeaters.length === 0) {
+          if (nearbyRepeaters.length === 0) {
 
-  listHtml = `
-    <div class="repeater-empty">
-      No known repeaters within
-      ${LOCAL_RADIUS_MILES} miles.
-    </div>
-  `;
+            listHtml = `
+            <div class="repeater-empty">
+            No known repeaters within
+            ${LOCAL_RADIUS_MILES} miles.
+            </div>
+            `;
 
-} else {
+          } else {
 
-  nearbyRepeaters.forEach(r => {
+            nearbyRepeaters.forEach(r => {
 
-    const direction =
-      bearingName(r.bearing);
+              const direction =
+              bearingName(r.bearing);
 
-    listHtml += `
-      <div class="repeater-list-row">
+              listHtml += `
+              <div class="repeater-list-row">
 
-        <div class="repeater-list-name">
-          ${escapeHtml(r.name)}
-        </div>
+              <div class="repeater-list-name">
+              ${escapeHtml(r.name)}
+              </div>
 
-        <div class="repeater-list-distance">
-          ${r.distance.toFixed(1)} mi
-        </div>
+              <div class="repeater-list-distance">
+              ${r.distance.toFixed(1)} mi
+              </div>
 
-        <div class="repeater-list-direction">
-          ${direction}
-        </div>
+              <div class="repeater-list-direction">
+              ${direction}
+              </div>
 
-      </div>
-    `;
+              </div>
+              `;
 
-  });
+            });
 
-}
+          }
 
-localRepeaterList.innerHTML = listHtml;
+          localRepeaterList.innerHTML = listHtml;
 
 
-        gpsStatus.innerHTML =
+          gpsStatus.innerHTML =
           "📍 " +
           nearbyRepeaters.length +
           " known repeaters within " +
@@ -2842,449 +2882,456 @@ localRepeaterList.innerHTML = listHtml;
           " miles.";
 
 
-        drawLocalRepeaterMap(
+          drawLocalRepeaterMap(
           userLat,
           userLon,
           repeaters
-        );
-        mapPanel.style.display = "block";
+          );
+          mapPanel.style.display = "block";
 
 
-        let html =
+          let html =
           "<h3>Nearest Repeaters</h3>";
 
 
-        repeaters
-         .filter(r => r.distance <= LOCAL_RADIUS_MILES)
+          repeaters
+          .filter(r => r.distance <= LOCAL_RADIUS_MILES)
           .slice(0, 10)
 
-          
+
 
 
           .forEach((r, index) => {
 
             const direction =
-              bearingName(r.bearing);
+            bearingName(r.bearing);
 
             const lastSeen =
-              r.lastAdvert
-                ? new Date(
-                    r.lastAdvert * 1000
-                  ).toLocaleDateString()
-                : "Unknown";
+            r.lastAdvert
+            ? new Date(
+            r.lastAdvert * 1000
+            ).toLocaleDateString()
+            : "Unknown";
 
 
             html += `
-              <div style="
-                padding:12px;
-                border-bottom:1px solid #444;
-                text-align:left;
-              ">
+            <div style="
+            padding:12px;
+            border-bottom:1px solid #444;
+            text-align:left;
+            ">
 
-                <strong>
-                  ${index + 1}. ${r.name}
-                </strong>
+            <strong>
+            ${index + 1}. ${r.name}
+            </strong>
 
-                <br>
+            <br>
 
-                ${r.distance.toFixed(1)}
-                miles
+            ${r.distance.toFixed(1)}
+            miles
 
-                ${direction}
+            ${direction}
 
-                (${Math.round(r.bearing)}°)
+            (${Math.round(r.bearing)}°)
 
-                <br>
+            <br>
 
-                <small>
-                  Last advert:
-                  ${lastSeen}
-                </small>
+            <small>
+            Last advert:
+            ${lastSeen}
+            </small>
 
-              </div>
+            </div>
             `;
 
           });
 
 
-        nearestRepeaters.innerHTML =
+          nearestRepeaters.innerHTML =
           html;
 
-      },
+        },
 
-      error => {
+        error => {
 
-        console.error(error);
+          console.error(error);
 
-        gpsStatus.innerHTML =
+          gpsStatus.innerHTML =
           "❌ GPS error: " +
           error.message;
 
-      },
+        },
 
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 30000
+        {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 30000
+        }
+
+        );
+
       }
 
-    );
+      catch(err) {
 
-  }
+        console.error(err);
 
-  catch(err) {
+        gpsStatus.innerHTML =
+        "❌ " + String(err);
 
-    console.error(err);
+      }
 
-    gpsStatus.innerHTML =
-      "❌ " + String(err);
+    };
 
-  }
+  // ==================== MESHC0RE CONTACT PATH / BATTERY COMMANDS ====================
+    async function resetContactPath(contact) {
 
-};
-
-async function resetContactPath(contact) {
-
-  const publicKey =
-    Uint8Array.from(
+      const publicKey =
+      Uint8Array.from(
       Object.values(contact.publicKey)
-    );
-
-  const frame =
-    new Uint8Array(1 + 32);
-
-  frame[0] = 0x0D; // CMD_RESET_PATH
-
-  frame.set(publicKey, 1);
-
-  await connection.sendToRadioFrame(frame);
-}
-
-
-async function requestBattery() {
-
-  await connection.sendToRadioFrame(
-    new Uint8Array([0x14])
-  );
-
-}
-
-function installBatteryListener() {
-
-  connection.txCharacteristic.addEventListener(
-    "characteristicvaluechanged",
-    (event) => {
+      );
 
       const frame =
-        new Uint8Array(event.target.value.buffer);
+      new Uint8Array(1 + 32);
 
-      if (frame[0] !== 0x0C)
-        return;
+      frame[0] = 0x0D; // CMD_RESET_PATH
 
-      if (frame.length < 4)
-        return;
+      frame.set(publicKey, 1);
 
-      const millivolts =
-        frame[1] |
-        (frame[2] << 8);
+      await connection.sendToRadioFrame(frame);
+    }
 
-      const batteryPercent =
-        frame[3];
 
-      const volts =
-        millivolts / 1000;
+    async function requestBattery() {
 
-      batteryStatus.textContent =
-        batteryPercent + "%";
-
-      if (batteryVolts) {
-        batteryVolts.textContent = volts.toFixed(2) + " V";
-      }
-
-      console.log(
-        "Battery:",
-        batteryPercent + "%",
-        volts.toFixed(3) + "V"
+      await connection.sendToRadioFrame(
+      new Uint8Array([0x14])
       );
 
     }
-  );
 
-}
+  // ==================== BATTERY RESPONSE LISTENER ====================
+    function installBatteryListener() {
 
-const radioStatusCard = document.getElementById("radioStatusCard");
+      connection.txCharacteristic.addEventListener(
+      "characteristicvaluechanged",
+      (event) => {
 
-radioStatusCard.addEventListener("click", () => {
-  if (!connectBtn.disabled) connectBtn.click();
-});
+        const frame =
+        new Uint8Array(event.target.value.buffer);
 
-radioStatusCard.addEventListener("keydown", (event) => {
-  if ((event.key === "Enter" || event.key === " ") && !connectBtn.disabled) {
-    event.preventDefault();
-    connectBtn.click();
-  }
-});
+        if (frame[0] !== 0x0C)
+        return;
 
-// Also make the map itself re-run the GPS/repeater calculation when tapped.
-document.querySelector(".map-shell").addEventListener("click", (event) => {
-  if (event.target.closest("#radioStatusCard")) return;
-  if (!mapRepeatersBtn.disabled) mapRepeatersBtn.click();
-});
+        if (frame.length < 4)
+        return;
 
+        const millivolts =
+        frame[1] |
+        (frame[2] << 8);
 
-function getFamilyMember(keyPrefix) {
+        const batteryPercent =
+        frame[3];
 
-  const key =
-    String(keyPrefix || "").toLowerCase();
+        const volts =
+        millivolts / 1000;
 
-  return FAMILY.find(member =>
-    key.startsWith(member.keyPrefix.toLowerCase()) ||
-    member.keyPrefix.toLowerCase().startsWith(key)
-  );
-}
+        batteryStatus.textContent =
+        batteryPercent + "%";
 
+        if (batteryVolts) {
+          batteryVolts.textContent = volts.toFixed(2) + " V";
+        }
 
-function formatLastSeen(timestamp) {
-
-  if (!timestamp)
-    return "No check-in received";
-
-  const seconds =
-    Math.max(
-      0,
-      Math.floor(Date.now() / 1000) - timestamp
-    );
-
-  if (seconds < 60)
-    return "Checked in just now";
-
-  const minutes =
-    Math.floor(seconds / 60);
-
-  if (minutes < 60)
-    return `Checked in ${minutes} min ago`;
-
-  const hours =
-    Math.floor(minutes / 60);
-
-  if (hours < 24)
-    return `Checked in ${hours} hr${hours === 1 ? "" : "s"} ago`;
-
-  const days =
-    Math.floor(hours / 24);
-
-  return `Last check-in ${days} day${days === 1 ? "" : "s"} ago`;
-}
-
-
-function renderFamilyStatus() {
-
-  let html = "";
-
-  FAMILY.forEach(member => {
-
-    const data =
-      familyLocations[member.keyPrefix];
-
-    let locationText =
-      "Location unknown";
-
-    if (
-      data &&
-      myPosition &&
-      Number.isFinite(data.lat) &&
-      Number.isFinite(data.lon)
-    ) {
-
-      const distance =
-        haversineMiles(
-          myPosition.lat,
-          myPosition.lon,
-          data.lat,
-          data.lon
+        console.log(
+        "Battery:",
+        batteryPercent + "%",
+        volts.toFixed(3) + "V"
         );
 
-      const bearing =
-        calculateBearing(
-          myPosition.lat,
-          myPosition.lon,
-          data.lat,
-          data.lon
-        );
+      }
+      );
 
-      locationText =
-        `${distance.toFixed(1)} mi ${bearingName(bearing)}`;
     }
 
-    html += `
-      <div class="family-row">
+  // ==================== VISIBLE UI EVENT HANDLERS ====================
+    const radioStatusCard = document.getElementById("radioStatusCard");
+
+    radioStatusCard.addEventListener("click", () => {
+      if (!connectBtn.disabled) connectBtn.click();
+    });
+
+    radioStatusCard.addEventListener("keydown", (event) => {
+      if ((event.key === "Enter" || event.key === " ") && !connectBtn.disabled) {
+        event.preventDefault();
+        connectBtn.click();
+      }
+    });
+
+    // Also make the map itself re-run the GPS/repeater calculation when tapped.
+    document.querySelector(".map-shell").addEventListener("click", (event) => {
+      if (event.target.closest("#radioStatusCard")) return;
+      if (!mapRepeatersBtn.disabled) mapRepeatersBtn.click();
+    });
+
+
+  // ==================== FAMILY STATUS / ID MATCHING ====================
+    function getFamilyMember(keyPrefix) {
+
+      const key =
+      String(keyPrefix || "").toLowerCase();
+
+      return FAMILY.find(member =>
+      key.startsWith(member.keyPrefix.toLowerCase()) ||
+      member.keyPrefix.toLowerCase().startsWith(key)
+      );
+    }
+
+
+    function formatLastSeen(timestamp) {
+
+      if (!timestamp)
+      return "No check-in received";
+
+      const seconds =
+      Math.max(
+      0,
+      Math.floor(Date.now() / 1000) - timestamp
+      );
+
+      if (seconds < 60)
+      return "Checked in just now";
+
+      const minutes =
+      Math.floor(seconds / 60);
+
+      if (minutes < 60)
+      return `Checked in ${minutes} min ago`;
+
+      const hours =
+      Math.floor(minutes / 60);
+
+      if (hours < 24)
+      return `Checked in ${hours} hr${hours === 1 ? "" : "s"} ago`;
+
+      const days =
+      Math.floor(hours / 24);
+
+      return `Last check-in ${days} day${days === 1 ? "" : "s"} ago`;
+    }
+
+
+    function renderFamilyStatus() {
+
+      let html = "";
+
+      FAMILY.forEach(member => {
+
+        const data =
+        familyLocations[member.keyPrefix];
+
+        let locationText =
+        "Location unknown";
+
+        if (
+        data &&
+        myPosition &&
+        Number.isFinite(data.lat) &&
+        Number.isFinite(data.lon)
+        ) {
+
+          const distance =
+          haversineMiles(
+          myPosition.lat,
+          myPosition.lon,
+          data.lat,
+          data.lon
+          );
+
+          const bearing =
+          calculateBearing(
+          myPosition.lat,
+          myPosition.lon,
+          data.lat,
+          data.lon
+          );
+
+          locationText =
+          `${distance.toFixed(1)} mi ${bearingName(bearing)}`;
+        }
+
+        html += `
+        <div class="family-row">
 
         <div class="family-dot ${
-          data ? "family-known" : ""
-        }"></div>
+        data ? "family-known" : ""
+      }"></div>
 
-        <div class="family-info">
+      <div class="family-info">
 
-          <div class="family-name">
-            ${escapeHtml(member.name)}
-          </div>
+      <div class="family-name">
+      ${escapeHtml(member.name)}
+      </div>
 
-          <div class="family-time">
-            ${
-              data
-                ? formatLastSeen(data.timestamp)
-                : "No check-in received"
-            }
-          </div>
-
-        </div>
-
-        <div class="family-location">
-          ${locationText}
-        </div>
+      <div class="family-time">
+      ${
+        data
+        ? formatLastSeen(data.timestamp)
+        : "No check-in received"
+      }
+      </div>
 
       </div>
-    `;
-  });
 
-  familyList.innerHTML = html;
-}
+      <div class="family-location">
+      ${locationText}
+      </div>
 
-async function sendLocationCheckIn() {
+      </div>
+      `;
+    });
 
-  if (!currentRoom)
+    familyList.innerHTML = html;
+  }
+
+  // ==================== AUTOMATIC FAMILY LOCATION CHECK-IN ====================
+  async function sendLocationCheckIn() {
+
+    if (!currentRoom)
     return;
 
-  try {
+    try {
 
-    const position =
+      const position =
       await new Promise((resolve, reject) => {
 
         navigator.geolocation.getCurrentPosition(
-          resolve,
-          reject,
-          {
-            enableHighAccuracy: true,
-            timeout: 8000,
-            maximumAge: 60000
-          }
+        resolve,
+        reject,
+        {
+          enableHighAccuracy: true,
+          timeout: 8000,
+          maximumAge: 60000
+        }
         );
 
       });
 
-    const lat =
+      const lat =
       position.coords.latitude;
 
-    const lon =
+      const lon =
       position.coords.longitude;
 
-    myPosition = {
-      lat,
-      lon
-    };
+      myPosition = {
+        lat,
+        lon
+      };
 
-    const timestamp =
+      const timestamp =
       Math.floor(Date.now() / 1000);
 
-    const text =
+      const text =
       `${FAMILY_STATUS_PREFIX}${timestamp}|${lat.toFixed(6)}|${lon.toFixed(6)}`;
 
-    await sendRoomText(text);
+      await sendRoomText(text);
 
-    console.log(
+      console.log(
       "Family location check-in sent:",
       text
-    );
+      );
 
-  } catch (err) {
+    } catch (err) {
 
-    console.log(
+      console.log(
       "Location check-in unavailable:",
       err
-    );
+      );
 
-  }
-}
-
-function startLiveRoomPolling() {
-
-  if (liveRoomPollTimer) {
-    clearInterval(liveRoomPollTimer);
+    }
   }
 
-  liveRoomPollTimer = setInterval(async () => {
+  // ==================== LIVE ROOM POLLING ====================
+  function startLiveRoomPolling() {
 
-    if (!connection || !currentRoom) {
-      return;
+    if (liveRoomPollTimer) {
+      clearInterval(liveRoomPollTimer);
     }
 
-    // Don't interfere with an existing request
-    if (roomRequestPending) {
-      return;
-    }
+    liveRoomPollTimer = setInterval(async () => {
 
-    try {
-      await requestNextMessage();
-    }
-    catch (err) {
-      console.log(
+      if (!connection || !currentRoom) {
+        return;
+      }
+
+      // Don't interfere with an existing request
+      if (roomRequestPending) {
+        return;
+      }
+
+      try {
+        await requestNextMessage();
+      }
+      catch (err) {
+        console.log(
         "Live room poll failed:",
         err
-      );
-    }
+        );
+      }
 
-  }, 3000);
-}
+    }, 3000);
+  }
 
 
 
-async function sendRoomText(text) {
+  // ==================== LOW-LEVEL ROOM TEXT TRANSMISSION ====================
+  async function sendRoomText(text) {
 
-  if (!currentRoom)
+    if (!currentRoom)
     throw new Error("No room selected");
 
-  const textBytes =
+    const textBytes =
     new TextEncoder().encode(text);
 
-  const publicKey =
+    const publicKey =
     Uint8Array.from(
-      Object.values(currentRoom.publicKey)
+    Object.values(currentRoom.publicKey)
     );
 
-  const timestamp =
+    const timestamp =
     Math.floor(Date.now() / 1000);
 
-  const frame =
+    const frame =
     new Uint8Array(
-      13 + textBytes.length
+    13 + textBytes.length
     );
 
-  frame[0] = 0x02; // CMD_SEND_TXT_MSG
-  frame[1] = 0;
-  frame[2] = 0;
+    frame[0] = 0x02; // CMD_SEND_TXT_MSG
+    frame[1] = 0;
+    frame[2] = 0;
 
-  const view =
+    const view =
     new DataView(frame.buffer);
 
-  view.setUint32(
+    view.setUint32(
     3,
     timestamp,
     true
-  );
+    );
 
-  frame.set(
+    frame.set(
     publicKey.slice(0, 6),
     7
-  );
+    );
 
-  frame.set(
+    frame.set(
     textBytes,
     13
-  );
+    );
 
-  await connection.sendToRadioFrame(frame);
-}
+    await connection.sendToRadioFrame(frame);
+  }
 
   </script>
-</body>
+  </body>
 </html>
