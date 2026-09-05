@@ -753,7 +753,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin3</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin4</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -2148,15 +2148,7 @@
 
             sendRoomPostBtn.disabled = false;
 
-            // Start pulling retained room messages.
-            roomRequestPending = false;
-
-            requestNextMessage().catch(err => {
-              console.error(
-                "Initial room message request failed:",
-                err
-              );
-            });
+            
 
             return;
           }
@@ -3337,40 +3329,41 @@
     new TextEncoder().encode(text);
 
     const publicKey =
-    Uint8Array.from(
-    Object.values(currentRoom.publicKey)
-    );
+  Uint8Array.from(
+    Object.values(room.publicKey)
+  );
 
-    const timestamp =
-    Math.floor(Date.now() / 1000);
+const password =
+  new TextEncoder().encode(
+    CHECKIN_ROOM_PASSWORD
+  );
 
+    // CMD_SEND_ANON_REQ = 0x39
+    // Force sync_since = 0 so we get retained history.
     const frame =
-    new Uint8Array(
-    13 + textBytes.length
-    );
+      new Uint8Array(
+        1 +
+        32 +
+        4 +
+        password.length
+      );
 
-    frame[0] = 0x02; // CMD_SEND_TXT_MSG
-    frame[1] = 0;
-    frame[2] = 0;
+    let pos = 0;
 
-    const view =
-    new DataView(frame.buffer);
+    frame[pos++] = 0x39;
 
-    view.setUint32(
-    3,
-    timestamp,
-    true
-    );
+    // Full room public key
+    frame.set(publicKey, pos);
+    pos += 32;
 
-    frame.set(
-    publicKey.slice(0, 6),
-    7
-    );
+    // sync_since = 0
+    frame[pos++] = 0x00;
+    frame[pos++] = 0x00;
+    frame[pos++] = 0x00;
+    frame[pos++] = 0x00;
 
-    frame.set(
-    textBytes,
-    13
-    );
+    // Room password
+    frame.set(password, pos);
 
     await connection.sendToRadioFrame(frame);
   }
