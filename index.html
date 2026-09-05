@@ -753,7 +753,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin4</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin5</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -1563,37 +1563,49 @@
         */
 
        // MeshCore CMD_SEND_LOGIN = 26 decimal = 0x1A
-        //
-        // Layout:
-        // byte 0      command
-        // bytes 1-32  room public key
-        // bytes 33+   password
+      // Request the room and force retained history from the beginning.
+      //
+      // CMD_SEND_ANON_REQ = 0x39
+      // Layout:
+      // byte 0      command
+      // bytes 1-32  full room public key
+      // bytes 33-36 sync_since
+      // bytes 37+   password
 
-        const frame =
-          new Uint8Array(
-            1 +
-            32 +
-            password.length
-          );
-
-        let pos = 0;
-
-        frame[pos++] = 0x1A;
-
-        frame.set(publicKey, pos);
-        pos += 32;
-
-        frame.set(password, pos);
-
-        console.log(
-          "ROOM: sending proper MeshCore login",
-          {
-            room: room.advName,
-            frameLength: frame.length
-          }
+      const frame =
+        new Uint8Array(
+          1 +
+          32 +
+          4 +
+          password.length
         );
 
-        await connection.sendToRadioFrame(frame);
+      let pos = 0;
+
+      frame[pos++] = 0x39;
+
+      // Full 32-byte room public key
+      frame.set(publicKey, pos);
+      pos += 32;
+
+      // sync_since = 0
+      frame[pos++] = 0x00;
+      frame[pos++] = 0x00;
+      frame[pos++] = 0x00;
+      frame[pos++] = 0x00;
+
+      // Password
+      frame.set(password, pos);
+
+      console.log(
+        "ROOM: requesting complete retained history",
+        {
+          room: room.advName,
+          frameLength: frame.length
+        }
+      );
+
+      await connection.sendToRadioFrame(frame);
 
         if (roomConnectTimer) {
           clearTimeout(roomConnectTimer);
@@ -2148,7 +2160,18 @@
 
             sendRoomPostBtn.disabled = false;
 
-            
+            roomRequestPending = false;
+
+            console.log(
+              "ROOM: login successful - requesting first message"
+            );
+
+            requestNextMessage().catch(err => {
+              console.error(
+                "Initial room message request failed:",
+                err
+              );
+            });
 
             return;
           }
