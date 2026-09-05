@@ -1264,14 +1264,20 @@ await requestBattery();
   roomBtn.disabled = false;
   readRoomBtn.disabled = false;
 
-  // WellsLink family flow: populate local map and connect to the family room automatically.
-  setTimeout(() => {
-    if (!mapRepeatersBtn.disabled) mapRepeatersBtn.click();
-  }, 250);
+// Connect to the important thing first: Check-In.
+setTimeout(() => {
+  if (!roomBtn.disabled) {
+    roomBtn.click();
+  }
+}, 500);
 
-  setTimeout(() => {
-    if (!roomBtn.disabled) roomBtn.click();
-  }, 700);
+// Let the room setup finish before asking
+// the radio for contacts again for the map.
+setTimeout(() => {
+  if (!mapRepeatersBtn.disabled) {
+    mapRepeatersBtn.click();
+  }
+}, 5000);
 
 });
 
