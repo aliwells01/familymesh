@@ -1596,39 +1596,43 @@ await connection.sendCommandSendLogin(
 
   // Room server says login succeeded
   connection.on(
-    Constants.PushCodes.LoginSuccess,
-    async (data) => {
+  Constants.PushCodes.LoginSuccess,
+  async (data) => {
 
-      console.log(
-        "ROOM LOGIN SUCCESS:",
-        data
-      );
+    console.log(
+      "ROOM LOGIN SUCCESS:",
+      data
+    );
 
-      if (roomConnectTimer) {
-        clearTimeout(roomConnectTimer);
-        roomConnectTimer = null;
-      }
-
-      familyStatus.textContent =
-        "Check-In Connected";
-
-      roomMessages.innerHTML = `
-        <div class="empty-chat">
-          Waiting for room messages...
-        </div>
-      `;
-
-      sendRoomPostBtn.disabled = false;
-
-      /*
-        Do NOT immediately assume history
-        is already in the companion queue.
-
-        The room server pushes messages
-        asynchronously after login.
-      */
+    if (roomConnectTimer) {
+      clearTimeout(roomConnectTimer);
+      roomConnectTimer = null;
     }
-  );
+
+    familyStatus.textContent =
+      "Check-In Connected";
+
+    roomMessages.innerHTML = `
+      <div class="empty-chat">
+        Loading family messages...
+      </div>
+    `;
+
+    sendRoomPostBtn.disabled = false;
+
+    // Give the login/path return time to settle.
+    await new Promise(resolve =>
+      setTimeout(resolve, 1000)
+    );
+
+    // Ask the room server to rewind our
+    // sync position and resend retained posts.
+    await requestRoomHistory(
+      currentRoom,
+      1
+    );
+  }
+);
 
 
   // Companion tells us a message is ready
@@ -1751,6 +1755,43 @@ let authorPrefix = null;
       }
     }
   );
+}
+
+async function requestRoomHistory(room, since = 1) {
+
+  const publicKey = Uint8Array.from(
+    Object.values(room.publicKey)
+  );
+
+  /*
+    CMD_SEND_BINARY_REQ = 50 / 0x32
+
+    Frame:
+      byte 0       command = 50
+      bytes 1-32   room public key
+      byte 33      REQ_TYPE_KEEP_ALIVE = 0x02
+      bytes 34-37  forceSince uint32 LE
+  */
+
+  const frame = new Uint8Array(38);
+
+  frame[0] = 0x32;
+
+  frame.set(publicKey, 1);
+
+  frame[33] = 0x02;
+
+  frame[34] = since & 0xff;
+  frame[35] = (since >>> 8) & 0xff;
+  frame[36] = (since >>> 16) & 0xff;
+  frame[37] = (since >>> 24) & 0xff;
+
+  console.log(
+    "ROOM: requesting history since",
+    since
+  );
+
+  await connection.sendToRadioFrame(frame);
 }
 
 
