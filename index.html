@@ -753,7 +753,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin8</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin9</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -3060,7 +3060,10 @@ async function requestRoomHistory(room, since = 1) {
     await connection.sendToRadioFrame(frame);
   }
 loadRoomPosts();
-displayRoomPosts();
+
+if (roomPosts.length > 0) {
+  displayRoomPosts();
+}
   </script>
   </body>
 </html>
