@@ -753,7 +753,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin5</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin6</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -1507,12 +1507,12 @@
 
         // Always discard any learned direct route before Check-In so the
         // companion can use flood routing again when the radio has moved.
-        message("Resetting room path to flood...");
+        /* message("Resetting room path to flood...");
         await resetContactPath(room);
 
         // Give the companion a moment to apply the path reset before login.
         await new Promise(resolve => setTimeout(resolve, 500));
-
+ */
         const publicKey = Uint8Array.from(
           Object.values(room.publicKey)
         );
