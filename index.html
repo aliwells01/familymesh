@@ -753,7 +753,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin2</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin3</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -1691,21 +1691,27 @@ await connection.sendCommandSendLogin(
         at the beginning of msg.text.
       */
 
-      let text = msg.text;
-      let authorPrefix = null;
+              let text;
+          let authorPrefix = null;
 
-      if (msg.txtType === 2) {
+          if (msg.txtType === 2) {
+            const data = msg.text instanceof Uint8Array
+              ? msg.text
+              : new Uint8Array(msg.text);
 
-        /*
-          meshcore.js currently exposes
-          the signed prefix as part of
-          the returned text bytes/string.
+            authorPrefix = bytesToHex(
+              data.slice(0, 4)
+            );
 
-          We'll verify exact formatting
-          from the first received room post.
-        */
-
-      }
+            text = new TextDecoder().decode(
+              data.slice(4)
+            );
+          } else {
+            text =
+              typeof msg.text === "string"
+                ? msg.text
+                : new TextDecoder().decode(msg.text);
+          }
 
 
       roomPosts.push({
