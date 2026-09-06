@@ -753,7 +753,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin9</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin1</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -1980,7 +1980,7 @@ async function requestRoomHistory(room, since = 1) {
         frame[2] = 0x00;
 
         frame.set(
-        uint32ToLEBytes(timestamp),
+        uint32ToLE(timestamp),
         3
         );
 
@@ -2796,17 +2796,26 @@ async function requestRoomHistory(room, since = 1) {
         return;
 
         const millivolts =
-        frame[1] |
-        (frame[2] << 8);
+            frame[1] |
+            (frame[2] << 8);
 
-        const batteryPercent =
-        frame[3];
+          const volts =
+            millivolts / 1000;
 
-        const volts =
-        millivolts / 1000;
+          // Generic single-cell Li-ion estimate,
+          // matching the usual MeshCore-style approach.
+          const batteryPercent = Math.max(
+            0,
+            Math.min(
+              100,
+              Math.round(
+                ((millivolts - 3000) / 1200) * 100
+              )
+            )
+          );
 
-        batteryStatus.textContent =
-        batteryPercent + "%";
+          batteryStatus.textContent =
+            batteryPercent + "%";
 
         if (batteryVolts) {
           batteryVolts.textContent = volts.toFixed(2) + " V";
@@ -3046,7 +3055,7 @@ async function requestRoomHistory(room, since = 1) {
     frame[2] = 0x00;
 
     frame.set(
-      uint32ToLEBytes(timestamp),
+      uint32ToLE(timestamp),
       3
     );
 
