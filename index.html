@@ -753,7 +753,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin7</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin8</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -966,6 +966,33 @@
       width: 500,
       height: 620
     };
+
+    const ROOM_HISTORY_KEY = "meshkin_checkin_history";
+
+    function saveRoomPosts() {
+      try {
+        localStorage.setItem(
+          ROOM_HISTORY_KEY,
+          JSON.stringify(roomPosts)
+        );
+      } catch (err) {
+        console.error("Could not save room history:", err);
+      }
+    }
+
+    function loadRoomPosts() {
+      try {
+        const saved = JSON.parse(
+          localStorage.getItem(ROOM_HISTORY_KEY) || "[]"
+        );
+
+        if (Array.isArray(saved)) {
+          roomPosts = saved;
+        }
+      } catch (err) {
+        console.error("Could not load room history:", err);
+      }
+    }
 
 
   // ==================== FAMILY RADIO IDENTITIES ====================
@@ -1610,13 +1637,9 @@ await connection.sendCommandSendLogin(
     }
 
     familyStatus.textContent =
-      "Check-In Connected";
+    "Check-In Connected";
 
-    roomMessages.innerHTML = `
-      <div class="empty-chat">
-        Loading family messages...
-      </div>
-    `;
+     displayRoomPosts();
 
     sendRoomPostBtn.disabled = false;
 
@@ -1627,10 +1650,13 @@ await connection.sendCommandSendLogin(
 
     // Ask the room server to rewind our
     // sync position and resend retained posts.
-    await requestRoomHistory(
-      currentRoom,
-      1
-    );
+      const since =
+        getLastSavedRoomTimestamp();
+
+      await requestRoomHistory(
+        currentRoom,
+        since
+      );
   }
 );
 
@@ -1719,7 +1745,7 @@ let authorPrefix = null;
         text:
           text
       });
-
+      saveRoomPosts();
       displayRoomPosts();
 
 
@@ -1854,7 +1880,7 @@ async function requestRoomHistory(room, since = 1) {
 
       try {
 
-        roomPosts = [];
+        // roomPosts = [];
 
         roomMessages.innerHTML =
         "<p>Checking room...</p>";
@@ -1885,7 +1911,19 @@ async function requestRoomHistory(room, since = 1) {
 
     };
 
- 
+ function getLastSavedRoomTimestamp() {
+  if (!roomPosts.length) {
+    return 1;
+  }
+
+  const newest = Math.max(
+    ...roomPosts.map(post =>
+      Number(post.timestamp) || 0
+    )
+  );
+
+  return Math.max(1, newest - 10);
+}
 
   // ==================== SEND A CHECK-IN ROOM MESSAGE ====================
     sendRoomPostBtn.onclick = async () => {
@@ -3021,7 +3059,8 @@ async function requestRoomHistory(room, since = 1) {
 
     await connection.sendToRadioFrame(frame);
   }
-
+loadRoomPosts();
+displayRoomPosts();
   </script>
   </body>
 </html>
