@@ -753,7 +753,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin1</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin2</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -1841,18 +1841,35 @@ async function requestRoomHistory(room, since = 1) {
         ? "Family"
         : "Family";
 
-        html += `
-        <div class="message-row incoming">
-        <div class="avatar">${sender.substring(0,2).toUpperCase()}</div>
-        <div class="message-stack">
-        <div class="message-meta">
-        <span>${sender}</span>
-        <time>${when}</time>
-        </div>
-        <div class="bubble">${escapeHtml(post.text)}</div>
-        </div>
-        </div>
-        `;
+       if (post.outgoing) {
+
+          html += `
+            <div class="message-row outgoing">
+              <div class="message-stack">
+                <div class="message-meta">
+                  <time>${when}</time>
+                </div>
+                <div class="bubble">${escapeHtml(post.text)}</div>
+              </div>
+            </div>
+          `;
+
+        } else {
+
+          html += `
+            <div class="message-row incoming">
+              <div class="avatar">${sender.substring(0,2).toUpperCase()}</div>
+              <div class="message-stack">
+                <div class="message-meta">
+                  <span>${sender}</span>
+                  <time>${when}</time>
+                </div>
+                <div class="bubble">${escapeHtml(post.text)}</div>
+              </div>
+            </div>
+          `;
+
+        }
       });
 
       if (!posts.length) {
@@ -2001,21 +2018,17 @@ async function requestRoomHistory(room, since = 1) {
 
         sendRoomStatus.innerHTML = "Sent";
 
-        const sentTime = new Date().toLocaleTimeString([], {
-          hour: "numeric",
-          minute: "2-digit"
+       roomPosts.push({
+          senderPrefix: "self",
+          authorPrefix: null,
+          timestamp: timestamp,
+          snr: null,
+          text: text,
+          outgoing: true
         });
 
-        const outgoing = document.createElement("div");
-        outgoing.className = "message-row outgoing";
-        outgoing.innerHTML = `
-        <div class="message-stack">
-        <div class="message-meta"><time>${sentTime}</time></div>
-        <div class="bubble">${escapeHtml(text)}</div>
-        </div>
-        `;
-        roomMessages.appendChild(outgoing);
-        roomMessages.scrollTop = roomMessages.scrollHeight;
+        saveRoomPosts();
+        displayRoomPosts();
 
         roomPostText.value = "";
         setTimeout(() => {
