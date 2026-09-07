@@ -753,7 +753,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin2</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin3</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -1507,13 +1507,21 @@
         }
 
         roomStatus.innerHTML = "Connecting to family room...";
-        if (familyStatus) familyStatus.textContent = "Checking...";
 
-        roomMessages.innerHTML = `
-          <div class="empty-chat">
-            Trying to reach the family check-in room...
-          </div>
-        `;
+        if (familyStatus) {
+          familyStatus.textContent = "Connecting...";
+        }
+
+        // Keep saved chat visible while the radio connects.
+        if (roomPosts.length === 0) {
+          roomMessages.innerHTML = `
+            <div class="empty-chat">
+              Connecting to family check-in...
+            </div>
+          `;
+        } else {
+          displayRoomPosts();
+        }
 
         message("Looking for check-in room...");
 
@@ -1562,20 +1570,19 @@ await connection.sendCommandSendLogin(
         // If neither LOGIN_SUCCESS nor a room message arrives, show failure.
         roomConnectTimer = setTimeout(() => {
           if (familyStatus) {
-            familyStatus.textContent = "Check-In Not Connected";
+          familyStatus.textContent = "Radio not connected";
           }
 
-          roomMessages.innerHTML = `
-            <div class="empty-chat">
-              <strong>Family check-in room could not be reached.</strong>
-              <br><br>
-              Try again, or move closer to a repeater and retry.
-            </div>
-          `;
+          roomStatus.innerHTML =
+            "Unable to reach Check-In right now.";
 
-          roomStatus.innerHTML = "";
           sendRoomPostBtn.disabled = true;
-        }, 8000);
+
+          // Never destroy locally saved chat.
+          if (roomPosts.length > 0) {
+            displayRoomPosts();
+          }
+        }, 30000);
 
       } catch (err) {
         console.error(err);
