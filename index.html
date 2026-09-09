@@ -753,7 +753,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin4</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin7</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -853,6 +853,9 @@
       <div id="log">Ready.</div>
 
     </main>
+
+    <!-- ==================== OFFLINE NORTH GEORGIA BASE MAP ==================== -->
+  <script src="./north_georgia_basemap.js"></script>
 
     <!-- ==================== MESHKIN APPLICATION LOGIC ==================== -->
   <script type="module">
@@ -966,33 +969,6 @@
       width: 500,
       height: 620
     };
-
-    const ROOM_HISTORY_KEY = "meshkin_checkin_history";
-
-    function saveRoomPosts() {
-      try {
-        localStorage.setItem(
-          ROOM_HISTORY_KEY,
-          JSON.stringify(roomPosts)
-        );
-      } catch (err) {
-        console.error("Could not save room history:", err);
-      }
-    }
-
-    function loadRoomPosts() {
-      try {
-        const saved = JSON.parse(
-          localStorage.getItem(ROOM_HISTORY_KEY) || "[]"
-        );
-
-        if (Array.isArray(saved)) {
-          roomPosts = saved;
-        }
-      } catch (err) {
-        console.error("Could not load room history:", err);
-      }
-    }
 
 
   // ==================== FAMILY RADIO IDENTITIES ====================
@@ -1507,21 +1483,13 @@
         }
 
         roomStatus.innerHTML = "Connecting to family room...";
+        if (familyStatus) familyStatus.textContent = "Checking...";
 
-        if (familyStatus) {
-          familyStatus.textContent = "Connecting...";
-        }
-
-        // Keep saved chat visible while the radio connects.
-        if (roomPosts.length === 0) {
-          roomMessages.innerHTML = `
-            <div class="empty-chat">
-              Connecting to family check-in...
-            </div>
-          `;
-        } else {
-          displayRoomPosts();
-        }
+        roomMessages.innerHTML = `
+          <div class="empty-chat">
+            Trying to reach the family check-in room...
+          </div>
+        `;
 
         message("Looking for check-in room...");
 
@@ -1570,19 +1538,20 @@ await connection.sendCommandSendLogin(
         // If neither LOGIN_SUCCESS nor a room message arrives, show failure.
         roomConnectTimer = setTimeout(() => {
           if (familyStatus) {
-          familyStatus.textContent = "Radio not connected";
+            familyStatus.textContent = "Check-In Not Connected";
           }
 
-          roomStatus.innerHTML =
-            "Unable to reach Check-In right now.";
+          roomMessages.innerHTML = `
+            <div class="empty-chat">
+              <strong>Family check-in room could not be reached.</strong>
+              <br><br>
+              Try again, or move closer to a repeater and retry.
+            </div>
+          `;
 
+          roomStatus.innerHTML = "";
           sendRoomPostBtn.disabled = true;
-
-          // Never destroy locally saved chat.
-          if (roomPosts.length > 0) {
-            displayRoomPosts();
-          }
-        }, 30000);
+        }, 8000);
 
       } catch (err) {
         console.error(err);
@@ -1644,13 +1613,27 @@ await connection.sendCommandSendLogin(
     }
 
     familyStatus.textContent =
-    "Check-In Connected";
+      "Check-In Connected";
 
-     displayRoomPosts();
+    roomMessages.innerHTML = `
+      <div class="empty-chat">
+        Loading family messages...
+      </div>
+    `;
 
     sendRoomPostBtn.disabled = false;
 
-    
+    // Give the login/path return time to settle.
+    await new Promise(resolve =>
+      setTimeout(resolve, 4000)
+    );
+
+    // Ask the room server to rewind our
+    // sync position and resend retained posts.
+    await requestRoomHistory(
+      currentRoom,
+      1
+    );
   }
 );
 
@@ -1739,7 +1722,7 @@ let authorPrefix = null;
         text:
           text
       });
-      saveRoomPosts();
+
       displayRoomPosts();
 
 
@@ -1835,35 +1818,18 @@ async function requestRoomHistory(room, since = 1) {
         ? "Family"
         : "Family";
 
-       if (post.outgoing) {
-
-          html += `
-            <div class="message-row outgoing">
-              <div class="message-stack">
-                <div class="message-meta">
-                  <time>${when}</time>
-                </div>
-                <div class="bubble">${escapeHtml(post.text)}</div>
-              </div>
-            </div>
-          `;
-
-        } else {
-
-          html += `
-            <div class="message-row incoming">
-              <div class="avatar">${sender.substring(0,2).toUpperCase()}</div>
-              <div class="message-stack">
-                <div class="message-meta">
-                  <span>${sender}</span>
-                  <time>${when}</time>
-                </div>
-                <div class="bubble">${escapeHtml(post.text)}</div>
-              </div>
-            </div>
-          `;
-
-        }
+        html += `
+        <div class="message-row incoming">
+        <div class="avatar">${sender.substring(0,2).toUpperCase()}</div>
+        <div class="message-stack">
+        <div class="message-meta">
+        <span>${sender}</span>
+        <time>${when}</time>
+        </div>
+        <div class="bubble">${escapeHtml(post.text)}</div>
+        </div>
+        </div>
+        `;
       });
 
       if (!posts.length) {
@@ -1891,7 +1857,7 @@ async function requestRoomHistory(room, since = 1) {
 
       try {
 
-        // roomPosts = [];
+        roomPosts = [];
 
         roomMessages.innerHTML =
         "<p>Checking room...</p>";
@@ -1922,19 +1888,7 @@ async function requestRoomHistory(room, since = 1) {
 
     };
 
- function getLastSavedRoomTimestamp() {
-  if (!roomPosts.length) {
-    return 1;
-  }
-
-  const newest = Math.max(
-    ...roomPosts.map(post =>
-      Number(post.timestamp) || 0
-    )
-  );
-
-  return Math.max(1, newest - 10);
-}
+ 
 
   // ==================== SEND A CHECK-IN ROOM MESSAGE ====================
     sendRoomPostBtn.onclick = async () => {
@@ -1991,7 +1945,7 @@ async function requestRoomHistory(room, since = 1) {
         frame[2] = 0x00;
 
         frame.set(
-        uint32ToLE(timestamp),
+        uint32ToLEBytes(timestamp),
         3
         );
 
@@ -2012,17 +1966,21 @@ async function requestRoomHistory(room, since = 1) {
 
         sendRoomStatus.innerHTML = "Sent";
 
-       roomPosts.push({
-          senderPrefix: "self",
-          authorPrefix: null,
-          timestamp: timestamp,
-          snr: null,
-          text: text,
-          outgoing: true
+        const sentTime = new Date().toLocaleTimeString([], {
+          hour: "numeric",
+          minute: "2-digit"
         });
 
-        saveRoomPosts();
-        displayRoomPosts();
+        const outgoing = document.createElement("div");
+        outgoing.className = "message-row outgoing";
+        outgoing.innerHTML = `
+        <div class="message-stack">
+        <div class="message-meta"><time>${sentTime}</time></div>
+        <div class="bubble">${escapeHtml(text)}</div>
+        </div>
+        `;
+        roomMessages.appendChild(outgoing);
+        roomMessages.scrollTop = roomMessages.scrollHeight;
 
         roomPostText.value = "";
         setTimeout(() => {
@@ -2147,6 +2105,128 @@ async function requestRoomHistory(room, since = 1) {
     }
 
 
+  // ==================== OFFLINE NORTH GEORGIA ROAD BASE MAP ====================
+    function projectLocalMapPoint(userLat, userLon, lat, lon, radiusMiles = LOCAL_RADIUS_MILES) {
+      const distance = distanceMiles(userLat, userLon, lat, lon);
+      const bearing = bearingDegrees(userLat, userLon, lat, lon);
+      const pixelDistance = (distance / radiusMiles) * 220;
+      const angle = toRadians(bearing);
+
+      return {
+        x: 250 + Math.sin(angle) * pixelDistance,
+        y: 250 - Math.cos(angle) * pixelDistance,
+        distance,
+        bearing
+      };
+    }
+
+    function drawOfflineBasemap(userLat, userLon) {
+      const basemap = window.NORTH_GEORGIA_BASEMAP;
+      if (!basemap || !Array.isArray(basemap.roads)) {
+        console.warn("Offline North Georgia basemap is not loaded.");
+        return;
+      }
+
+      const svgNS = "http://www.w3.org/2000/svg";
+
+      const defs = document.createElementNS(svgNS, "defs");
+      const clipPath = document.createElementNS(svgNS, "clipPath");
+      clipPath.setAttribute("id", "localMapClip");
+      const clipCircle = document.createElementNS(svgNS, "circle");
+      clipCircle.setAttribute("cx", "250");
+      clipCircle.setAttribute("cy", "250");
+      clipCircle.setAttribute("r", "220");
+      clipPath.appendChild(clipCircle);
+      defs.appendChild(clipPath);
+      gaMap.appendChild(defs);
+
+      const roadGroup = document.createElementNS(svgNS, "g");
+      roadGroup.setAttribute("clip-path", "url(#localMapClip)");
+
+      basemap.roads.forEach(road => {
+        if (!Array.isArray(road.points) || road.points.length < 2) return;
+
+        const projected = road.points.map(([lat, lon]) =>
+          projectLocalMapPoint(userLat, userLon, lat, lon)
+        );
+
+        const nearest = Math.min(...projected.map(p => p.distance));
+        if (nearest > LOCAL_RADIUS_MILES + 8) return;
+
+        const polyline = document.createElementNS(svgNS, "polyline");
+        polyline.setAttribute("points", projected.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" "));
+        polyline.setAttribute("fill", "none");
+        polyline.setAttribute("stroke-linecap", "round");
+        polyline.setAttribute("stroke-linejoin", "round");
+        polyline.setAttribute("vector-effect", "non-scaling-stroke");
+
+        if (road.class === "interstate") {
+          polyline.setAttribute("stroke", "#607f95");
+          polyline.setAttribute("stroke-width", "4");
+          polyline.setAttribute("opacity", "0.90");
+        } else if (road.class === "highway") {
+          polyline.setAttribute("stroke", "#496a81");
+          polyline.setAttribute("stroke-width", "3");
+          polyline.setAttribute("opacity", "0.86");
+        } else {
+          polyline.setAttribute("stroke", "#38566c");
+          polyline.setAttribute("stroke-width", "2");
+          polyline.setAttribute("opacity", "0.78");
+        }
+
+        roadGroup.appendChild(polyline);
+
+        const labelPoint = projected.reduce((best, p) =>
+          p.distance < best.distance ? p : best, projected[0]
+        );
+
+        if (labelPoint.distance <= LOCAL_RADIUS_MILES) {
+          const label = document.createElementNS(svgNS, "text");
+          label.setAttribute("x", (labelPoint.x + 6).toFixed(1));
+          label.setAttribute("y", (labelPoint.y - 5).toFixed(1));
+          label.setAttribute("fill", "#9eb9ca");
+          label.setAttribute("font-size", road.class === "interstate" ? "10" : "9");
+          label.setAttribute("font-weight", "650");
+          label.setAttribute("paint-order", "stroke");
+          label.setAttribute("stroke", "#071b2a");
+          label.setAttribute("stroke-width", "3");
+          label.setAttribute("stroke-linejoin", "round");
+          label.textContent = road.name;
+          roadGroup.appendChild(label);
+        }
+      });
+
+      if (Array.isArray(basemap.places)) {
+        basemap.places.forEach(place => {
+          const p = projectLocalMapPoint(userLat, userLon, place.lat, place.lon);
+          if (p.distance > LOCAL_RADIUS_MILES) return;
+
+          const townDot = document.createElementNS(svgNS, "circle");
+          townDot.setAttribute("cx", p.x.toFixed(1));
+          townDot.setAttribute("cy", p.y.toFixed(1));
+          townDot.setAttribute("r", place.rank === 1 ? "4" : "3");
+          townDot.setAttribute("fill", "#7f9fb4");
+          townDot.setAttribute("opacity", "0.85");
+          roadGroup.appendChild(townDot);
+
+          const townLabel = document.createElementNS(svgNS, "text");
+          townLabel.setAttribute("x", (p.x + 6).toFixed(1));
+          townLabel.setAttribute("y", (p.y + 4).toFixed(1));
+          townLabel.setAttribute("fill", "#b5c9d6");
+          townLabel.setAttribute("font-size", place.rank === 1 ? "11" : "9");
+          townLabel.setAttribute("font-weight", place.rank <= 2 ? "700" : "600");
+          townLabel.setAttribute("paint-order", "stroke");
+          townLabel.setAttribute("stroke", "#071b2a");
+          townLabel.setAttribute("stroke-width", "3");
+          townLabel.textContent = place.name;
+          roadGroup.appendChild(townLabel);
+        });
+      }
+
+      gaMap.appendChild(roadGroup);
+    }
+
+
   // ==================== LOCAL REPEATER RADAR MAP ====================
     function drawLocalRepeaterMap(userLat, userLon, repeaters) {
 
@@ -2154,6 +2234,9 @@ async function requestRoomHistory(room, since = 1) {
 
       // We will use a simple 500 x 500 local map
       gaMap.setAttribute("viewBox", "0 0 500 500");
+
+      // Draw bundled offline road and town context first, beneath repeaters.
+      drawOfflineBasemap(userLat, userLon);
 
       // Outer 5-mile circle
       const outerCircle =
@@ -2187,6 +2270,20 @@ async function requestRoomHistory(room, since = 1) {
       innerCircle.setAttribute("stroke-width", "1");
 
       gaMap.appendChild(innerCircle);
+
+      // 1-mile range ring
+      const oneMileCircle = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "circle"
+      );
+      oneMileCircle.setAttribute("cx", "250");
+      oneMileCircle.setAttribute("cy", "250");
+      oneMileCircle.setAttribute("r", String(220 / LOCAL_RADIUS_MILES));
+      oneMileCircle.setAttribute("fill", "none");
+      oneMileCircle.setAttribute("stroke", "#1a3448");
+      oneMileCircle.setAttribute("stroke-width", "1");
+      oneMileCircle.setAttribute("stroke-dasharray", "4 5");
+      gaMap.appendChild(oneMileCircle);
 
 
       // North marker
@@ -2803,26 +2900,17 @@ async function requestRoomHistory(room, since = 1) {
         return;
 
         const millivolts =
-            frame[1] |
-            (frame[2] << 8);
+        frame[1] |
+        (frame[2] << 8);
 
-          const volts =
-            millivolts / 1000;
+        const batteryPercent =
+        frame[3];
 
-          // Generic single-cell Li-ion estimate,
-          // matching the usual MeshCore-style approach.
-          const batteryPercent = Math.max(
-            0,
-            Math.min(
-              100,
-              Math.round(
-                ((millivolts - 3000) / 1200) * 100
-              )
-            )
-          );
+        const volts =
+        millivolts / 1000;
 
-          batteryStatus.textContent =
-            batteryPercent + "%";
+        batteryStatus.textContent =
+        batteryPercent + "%";
 
         if (batteryVolts) {
           batteryVolts.textContent = volts.toFixed(2) + " V";
@@ -3062,7 +3150,7 @@ async function requestRoomHistory(room, since = 1) {
     frame[2] = 0x00;
 
     frame.set(
-      uint32ToLE(timestamp),
+      uint32ToLEBytes(timestamp),
       3
     );
 
@@ -3075,11 +3163,7 @@ async function requestRoomHistory(room, since = 1) {
 
     await connection.sendToRadioFrame(frame);
   }
-loadRoomPosts();
 
-if (roomPosts.length > 0) {
-  displayRoomPosts();
-}
   </script>
   </body>
 </html>
