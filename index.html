@@ -749,7 +749,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin1</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin9</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -1280,6 +1280,7 @@ window.NORTH_GEORGIA_BASEMAP={"version":"2.0-tiger2025","name":"North Georgia Of
           installDiscoveryListener();
           installRoomHandlers();
           installBatteryListener();
+          installRawMessageListener();
 
           message("Announcing node to mesh...");
 
@@ -1660,102 +1661,21 @@ await connection.sendCommandSendLogin(
   );
 
 
-  // Parsed direct / room message
+  // Parsed direct / room message.
+  // NOTE: actually adding the post to the chat now happens in
+  // installRawMessageListener(), which parses the raw BLE frame
+  // directly so it can recover the room's embedded author prefix
+  // intact (msg.text here has already had that prefix mangled by
+  // the library's own UTF-8 decode). This handler is just a log.
   connection.on(
     Constants.ResponseCodes.ContactMsgRecv,
     async (msg) => {
 
       console.log(
-        "ROOM MESSAGE:",
+        "ROOM MESSAGE (library):",
         msg
       );
 
-      /*
-        Check this message actually belongs
-        to our room.
-      */
-
-      const roomKey =
-        Uint8Array.from(
-          Object.values(
-            currentRoom.publicKey
-          )
-        );
-
-      const roomPrefix =
-        bytesToHex(
-          roomKey.slice(0, 6)
-        );
-
-      const incomingPrefix =
-        bytesToHex(
-          msg.pubKeyPrefix
-        );
-
-      if (
-        incomingPrefix !== roomPrefix
-      ) {
-        return;
-      }
-
-
-      /*
-        Signed room messages have the
-        author's 4-byte prefix embedded
-        at the beginning of msg.text.
-      */
-
-let text;
-let authorPrefix = null;
-
-if (typeof msg.text === "string") {
-  // Already decoded to a string upstream, so there are no
-  // raw bytes left to pull a binary author prefix from.
-  text = msg.text;
-} else {
-  const rawBytes =
-    msg.text instanceof Uint8Array
-      ? msg.text
-      : new Uint8Array(msg.text);
-
-  if (rawBytes.length > 4) {
-    // First 4 bytes = sender's public key prefix, the rest is the
-    // actual UTF-8 message text.
-    authorPrefix = bytesToHex(rawBytes.slice(0, 4));
-    text = decodeText(rawBytes.slice(4));
-  } else {
-    text = decodeText(rawBytes);
-  }
-}
-
-
-      roomPosts.push({
-        senderPrefix:
-          incomingPrefix,
-
-        authorPrefix:
-          authorPrefix,
-
-        timestamp:
-          msg.senderTimestamp,
-
-        snr:
-          msg.snr,
-
-        text:
-          text
-      });
-
-      displayRoomPosts();
-
-
-      /*
-        Continue draining anything else
-        queued behind this message.
-      */
-
-      await connection
-        .sendCommandSyncNextMessage();
     }
   );
 
@@ -3008,6 +2928,109 @@ async function requestRoomHistory(room, since = 1) {
       );
 
     }
+
+  // ==================== RAW MESSAGE FRAME LISTENER ====================
+  // The meshcore.js library decodes msg.text as one UTF-8 string,
+  // which corrupts (mangles into replacement characters) the raw
+  // 4-byte author prefix our room server embeds at the start of
+  // signed posts, and there's no reliable way to recover those
+  // bytes from the library's already-decoded string afterwards.
+  //
+  // So this parses the same BLE frame directly, independently of
+  // the library's own "ContactMsgRecv" event, and does the actual
+  // work of adding the post to the chat itself.
+  function installRawMessageListener() {
+
+    connection.txCharacteristic.addEventListener(
+    "characteristicvaluechanged",
+    async (event) => {
+
+      const frame = new Uint8Array(event.target.value.buffer);
+
+      const packetType = frame[0];
+
+      // PACKET_CONTACT_MSG_RECV (0x07) or PACKET_CONTACT_MSG_RECV_V3 (0x10)
+      if (packetType !== 0x07 && packetType !== 0x10) return;
+
+      let offset = 1;
+      let snr = null;
+
+      if (packetType === 0x10) {
+        // V3 adds: SNR (signed byte, /4 for dB) + reserved (2 bytes)
+        const snrByte = frame[offset];
+        snr = (snrByte << 24 >> 24) / 4;
+        offset += 3;
+      }
+
+      // Need at least: 6-byte pubkey prefix + path_len + txt_type + 4-byte timestamp
+      if (frame.length < offset + 6 + 2 + 4) return;
+
+      const incomingPrefix = bytesToHex(frame.slice(offset, offset + 6));
+      offset += 6;
+
+      const pathLen = frame[offset];
+      const txtType = frame[offset + 1];
+      offset += 2;
+
+      const timestamp = readUint32LE(frame, offset);
+      offset += 4;
+
+      let authorPrefix = null;
+
+      // txt_type 2 = TXT_TYPE_SIGNED_PLAIN. Our room server repurposes
+      // the 4 bytes there (normally a signature) as the original
+      // author's 4-byte public key prefix.
+      if (txtType === 2) {
+        if (frame.length < offset + 4) return;
+        authorPrefix = bytesToHex(frame.slice(offset, offset + 4));
+        offset += 4;
+      }
+
+      const text = decodeText(frame.slice(offset));
+
+      /*
+        Check this message actually belongs to our room.
+      */
+
+      if (!currentRoom) return;
+
+      const roomKey =
+        Uint8Array.from(
+          Object.values(
+            currentRoom.publicKey
+          )
+        );
+
+      const roomPrefix =
+        bytesToHex(
+          roomKey.slice(0, 6)
+        );
+
+      if (incomingPrefix !== roomPrefix) return;
+
+      console.log(
+        "ROOM MESSAGE (raw):",
+        { incomingPrefix, pathLen, txtType, timestamp, authorPrefix, text }
+      );
+
+      roomPosts.push({
+        senderPrefix: incomingPrefix,
+        authorPrefix: authorPrefix,
+        timestamp: timestamp,
+        snr: snr,
+        text: text
+      });
+
+      displayRoomPosts();
+
+      /*
+        Continue draining anything else queued behind this message.
+      */
+
+      await connection.sendCommandSyncNextMessage();
+    }
+    );
+  }
 
   // ==================== VISIBLE UI EVENT HANDLERS ====================
     const radioStatusCard = document.getElementById("radioStatusCard");
