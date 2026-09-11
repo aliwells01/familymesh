@@ -749,7 +749,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin8</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin9</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -975,24 +975,28 @@ window.NORTH_GEORGIA_BASEMAP={"version":"2.0-tiger2025","name":"North Georgia Of
 
 
   // ==================== FAMILY RADIO IDENTITIES ====================
-    const FAMILY = [
-    {
-      name: "GhostPacketCC",
-      keyPrefix: "a053028f4203"
-    },
-    {
-      name: "GhostPacketD1",
-      keyPrefix: "083ffcb7b742"
-    },
-    {
-      name: "GhostPacketI8",
-      keyPrefix: "a3926318273e"
-    },
-    {
-      name: "GhostPacketPT",
-      keyPrefix: "774c66e368b4"
-    }
-    ];
+          const FAMILY = [
+        {
+          name: "D1",
+          keyPrefix: "083ffcb7b742",
+          authorPrefix: "083ffcb7"
+        },
+        {
+          name: "CC",
+          keyPrefix: "a053028f4203",
+          authorPrefix: "a053028f"
+        },
+        {
+          name: "PT",
+          keyPrefix: "76bb0474e43d",
+          authorPrefix: "76bb0474"
+        },
+        {
+          name: "I8",
+          keyPrefix: "a3926318273e",
+          authorPrefix: "a3926318"
+        }
+      ];
 
     const FAMILY_STATUS_PREFIX = "WLLOC|";
 
@@ -1040,6 +1044,15 @@ window.NORTH_GEORGIA_BASEMAP={"version":"2.0-tiger2025","name":"North Georgia Of
 
       renderFamilyStatus();
     };
+
+
+        function getFamilyMemberByAuthorPrefix(prefix) {
+      const key = String(prefix || "").toLowerCase();
+
+      return FAMILY.find(member =>
+        member.authorPrefix.toLowerCase() === key
+      );
+    }
 
   // ==================== MAP VIEW / ZOOM CONTROLS ====================
     function applyMapView() {
@@ -1684,58 +1697,45 @@ await connection.sendCommandSendLogin(
         );
 
       const incomingPrefix =
-        bytesToHex(
-          msg.pubKeyPrefix
-        );
+  bytesToHex(
+    msg.pubKeyPrefix
+  );
 
-      if (
-        incomingPrefix !== roomPrefix
-      ) {
-        return;
-      }
+if (
+  incomingPrefix !== roomPrefix
+) {
+  return;
+}
 
-
-      /*
-        Signed room messages have the
-        author's 4-byte prefix embedded
-        at the beginning of msg.text.
-      */
-
-let text =
-  typeof msg.text === "string"
-    ? msg.text
-    : new TextDecoder().decode(msg.text);
-
+let text = msg.text;
 let authorPrefix = null;
 
+if (msg.txtType === 2 && typeof text === "string") {
 
-      roomPosts.push({
-        senderPrefix:
-          incomingPrefix,
+  const raw = new TextEncoder().encode(text);
 
-        authorPrefix:
-          authorPrefix,
+  authorPrefix = bytesToHex(
+    raw.slice(0, 4)
+  );
 
-        timestamp:
-          msg.senderTimestamp,
+  text = new TextDecoder().decode(
+    raw.slice(4)
+  );
+}
 
-        snr:
-          msg.snr,
+roomPosts.push({
+  senderPrefix: incomingPrefix,
+  authorPrefix: authorPrefix,
+  timestamp: msg.senderTimestamp,
+  snr: msg.snr,
+  text: text
+});
 
-        text:
-          text
-      });
+saveRoomPosts();
+displayRoomPosts();
 
-      displayRoomPosts();
-
-
-      /*
-        Continue draining anything else
-        queued behind this message.
-      */
-
-      await connection
-        .sendCommandSyncNextMessage();
+await connection
+  .sendCommandSyncNextMessage();
     }
   );
 
@@ -1811,15 +1811,22 @@ async function requestRoomHistory(room, since = 1) {
       posts.forEach(post => {
 
         const whenDate = new Date(post.timestamp * 1000);
-        const when = whenDate.toLocaleTimeString([], {
+        const when = whenDate.toLocaleString([], {
+          month: "short",
+          day: "numeric",
           hour: "numeric",
           minute: "2-digit"
         });
 
+       const member =
+          getFamilyMemberByAuthorPrefix(
+            post.authorPrefix
+          );
+
         const sender =
-        post.authorPrefix
-        ? "Family"
-        : "Family";
+          member
+            ? member.name
+            : "Family";
 
         html += `
         <div class="message-row incoming">
