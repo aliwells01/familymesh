@@ -749,7 +749,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin1</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin9</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -1046,13 +1046,7 @@ window.NORTH_GEORGIA_BASEMAP={"version":"2.0-tiger2025","name":"North Georgia Of
     };
 
 
-        function getFamilyMemberByAuthorPrefix(prefix) {
-      const key = String(prefix || "").toLowerCase();
-
-      return FAMILY.find(member =>
-        member.authorPrefix.toLowerCase() === key
-      );
-    }
+    
 
   // ==================== MAP VIEW / ZOOM CONTROLS ====================
     function applyMapView() {
@@ -1629,11 +1623,27 @@ await connection.sendCommandSendLogin(
     }
 
     familyStatus.textContent =
-  "Check-In Connected";
+      "Check-In Connected";
 
-displayRoomPosts();
+    roomMessages.innerHTML = `
+      <div class="empty-chat">
+        Loading family messages...
+      </div>
+    `;
 
-sendRoomPostBtn.disabled = false;
+    sendRoomPostBtn.disabled = false;
+
+    // Give the login/path return time to settle.
+    await new Promise(resolve =>
+      setTimeout(resolve, 4000)
+    );
+
+    // Ask the room server to rewind our
+    // sync position and resend retained posts.
+    await requestRoomHistory(
+      currentRoom,
+      1
+    );
   }
 );
 
@@ -1681,45 +1691,58 @@ sendRoomPostBtn.disabled = false;
         );
 
       const incomingPrefix =
-  bytesToHex(
-    msg.pubKeyPrefix
-  );
+        bytesToHex(
+          msg.pubKeyPrefix
+        );
 
-if (
-  incomingPrefix !== roomPrefix
-) {
-  return;
-}
+      if (
+        incomingPrefix !== roomPrefix
+      ) {
+        return;
+      }
 
-let text = msg.text;
+
+      /*
+        Signed room messages have the
+        author's 4-byte prefix embedded
+        at the beginning of msg.text.
+      */
+
+let text =
+  typeof msg.text === "string"
+    ? msg.text
+    : new TextDecoder().decode(msg.text);
+
 let authorPrefix = null;
 
-if (msg.txtType === 2 && typeof text === "string") {
 
-  const raw = new TextEncoder().encode(text);
+      roomPosts.push({
+        senderPrefix:
+          incomingPrefix,
 
-  authorPrefix = bytesToHex(
-    raw.slice(0, 4)
-  );
+        authorPrefix:
+          authorPrefix,
 
-  text = new TextDecoder().decode(
-    raw.slice(4)
-  );
-}
+        timestamp:
+          msg.senderTimestamp,
 
-roomPosts.push({
-  senderPrefix: incomingPrefix,
-  authorPrefix: authorPrefix,
-  timestamp: msg.senderTimestamp,
-  snr: msg.snr,
-  text: text
-});
+        snr:
+          msg.snr,
 
-saveRoomPosts();
-displayRoomPosts();
+        text:
+          text
+      });
 
-await connection
-  .sendCommandSyncNextMessage();
+      displayRoomPosts();
+
+
+      /*
+        Continue draining anything else
+        queued behind this message.
+      */
+
+      await connection
+        .sendCommandSyncNextMessage();
     }
   );
 
@@ -1802,15 +1825,10 @@ async function requestRoomHistory(room, since = 1) {
           minute: "2-digit"
         });
 
-       const member =
-          getFamilyMemberByAuthorPrefix(
-            post.authorPrefix
-          );
-
         const sender =
-          member
-            ? member.name
-            : "Family";
+        post.authorPrefix
+        ? "Family"
+        : "Family";
 
         html += `
         <div class="message-row incoming">
