@@ -749,7 +749,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin0</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin9</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -1720,36 +1720,6 @@ let text =
 
 let authorPrefix = null;
 
-/*
-  Signed room messages currently arrive with a
-  4-character author prefix at the start of msg.text.
-
-  Remove those 4 characters from what we display,
-  but also keep them so we can try to identify
-  the sender.
-*/
-if (msg.txtType === 2 && text.length >= 4) {
-
-  const prefixChars = text.slice(0, 4);
-
-  authorPrefix = Array.from(prefixChars)
-    .map(ch =>
-      (ch.charCodeAt(0) & 0xff)
-        .toString(16)
-        .padStart(2, "0")
-    )
-    .join("");
-
-  text = text.slice(4);
-
-  console.log(
-    "ROOM AUTHOR PREFIX:",
-    authorPrefix,
-    "raw:",
-    prefixChars
-  );
-}
-
 
       roomPosts.push({
         senderPrefix:
@@ -1860,15 +1830,10 @@ async function requestRoomHistory(room, since = 1) {
           minute: "2-digit"
         });
 
-const member =
-  getFamilyMemberByAuthorPrefix(
-    post.authorPrefix
-  );
-
-const sender =
-  member
-    ? member.name
-    : "Family";
+        const sender =
+        post.authorPrefix
+        ? "Family"
+        : "Family";
 
         html += `
         <div class="message-row incoming">
