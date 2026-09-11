@@ -1705,7 +1705,7 @@ await connection.sendCommandSendLogin(
       ) {
         return;
       }
-      csendRoomStatus.textContent =
+      sendRoomStatus.textContent =
   `type:${msg.txtType} prefix:${bytesToHex(msg.pubKeyPrefix)} text:${msg.text}`;
 
       /*
