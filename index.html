@@ -1705,7 +1705,8 @@ await connection.sendCommandSendLogin(
       ) {
         return;
       }
-      console.log("ROOM MESSAGE OBJECT:", msg);
+      csendRoomStatus.textContent =
+  `type:${msg.txtType} prefix:${bytesToHex(msg.pubKeyPrefix)} text:${msg.text}`;
 
       /*
         Signed room messages have the
