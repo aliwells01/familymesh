@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
     <meta name="theme-color" content="#06131f">
-    <title>MeshKin</title>
+    <title>MeshKin1</title>
 
     <!-- ==================== STYLES / VISUAL DESIGN ==================== -->
   <style>
@@ -1705,12 +1705,28 @@ await connection.sendCommandSendLogin(
         at the beginning of msg.text.
       */
 
-let text =
-  typeof msg.text === "string"
-    ? msg.text
-    : new TextDecoder().decode(msg.text);
-
+let text;
 let authorPrefix = null;
+
+if (typeof msg.text === "string") {
+  // Already decoded to a string upstream, so there are no
+  // raw bytes left to pull a binary author prefix from.
+  text = msg.text;
+} else {
+  const rawBytes =
+    msg.text instanceof Uint8Array
+      ? msg.text
+      : new Uint8Array(msg.text);
+
+  if (rawBytes.length > 4) {
+    // First 4 bytes = sender's public key prefix, the rest is the
+    // actual UTF-8 message text.
+    authorPrefix = bytesToHex(rawBytes.slice(0, 4));
+    text = decodeText(rawBytes.slice(4));
+  } else {
+    text = decodeText(rawBytes);
+  }
+}
 
 
       roomPosts.push({
@@ -1822,9 +1838,14 @@ async function requestRoomHistory(room, since = 1) {
           minute: "2-digit"
         });
 
-        const sender =
+        const familyMember =
         post.authorPrefix
-        ? "Family"
+        ? getFamilyMemberByAuthorPrefix(post.authorPrefix)
+        : null;
+
+        const sender =
+        familyMember
+        ? familyMember.name
         : "Family";
 
         html += `
@@ -3018,6 +3039,18 @@ async function requestRoomHistory(room, since = 1) {
       return FAMILY.find(member =>
       key.startsWith(member.keyPrefix.toLowerCase()) ||
       member.keyPrefix.toLowerCase().startsWith(key)
+      );
+    }
+
+    // Matches the 4-byte author prefix embedded at the start of a
+    // signed room message against FAMILY[].authorPrefix.
+    function getFamilyMemberByAuthorPrefix(authorPrefix) {
+
+      const key =
+      String(authorPrefix || "").toLowerCase();
+
+      return FAMILY.find(member =>
+      member.authorPrefix.toLowerCase() === key
       );
     }
 
