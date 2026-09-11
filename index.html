@@ -749,7 +749,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin9</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin1</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -1706,7 +1706,7 @@ await connection.sendCommandSendLogin(
         return;
       }
       sendRoomStatus.textContent =
-  `type:${msg.txtType} prefix:${bytesToHex(msg.pubKeyPrefix)} text:${msg.text}`;
+  JSON.stringify(msg);
 
       /*
         Signed room messages have the
