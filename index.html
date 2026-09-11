@@ -1006,14 +1006,6 @@ window.NORTH_GEORGIA_BASEMAP={"version":"2.0-tiger2025","name":"North Georgia Of
     // True while a CMD_SYNC_NEXT_MESSAGE request is awaiting a response.
     let roomRequestPending = false;
 
-function getFamilyMemberByAuthorPrefix(prefix) {
-  const key = String(prefix || "").toLowerCase();
-
-  return FAMILY.find(member =>
-    member.authorPrefix.toLowerCase() === key
-  );
-}
-
 
   // ==================== MAP / LIST / FAMILY TAB CONTROLS ====================
     mapTab.onclick = () => {
@@ -1705,7 +1697,7 @@ await connection.sendCommandSendLogin(
       ) {
         return;
       }
-      console.log("ROOM MESSAGE OBJECT:", msg);
+
 
       /*
         Signed room messages have the
