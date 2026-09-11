@@ -749,7 +749,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin9</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin0</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -975,28 +975,28 @@ window.NORTH_GEORGIA_BASEMAP={"version":"2.0-tiger2025","name":"North Georgia Of
 
 
   // ==================== FAMILY RADIO IDENTITIES ====================
-          const FAMILY = [
-        {
-          name: "D1",
-          keyPrefix: "083ffcb7b742",
-          authorPrefix: "083ffcb7"
-        },
-        {
-          name: "CC",
-          keyPrefix: "a053028f4203",
-          authorPrefix: "a053028f"
-        },
-        {
-          name: "PT",
-          keyPrefix: "76bb0474e43d",
-          authorPrefix: "76bb0474"
-        },
-        {
-          name: "I8",
-          keyPrefix: "a3926318273e",
-          authorPrefix: "a3926318"
-        }
-      ];
+    const FAMILY = [
+  {
+    name: "D1",
+    keyPrefix: "083ffcb7b742",
+    authorPrefix: "083ffcb7"
+  },
+  {
+    name: "CC",
+    keyPrefix: "a053028f4203",
+    authorPrefix: "a053028f"
+  },
+  {
+    name: "PT",
+    keyPrefix: "76bb0474e43d",
+    authorPrefix: "76bb0474"
+  },
+  {
+    name: "I8",
+    keyPrefix: "a3926318273e",
+    authorPrefix: "a3926318"
+  }
+];
 
     const FAMILY_STATUS_PREFIX = "WLLOC|";
 
@@ -1005,6 +1005,14 @@ window.NORTH_GEORGIA_BASEMAP={"version":"2.0-tiger2025","name":"North Georgia Of
 
     // True while a CMD_SYNC_NEXT_MESSAGE request is awaiting a response.
     let roomRequestPending = false;
+
+function getFamilyMemberByAuthorPrefix(prefix) {
+  const key = String(prefix || "").toLowerCase();
+
+  return FAMILY.find(member =>
+    member.authorPrefix.toLowerCase() === key
+  );
+}
 
 
   // ==================== MAP / LIST / FAMILY TAB CONTROLS ====================
@@ -1044,9 +1052,6 @@ window.NORTH_GEORGIA_BASEMAP={"version":"2.0-tiger2025","name":"North Georgia Of
 
       renderFamilyStatus();
     };
-
-
-    
 
   // ==================== MAP VIEW / ZOOM CONTROLS ====================
     function applyMapView() {
@@ -1715,6 +1720,36 @@ let text =
 
 let authorPrefix = null;
 
+/*
+  Signed room messages currently arrive with a
+  4-character author prefix at the start of msg.text.
+
+  Remove those 4 characters from what we display,
+  but also keep them so we can try to identify
+  the sender.
+*/
+if (msg.txtType === 2 && text.length >= 4) {
+
+  const prefixChars = text.slice(0, 4);
+
+  authorPrefix = Array.from(prefixChars)
+    .map(ch =>
+      (ch.charCodeAt(0) & 0xff)
+        .toString(16)
+        .padStart(2, "0")
+    )
+    .join("");
+
+  text = text.slice(4);
+
+  console.log(
+    "ROOM AUTHOR PREFIX:",
+    authorPrefix,
+    "raw:",
+    prefixChars
+  );
+}
+
 
       roomPosts.push({
         senderPrefix:
@@ -1825,10 +1860,15 @@ async function requestRoomHistory(room, since = 1) {
           minute: "2-digit"
         });
 
-        const sender =
-        post.authorPrefix
-        ? "Family"
-        : "Family";
+const member =
+  getFamilyMemberByAuthorPrefix(
+    post.authorPrefix
+  );
+
+const sender =
+  member
+    ? member.name
+    : "Family";
 
         html += `
         <div class="message-row incoming">
