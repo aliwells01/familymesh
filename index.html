@@ -1826,7 +1826,7 @@ async function requestRoomHistory(room, since = 1) {
         // TEMPORARY DEBUG AID: show the raw prefix hex for anyone we
         // can't match yet, so it can be read off the phone and used
         // to fill in / correct FAMILY[].authorPrefix. Remove the
-        // ": ${post.authorPrefix}" part once everyone's names show up.
+        // ": ${post.authorPrefix}" part once everyone's names show up.  <span>${sender}</span>
         const sender =
         familyMember
         ? familyMember.name
@@ -1837,7 +1837,7 @@ async function requestRoomHistory(room, since = 1) {
         <div class="avatar">${sender.substring(0,2).toUpperCase()}</div>
         <div class="message-stack">
         <div class="message-meta">
-        <span>${sender}</span>
+      
         <time>${when}</time>
         </div>
         <div class="bubble">${escapeHtml(post.text)}</div>
