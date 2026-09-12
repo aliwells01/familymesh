@@ -749,7 +749,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin2</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin1</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -904,7 +904,68 @@ window.NORTH_GEORGIA_BASEMAP={"version":"2.0-tiger2025","name":"North Georgia Of
     const closeMapBtn =
     document.getElementById("closeMap");
 
-    let roomPosts = [];
+  // ==================== ROOM POST PERSISTENCE (OFFLINE STORAGE) ====================
+  // Everything below is stored in localStorage, which survives page
+  // reloads, reconnects, and closing/reopening Bluefy — this is what
+  // makes the check-in history usable when there's no internet and
+  // you're relying entirely on what the phone has already seen.
+
+    const ROOM_POSTS_STORAGE_KEY = "meshkin_room_posts_" + CHECKIN_ROOM_NAME;
+    const ROOM_SYNC_STORAGE_KEY = "meshkin_room_last_sync_" + CHECKIN_ROOM_NAME;
+
+    // Keep at most this many posts on disk so storage doesn't grow forever.
+    const MAX_STORED_POSTS = 500;
+
+    function loadStoredRoomPosts() {
+      try {
+        const raw = localStorage.getItem(ROOM_POSTS_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (err) {
+        console.error("Failed to load stored room posts:", err);
+        return [];
+      }
+    }
+
+    function saveRoomPosts() {
+      try {
+        const toStore = roomPosts.slice(-MAX_STORED_POSTS);
+        localStorage.setItem(ROOM_POSTS_STORAGE_KEY, JSON.stringify(toStore));
+      } catch (err) {
+        console.error("Failed to save room posts:", err);
+      }
+    }
+
+    // Defaults to 1 (the start of time) the very first time the app is
+    // ever run against this room, so the first sync still pulls
+    // everything retained on the server.
+    function loadLastSyncedTimestamp() {
+      const raw = localStorage.getItem(ROOM_SYNC_STORAGE_KEY);
+      const parsed = raw ? parseInt(raw, 10) : 1;
+      return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+    }
+
+    function saveLastSyncedTimestamp(timestamp) {
+      try {
+        if (timestamp > loadLastSyncedTimestamp()) {
+          localStorage.setItem(ROOM_SYNC_STORAGE_KEY, String(timestamp));
+        }
+      } catch (err) {
+        console.error("Failed to save last synced timestamp:", err);
+      }
+    }
+
+    // Avoids storing/displaying the same retained post twice if the
+    // room server ever resends something we already have.
+    function isDuplicatePost(candidate) {
+      return roomPosts.some(post =>
+        post.timestamp === candidate.timestamp &&
+        post.senderPrefix === candidate.senderPrefix &&
+        post.text === candidate.text
+      );
+    }
+
+    let roomPosts = loadStoredRoomPosts();
 
     const roomPostText =
     document.getElementById("roomPostText");
@@ -1623,11 +1684,9 @@ await connection.sendCommandSendLogin(
     familyStatus.textContent =
       "Check-In Connected";
 
-    roomMessages.innerHTML = `
-      <div class="empty-chat">
-        Loading family messages...
-      </div>
-    `;
+    // Show whatever we already have saved from last time immediately,
+    // rather than blanking the chat while we wait on the mesh.
+    displayRoomPosts();
 
     sendRoomPostBtn.disabled = false;
 
@@ -1636,11 +1695,12 @@ await connection.sendCommandSendLogin(
       setTimeout(resolve, 4000)
     );
 
-    // Ask the room server to rewind our
-    // sync position and resend retained posts.
+    // Ask the room server to resend anything posted after the last
+    // message we've already saved, instead of rewinding all the way
+    // back to the beginning of time on every single reconnect.
     await requestRoomHistory(
       currentRoom,
-      1
+      loadLastSyncedTimestamp()
     );
   }
 );
@@ -1763,10 +1823,14 @@ async function requestRoomHistory(room, since = 1) {
         ? getFamilyMemberByAuthorPrefix(post.authorPrefix)
         : null;
 
+        // TEMPORARY DEBUG AID: show the raw prefix hex for anyone we
+        // can't match yet, so it can be read off the phone and used
+        // to fill in / correct FAMILY[].authorPrefix. Remove the
+        // ": ${post.authorPrefix}" part once everyone's names show up.
         const sender =
         familyMember
         ? familyMember.name
-        : "Family";
+        : (post.authorPrefix ? `Unknown: ${post.authorPrefix}` : "Family");
 
         html += `
         <div class="message-row incoming">
@@ -1806,11 +1870,6 @@ async function requestRoomHistory(room, since = 1) {
     readRoomBtn.onclick = async () => {
 
       try {
-
-        roomPosts = [];
-
-        roomMessages.innerHTML =
-        "<p>Checking room...</p>";
 
         message(
         "Reading room messages..."
@@ -3013,15 +3072,20 @@ async function requestRoomHistory(room, since = 1) {
         { incomingPrefix, pathLen, txtType, timestamp, authorPrefix, text }
       );
 
-      roomPosts.push({
+      const post = {
         senderPrefix: incomingPrefix,
         authorPrefix: authorPrefix,
         timestamp: timestamp,
         snr: snr,
         text: text
-      });
+      };
 
-      displayRoomPosts();
+      if (!isDuplicatePost(post)) {
+        roomPosts.push(post);
+        saveRoomPosts();
+        saveLastSyncedTimestamp(timestamp);
+        displayRoomPosts();
+      }
 
       /*
         Continue draining anything else queued behind this message.
