@@ -749,7 +749,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin3</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin4</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -3078,8 +3078,8 @@ async function requestRoomHistory(room, since = 1) {
     : null;
 
 /*
-  If this signed post came from one of our family radios,
-  update that person's most recent check-in time.
+  Any message from a recognised family member
+  counts as a check-in.
 */
 if (familyMember) {
 
@@ -3092,9 +3092,8 @@ if (familyMember) {
   };
 
   /*
-    Location check-in messages have this form:
-
-    WLLOC|timestamp|latitude|longitude
+    If this is one of our automatic location
+    packets, also save the coordinates.
   */
   if (text.startsWith(FAMILY_STATUS_PREFIX)) {
 
@@ -3116,6 +3115,7 @@ if (familyMember) {
         Number.isFinite(lat) &&
         Number.isFinite(lon)
       ) {
+
         familyLocations[familyMember.keyPrefix] = {
           timestamp: locationTimestamp,
           lat: lat,
@@ -3129,60 +3129,30 @@ if (familyMember) {
 }
 
 /*
-  Location packets are machine messages.
-  Use them to update Family status,
-  but don't show WLLOC|... in the chat.
+  Don't display automatic WLLOC location
+  packets in the Check-In chat.
 */
 if (!text.startsWith(FAMILY_STATUS_PREFIX)) {
 
-
-const familyMember =
-  authorPrefix
-    ? getFamilyMemberByAuthorPrefix(authorPrefix)
-    : null;
-
-/*
-  Any identified family message counts as
-  a check-in from that person.
-*/
-if (familyMember) {
-
-  const existing =
-    familyLocations[familyMember.keyPrefix] || {};
-
-  familyLocations[familyMember.keyPrefix] = {
-    ...existing,
-    timestamp: timestamp
+  const post = {
+    senderPrefix: incomingPrefix,
+    authorPrefix: authorPrefix,
+    timestamp: timestamp,
+    snr: snr,
+    text: text
   };
 
-  renderFamilyStatus();
-}
-
-const post = {
-  senderPrefix: incomingPrefix,
-  authorPrefix: authorPrefix,
-  timestamp: timestamp,
-  snr: snr,
-  text: text
-};
-
-if (!isDuplicatePost(post)) {
-  roomPosts.push(post);
-  saveRoomPosts();
-  saveLastSyncedTimestamp(timestamp);
-  displayRoomPosts();
-}
-
+  if (!isDuplicatePost(post)) {
+    roomPosts.push(post);
+    saveRoomPosts();
+    saveLastSyncedTimestamp(timestamp);
+    displayRoomPosts();
+  }
 
 } else {
 
-  /*
-    Still advance our sync timestamp even though
-    this location packet is hidden from the chat.
-  */
   saveLastSyncedTimestamp(timestamp);
 }
-
 
 
       /*
