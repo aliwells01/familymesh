@@ -749,7 +749,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin4</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin5</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -3247,13 +3247,49 @@ if (!text.startsWith(FAMILY_STATUS_PREFIX)) {
 
       let html = "";
 
-      FAMILY.forEach(member => {
+     FAMILY.forEach(member => {
 
-        const data =
-        familyLocations[member.keyPrefix];
+  /*
+    Find this person's most recent message
+    from the same roomPosts used by the chat.
+  */
+  const memberPosts =
+    roomPosts.filter(post =>
+      post.authorPrefix &&
+      post.authorPrefix.toLowerCase() ===
+        member.authorPrefix.toLowerCase()
+    );
 
-        let locationText =
-        "Location unknown";
+  const latestPost =
+    memberPosts.length
+      ? memberPosts.reduce((latest, post) =>
+          post.timestamp > latest.timestamp
+            ? post
+            : latest
+        )
+      : null;
+
+  /*
+    Keep location data if we have it,
+    but use the latest chat post as the
+    authoritative last check-in time.
+  */
+  const savedLocation =
+    familyLocations[member.keyPrefix];
+
+  const data =
+    latestPost || savedLocation
+      ? {
+          ...(savedLocation || {}),
+          timestamp:
+            latestPost
+              ? latestPost.timestamp
+              : savedLocation.timestamp
+        }
+      : null;
+
+  let locationText =
+    "Location unknown";
 
         if (
         data &&
