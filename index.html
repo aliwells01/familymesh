@@ -749,7 +749,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin2</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin3</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -3135,20 +3135,45 @@ if (familyMember) {
 */
 if (!text.startsWith(FAMILY_STATUS_PREFIX)) {
 
-  const post = {
-    senderPrefix: incomingPrefix,
-    authorPrefix: authorPrefix,
-    timestamp: timestamp,
-    snr: snr,
-    text: text
+
+const familyMember =
+  authorPrefix
+    ? getFamilyMemberByAuthorPrefix(authorPrefix)
+    : null;
+
+/*
+  Any identified family message counts as
+  a check-in from that person.
+*/
+if (familyMember) {
+
+  const existing =
+    familyLocations[familyMember.keyPrefix] || {};
+
+  familyLocations[familyMember.keyPrefix] = {
+    ...existing,
+    timestamp: timestamp
   };
 
-  if (!isDuplicatePost(post)) {
-    roomPosts.push(post);
-    saveRoomPosts();
-    saveLastSyncedTimestamp(timestamp);
-    displayRoomPosts();
-  }
+  renderFamilyStatus();
+}
+
+const post = {
+  senderPrefix: incomingPrefix,
+  authorPrefix: authorPrefix,
+  timestamp: timestamp,
+  snr: snr,
+  text: text
+};
+
+if (!isDuplicatePost(post)) {
+  roomPosts.push(post);
+  saveRoomPosts();
+  saveLastSyncedTimestamp(timestamp);
+  displayRoomPosts();
+}
+
+
 } else {
 
   /*
