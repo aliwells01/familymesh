@@ -1837,7 +1837,7 @@ async function requestRoomHistory(room, since = 1) {
         <div class="avatar">${sender.substring(0,2).toUpperCase()}</div>
         <div class="message-stack">
         <div class="message-meta">
-      
+      <span>${escapeHtml(sender)}</span>
         <time>${when}</time>
         </div>
         <div class="bubble">${escapeHtml(post.text)}</div>
@@ -3072,20 +3072,93 @@ async function requestRoomHistory(room, since = 1) {
         { incomingPrefix, pathLen, txtType, timestamp, authorPrefix, text }
       );
 
-      const post = {
-        senderPrefix: incomingPrefix,
-        authorPrefix: authorPrefix,
-        timestamp: timestamp,
-        snr: snr,
-        text: text
-      };
+    const familyMember =
+  authorPrefix
+    ? getFamilyMemberByAuthorPrefix(authorPrefix)
+    : null;
 
-      if (!isDuplicatePost(post)) {
-        roomPosts.push(post);
-        saveRoomPosts();
-        saveLastSyncedTimestamp(timestamp);
-        displayRoomPosts();
+/*
+  If this signed post came from one of our family radios,
+  update that person's most recent check-in time.
+*/
+if (familyMember) {
+
+  const existing =
+    familyLocations[familyMember.keyPrefix] || {};
+
+  familyLocations[familyMember.keyPrefix] = {
+    ...existing,
+    timestamp: timestamp
+  };
+
+  /*
+    Location check-in messages have this form:
+
+    WLLOC|timestamp|latitude|longitude
+  */
+  if (text.startsWith(FAMILY_STATUS_PREFIX)) {
+
+    const parts = text.split("|");
+
+    if (parts.length >= 4) {
+
+      const locationTimestamp =
+        parseInt(parts[1], 10);
+
+      const lat =
+        parseFloat(parts[2]);
+
+      const lon =
+        parseFloat(parts[3]);
+
+      if (
+        Number.isFinite(locationTimestamp) &&
+        Number.isFinite(lat) &&
+        Number.isFinite(lon)
+      ) {
+        familyLocations[familyMember.keyPrefix] = {
+          timestamp: locationTimestamp,
+          lat: lat,
+          lon: lon
+        };
       }
+    }
+  }
+
+  renderFamilyStatus();
+}
+
+/*
+  Location packets are machine messages.
+  Use them to update Family status,
+  but don't show WLLOC|... in the chat.
+*/
+if (!text.startsWith(FAMILY_STATUS_PREFIX)) {
+
+  const post = {
+    senderPrefix: incomingPrefix,
+    authorPrefix: authorPrefix,
+    timestamp: timestamp,
+    snr: snr,
+    text: text
+  };
+
+  if (!isDuplicatePost(post)) {
+    roomPosts.push(post);
+    saveRoomPosts();
+    saveLastSyncedTimestamp(timestamp);
+    displayRoomPosts();
+  }
+} else {
+
+  /*
+    Still advance our sync timestamp even though
+    this location packet is hidden from the chat.
+  */
+  saveLastSyncedTimestamp(timestamp);
+}
+
+
 
       /*
         Continue draining anything else queued behind this message.
