@@ -1112,6 +1112,48 @@ window.NORTH_GEORGIA_BASEMAP={"version":"2.0-tiger2025","name":"North Georgia Of
       "viewBox",
       `${mapView.x} ${mapView.y} ${mapView.width} ${mapView.height}`
       );
+
+      /*
+        Make zoom behave like a map rather than magnifying a picture.
+        Geography spreads apart, while markers, labels and road styling
+        stay roughly the same apparent size on the phone screen.
+      */
+      const scale = mapView.width / 500;
+
+      gaMap.querySelectorAll(".repeater-dot").forEach(dot => {
+        dot.setAttribute("r", String(7 * scale));
+        dot.style.strokeWidth = `${3 * scale}px`;
+      });
+
+      gaMap.querySelectorAll(".user-dot").forEach(dot => {
+        dot.setAttribute("r", String(9 * scale));
+        dot.style.strokeWidth = `${3 * scale}px`;
+      });
+
+      gaMap.querySelectorAll(".family-map-dot").forEach(dot => {
+        dot.setAttribute("r", String(8 * scale));
+        dot.style.strokeWidth = `${2 * scale}px`;
+      });
+
+      gaMap.querySelectorAll(".town-dot").forEach(dot => {
+        const baseRadius = Number(dot.dataset.baseRadius || 3);
+        dot.setAttribute("r", String(baseRadius * scale));
+      });
+
+      gaMap.querySelectorAll(".map-road").forEach(road => {
+        const baseWidth = Number(road.dataset.baseWidth || 2);
+        road.setAttribute("stroke-width", String(baseWidth * scale));
+      });
+
+      gaMap.querySelectorAll(".map-label").forEach(label => {
+        const baseSize = Number(label.dataset.baseSize || 12);
+        label.style.fontSize = `${baseSize * scale}px`;
+
+        const baseStroke = Number(label.dataset.baseStroke || 0);
+        if (baseStroke > 0) {
+          label.style.strokeWidth = `${baseStroke * scale}px`;
+        }
+      });
     }
 
     closeMapBtn.onclick = () => {
@@ -1148,10 +1190,10 @@ window.NORTH_GEORGIA_BASEMAP={"version":"2.0-tiger2025","name":"North Georgia Of
       mapView.y -= (newHeight - mapView.height) / 2;
 
       mapView.width = Math.min(newWidth, 500);
-      mapView.height = Math.min(newHeight, 620);
+      mapView.height = Math.min(newHeight, 500);
 
       if (mapView.width === 500) mapView.x = 0;
-      if (mapView.height === 620) mapView.y = 0;
+      if (mapView.height === 500) mapView.y = 0;
 
       applyMapView();
     };
@@ -2301,23 +2343,27 @@ async function requestRoomHistory(room, since = 1) {
         polyline.setAttribute("fill", "none");
         polyline.setAttribute("stroke-linecap", "round");
         polyline.setAttribute("stroke-linejoin", "round");
-        polyline.setAttribute("vector-effect", "non-scaling-stroke");
+        polyline.setAttribute("class", "map-road");
 
         const cls = road.c || road.class || "secondary";
         if (cls === "interstate") {
           polyline.setAttribute("stroke", "#7f9eb3");
+          polyline.dataset.baseWidth = "4.5";
           polyline.setAttribute("stroke-width", "4.5");
           polyline.setAttribute("opacity", "0.95");
         } else if (cls === "primary") {
           polyline.setAttribute("stroke", "#69899f");
+          polyline.dataset.baseWidth = "3.7";
           polyline.setAttribute("stroke-width", "3.7");
           polyline.setAttribute("opacity", "0.92");
         } else if (cls === "highway") {
           polyline.setAttribute("stroke", "#58798f");
+          polyline.dataset.baseWidth = "3.0";
           polyline.setAttribute("stroke-width", "3.0");
           polyline.setAttribute("opacity", "0.90");
         } else {
           polyline.setAttribute("stroke", "#3f6076");
+          polyline.dataset.baseWidth = "2.0";
           polyline.setAttribute("stroke-width", "2.0");
           polyline.setAttribute("opacity", "0.82");
         }
@@ -2354,7 +2400,10 @@ async function requestRoomHistory(room, since = 1) {
           label.setAttribute("x", (item.point.x + 5).toFixed(1));
           label.setAttribute("y", (item.point.y - 4).toFixed(1));
           label.setAttribute("fill", "#adc3d1");
-          label.setAttribute("font-size", item.cls === "interstate" ? "10" : "8.5");
+          label.setAttribute("class", "map-label");
+          label.dataset.baseSize = item.cls === "interstate" ? "10" : "8.5";
+          label.dataset.baseStroke = "3";
+          label.setAttribute("font-size", label.dataset.baseSize);
           label.setAttribute("font-weight", "650");
           label.setAttribute("paint-order", "stroke");
           label.setAttribute("stroke", "#071b2a");
@@ -2372,7 +2421,9 @@ async function requestRoomHistory(room, since = 1) {
           const townDot = document.createElementNS(svgNS, "circle");
           townDot.setAttribute("cx", p.x.toFixed(1));
           townDot.setAttribute("cy", p.y.toFixed(1));
-          townDot.setAttribute("r", place.rank === 1 ? "4" : "3");
+          townDot.setAttribute("class", "town-dot");
+          townDot.dataset.baseRadius = place.rank === 1 ? "4" : "3";
+          townDot.setAttribute("r", townDot.dataset.baseRadius);
           townDot.setAttribute("fill", "#96aebb");
           townDot.setAttribute("opacity", "0.9");
           roadGroup.appendChild(townDot);
@@ -2381,7 +2432,10 @@ async function requestRoomHistory(room, since = 1) {
           townLabel.setAttribute("x", (p.x + 6).toFixed(1));
           townLabel.setAttribute("y", (p.y + 4).toFixed(1));
           townLabel.setAttribute("fill", "#d0dce3");
-          townLabel.setAttribute("font-size", place.rank === 1 ? "11" : "9");
+          townLabel.setAttribute("class", "map-label");
+          townLabel.dataset.baseSize = place.rank === 1 ? "11" : "9";
+          townLabel.dataset.baseStroke = "3";
+          townLabel.setAttribute("font-size", townLabel.dataset.baseSize);
           townLabel.setAttribute("font-weight", "700");
           townLabel.setAttribute("paint-order", "stroke");
           townLabel.setAttribute("stroke", "#071b2a");
@@ -2482,6 +2536,7 @@ async function requestRoomHistory(room, since = 1) {
 
       userCircle.setAttribute("cx", "250");
       userCircle.setAttribute("cy", "250");
+      userCircle.setAttribute("class", "user-dot");
       userCircle.setAttribute("r", "9");
       userCircle.setAttribute("fill", "#1188ff");
       userCircle.setAttribute("stroke", "#ffffff");
@@ -2533,6 +2588,7 @@ async function requestRoomHistory(room, since = 1) {
 
         dot.setAttribute("cx", x);
         dot.setAttribute("cy", y);
+        dot.setAttribute("class", "repeater-dot");
         dot.setAttribute("r", "7");
         dot.setAttribute("fill", "#35d67a");
         dot.setAttribute("stroke", "#0e3a2a");
@@ -2552,6 +2608,8 @@ async function requestRoomHistory(room, since = 1) {
         label.setAttribute("x", x + 10);
         label.setAttribute("y", y - 8);
         label.setAttribute("fill", "#ffffff");
+        label.setAttribute("class", "map-label");
+        label.dataset.baseSize = "12";
         label.setAttribute("font-weight", "600");
         label.setAttribute("font-size", "12");
 
@@ -2724,8 +2782,10 @@ async function requestRoomHistory(room, since = 1) {
 
         label.setAttribute(
         "class",
-        "family-map-label"
+        "family-map-label map-label"
         );
+        label.dataset.baseSize = "13";
+        label.dataset.baseStroke = "3";
 
         label.textContent =
         member.name;
@@ -2755,8 +2815,10 @@ async function requestRoomHistory(room, since = 1) {
 
         detail.setAttribute(
         "class",
-        "family-map-detail"
+        "family-map-detail map-label"
         );
+        detail.dataset.baseSize = "10";
+        detail.dataset.baseStroke = "3";
 
         detail.textContent =
         `${distance.toFixed(1)} mi ${bearingName(bearing)}`;
