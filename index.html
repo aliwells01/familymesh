@@ -750,7 +750,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin7</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin8</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -1061,9 +1061,51 @@ window.NORTH_GEORGIA_BASEMAP={"version":"2.0-tiger2025","name":"North Georgia Of
 ];
 
     const FAMILY_STATUS_PREFIX = "WLLOC|";
+    const FAMILY_LOCATION_STORAGE_KEY = "meshkin-family-locations-v1";
 
-    let familyLocations = {};
+    function loadFamilyLocations() {
+      try {
+        const saved = localStorage.getItem(FAMILY_LOCATION_STORAGE_KEY);
+        return saved ? JSON.parse(saved) : {};
+      } catch (err) {
+        console.log("Could not load saved family locations:", err);
+        return {};
+      }
+    }
+
+    function saveFamilyLocations() {
+      try {
+        localStorage.setItem(
+          FAMILY_LOCATION_STORAGE_KEY,
+          JSON.stringify(familyLocations)
+        );
+      } catch (err) {
+        console.log("Could not save family locations:", err);
+      }
+    }
+
+    let familyLocations = loadFamilyLocations();
     let myPosition = null;
+
+    // Location sends are deliberately fire-and-forget so they cannot block
+    // the working Check-In login, history sync or normal message flow.
+    let locationSendPending = false;
+
+    function scheduleLocationCheckIn(delayMs = 3000) {
+      setTimeout(() => {
+        if (!currentRoom || locationSendPending) return;
+
+        locationSendPending = true;
+
+        Promise.resolve(sendLocationCheckIn())
+          .catch(err => {
+            console.log("Background location check-in failed:", err);
+          })
+          .finally(() => {
+            locationSendPending = false;
+          });
+      }, delayMs);
+    }
 
     // True while a CMD_SYNC_NEXT_MESSAGE request is awaiting a response.
     let roomRequestPending = false;
@@ -1985,6 +2027,10 @@ await connection.sendCommandSendLogin(
         familyStatus.textContent =
           "Check-In Connected";
       }
+
+      // History sync is finished and the room is idle. Send location later,
+      // without awaiting it, so this cannot interfere with Check-In.
+      scheduleLocationCheckIn(3000);
     }
   );
 }
@@ -2200,6 +2246,10 @@ async function requestRoomHistory(room, since = 1) {
         await connection.sendToRadioFrame(frame);
 
         sendRoomStatus.innerHTML = "Sent";
+
+        // The normal Check-In has already completed. Refresh location later
+        // in the background; do not await it or alter the message flow.
+        scheduleLocationCheckIn(2500);
 
         const sentTime = new Date().toLocaleTimeString([], {
           hour: "numeric",
@@ -3363,10 +3413,14 @@ if (familyMember) {
       ) {
 
         familyLocations[familyMember.keyPrefix] = {
+          ...familyLocations[familyMember.keyPrefix],
           timestamp: locationTimestamp,
+          locationTimestamp: locationTimestamp,
           lat: lat,
           lon: lon
         };
+
+        saveFamilyLocations();
       }
     }
   }
@@ -3489,6 +3543,29 @@ if (!text.startsWith(FAMILY_STATUS_PREFIX)) {
     }
 
 
+    function formatLocationAge(timestamp) {
+      if (!timestamp) return "location age unknown";
+
+      const seconds = Math.max(
+        0,
+        Math.floor(Date.now() / 1000) - timestamp
+      );
+
+      if (seconds < 60) return "location just now";
+
+      const minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return `location ${minutes} min old`;
+
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) {
+        return `location ${hours} hr${hours === 1 ? "" : "s"} old`;
+      }
+
+      const days = Math.floor(hours / 24);
+      return `location ${days} day${days === 1 ? "" : "s"} old`;
+    }
+
+
     function renderFamilyStatus() {
 
       let html = "";
@@ -3537,32 +3614,43 @@ if (!text.startsWith(FAMILY_STATUS_PREFIX)) {
   let locationText =
     "Location unknown";
 
-        if (
-        data &&
-        myPosition &&
-        Number.isFinite(data.lat) &&
-        Number.isFinite(data.lon)
-        ) {
+  const locationTimestamp =
+    savedLocation &&
+    (savedLocation.locationTimestamp || savedLocation.timestamp);
 
-          const distance =
-          distanceMiles(
+  if (
+    savedLocation &&
+    Number.isFinite(savedLocation.lat) &&
+    Number.isFinite(savedLocation.lon)
+  ) {
+
+    const ageText =
+      formatLocationAge(locationTimestamp);
+
+    if (myPosition) {
+      const distance =
+        distanceMiles(
           myPosition.lat,
           myPosition.lon,
-          data.lat,
-          data.lon
-          );
+          savedLocation.lat,
+          savedLocation.lon
+        );
 
-          const bearing =
-          bearingDegrees(
+      const bearing =
+        bearingDegrees(
           myPosition.lat,
           myPosition.lon,
-          data.lat,
-          data.lon
-          );
+          savedLocation.lat,
+          savedLocation.lon
+        );
 
-          locationText =
-          `${distance.toFixed(1)} mi ${bearingName(bearing)}`;
-        }
+      locationText =
+        `${distance.toFixed(1)} mi ${bearingName(bearing)} · ${ageText}`;
+    } else {
+      locationText =
+        `Location received · ${ageText}`;
+    }
+  }
 
         html += `
         <div class="family-row">
