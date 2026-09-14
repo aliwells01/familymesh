@@ -317,6 +317,7 @@
       display: block;
       position: absolute;
       inset: 0;
+      touch-action: none;
     }
 
     #nearestRepeaters {
@@ -749,7 +750,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin6</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin7</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -1210,10 +1211,12 @@ window.NORTH_GEORGIA_BASEMAP={"version":"2.0-tiger2025","name":"North Georgia Of
 
       applyMapView();
     };
-// ==================== TOUCH / PINCH ZOOM ====================
+// ==================== TOUCH / PINCH ZOOM + PAN ====================
 
 let pinchStartDistance = null;
 let pinchStartView = null;
+let panStartTouch = null;
+let panStartView = null;
 
 function touchDistance(touches) {
   const dx = touches[0].clientX - touches[1].clientX;
@@ -1222,12 +1225,38 @@ function touchDistance(touches) {
   return Math.sqrt(dx * dx + dy * dy);
 }
 
+function clampMapView() {
+  const maxX = Math.max(0, 500 - mapView.width);
+  const maxY = Math.max(0, 500 - mapView.height);
+
+  mapView.x = Math.max(0, Math.min(maxX, mapView.x));
+  mapView.y = Math.max(0, Math.min(maxY, mapView.y));
+}
+
 gaMap.addEventListener(
   "touchstart",
   event => {
 
-    if (event.touches.length === 2) {
+    if (event.touches.length === 1) {
+      event.preventDefault();
 
+      panStartTouch = {
+        x: event.touches[0].clientX,
+        y: event.touches[0].clientY
+      };
+
+      panStartView = {
+        x: mapView.x,
+        y: mapView.y,
+        width: mapView.width,
+        height: mapView.height
+      };
+
+      pinchStartDistance = null;
+      pinchStartView = null;
+    }
+
+    if (event.touches.length === 2) {
       event.preventDefault();
 
       pinchStartDistance =
@@ -1239,6 +1268,9 @@ gaMap.addEventListener(
         width: mapView.width,
         height: mapView.height
       };
+
+      panStartTouch = null;
+      panStartView = null;
     }
   },
   { passive: false }
@@ -1248,63 +1280,90 @@ gaMap.addEventListener(
   "touchmove",
   event => {
 
+    /* One-finger drag pans the zoomed map. */
     if (
-      event.touches.length !== 2 ||
-      !pinchStartDistance ||
-      !pinchStartView
+      event.touches.length === 1 &&
+      panStartTouch &&
+      panStartView
     ) {
+      event.preventDefault();
+
+      const rect = gaMap.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+
+      const dx =
+        event.touches[0].clientX - panStartTouch.x;
+
+      const dy =
+        event.touches[0].clientY - panStartTouch.y;
+
+      const svgPerPixelX =
+        panStartView.width / rect.width;
+
+      const svgPerPixelY =
+        panStartView.height / rect.height;
+
+      mapView.x =
+        panStartView.x - dx * svgPerPixelX;
+
+      mapView.y =
+        panStartView.y - dy * svgPerPixelY;
+
+      clampMapView();
+      applyMapView();
       return;
     }
 
-    event.preventDefault();
+    /* Two-finger pinch zooms the map. */
+    if (
+      event.touches.length === 2 &&
+      pinchStartDistance &&
+      pinchStartView
+    ) {
+      event.preventDefault();
 
-    const currentDistance =
-      touchDistance(event.touches);
+      const currentDistance =
+        touchDistance(event.touches);
 
-    const scale =
-      pinchStartDistance / currentDistance;
+      const scale =
+        pinchStartDistance / currentDistance;
 
-    let newWidth =
-      pinchStartView.width * scale;
+      let newWidth =
+        pinchStartView.width * scale;
 
-    let newHeight =
-      pinchStartView.height * scale;
+      let newHeight =
+        pinchStartView.height * scale;
 
-    /*
-      Limit zoom:
-      500 = fully zoomed out
-      100 = about 5x zoomed in
-    */
-    newWidth =
-      Math.max(
-        100,
-        Math.min(500, newWidth)
-      );
+      /*
+        500 = fully zoomed out
+        100 = about 5x zoomed in
+      */
+      newWidth =
+        Math.max(100, Math.min(500, newWidth));
 
-    newHeight =
-      Math.max(
-        100,
-        Math.min(500, newHeight)
-      );
+      newHeight =
+        Math.max(100, Math.min(500, newHeight));
 
-    const centerX =
-      pinchStartView.x +
-      pinchStartView.width / 2;
+      const centerX =
+        pinchStartView.x +
+        pinchStartView.width / 2;
 
-    const centerY =
-      pinchStartView.y +
-      pinchStartView.height / 2;
+      const centerY =
+        pinchStartView.y +
+        pinchStartView.height / 2;
 
-    mapView.width = newWidth;
-    mapView.height = newHeight;
+      mapView.width = newWidth;
+      mapView.height = newHeight;
 
-    mapView.x =
-      centerX - newWidth / 2;
+      mapView.x =
+        centerX - newWidth / 2;
 
-    mapView.y =
-      centerY - newHeight / 2;
+      mapView.y =
+        centerY - newHeight / 2;
 
-    applyMapView();
+      clampMapView();
+      applyMapView();
+    }
   },
   { passive: false }
 );
@@ -1313,11 +1372,28 @@ gaMap.addEventListener(
   "touchend",
   event => {
 
-    if (event.touches.length < 2) {
-      pinchStartDistance = null;
-      pinchStartView = null;
+    pinchStartDistance = null;
+    pinchStartView = null;
+
+    /* If one finger remains after a pinch, let it pan smoothly. */
+    if (event.touches.length === 1) {
+      panStartTouch = {
+        x: event.touches[0].clientX,
+        y: event.touches[0].clientY
+      };
+
+      panStartView = {
+        x: mapView.x,
+        y: mapView.y,
+        width: mapView.width,
+        height: mapView.height
+      };
+    } else {
+      panStartTouch = null;
+      panStartView = null;
     }
-  }
+  },
+  { passive: false }
 );
 
   // ==================== GENERAL HELPERS ====================
