@@ -750,7 +750,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin8</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin7</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -913,7 +913,6 @@ window.NORTH_GEORGIA_BASEMAP={"version":"2.0-tiger2025","name":"North Georgia Of
 
     const ROOM_POSTS_STORAGE_KEY = "meshkin_room_posts_" + CHECKIN_ROOM_NAME;
     const ROOM_SYNC_STORAGE_KEY = "meshkin_room_last_sync_" + CHECKIN_ROOM_NAME;
-    const FAMILY_LOCATIONS_STORAGE_KEY = "meshkin_family_locations_" + CHECKIN_ROOM_NAME;
 
     // Keep at most this many posts on disk so storage doesn't grow forever.
     const MAX_STORED_POSTS = 500;
@@ -965,28 +964,6 @@ window.NORTH_GEORGIA_BASEMAP={"version":"2.0-tiger2025","name":"North Georgia Of
         post.senderPrefix === candidate.senderPrefix &&
         post.text === candidate.text
       );
-    }
-
-    function loadStoredFamilyLocations() {
-      try {
-        const raw = localStorage.getItem(FAMILY_LOCATIONS_STORAGE_KEY);
-        const parsed = raw ? JSON.parse(raw) : {};
-        return parsed && typeof parsed === "object" ? parsed : {};
-      } catch (err) {
-        console.error("Failed to load stored family locations:", err);
-        return {};
-      }
-    }
-
-    function saveFamilyLocations() {
-      try {
-        localStorage.setItem(
-          FAMILY_LOCATIONS_STORAGE_KEY,
-          JSON.stringify(familyLocations)
-        );
-      } catch (err) {
-        console.error("Failed to save family locations:", err);
-      }
     }
 
     let roomPosts = loadStoredRoomPosts();
@@ -1085,9 +1062,8 @@ window.NORTH_GEORGIA_BASEMAP={"version":"2.0-tiger2025","name":"North Georgia Of
 
     const FAMILY_STATUS_PREFIX = "WLLOC|";
 
-    let familyLocations = loadStoredFamilyLocations();
+    let familyLocations = {};
     let myPosition = null;
-    let locationCheckInSentForSession = false;
 
     // True while a CMD_SYNC_NEXT_MESSAGE request is awaiting a response.
     let roomRequestPending = false;
@@ -1934,9 +1910,6 @@ await connection.sendCommandSendLogin(
     familyStatus.textContent =
       "Check-In Connected";
 
-    // A fresh room login is a new location-sharing session.
-    locationCheckInSentForSession = false;
-
     // Show whatever we already have saved from last time immediately,
     // rather than blanking the chat while we wait on the mesh.
     displayRoomPosts();
@@ -2011,15 +1984,6 @@ await connection.sendCommandSendLogin(
       if (familyStatus) {
         familyStatus.textContent =
           "Check-In Connected";
-      }
-
-      // Once the initial room/history queue is drained, publish this
-      // phone's current GPS position once for the session. This avoids
-      // competing with the history sync while still giving the family
-      // a fresh last-known location after each reconnect.
-      if (!locationCheckInSentForSession && currentRoom) {
-        locationCheckInSentForSession = true;
-        sendLocationCheckIn();
       }
     }
   );
@@ -2254,12 +2218,6 @@ async function requestRoomHistory(room, since = 1) {
         roomMessages.scrollTop = roomMessages.scrollHeight;
 
         roomPostText.value = "";
-
-        // A manual family check-in is also a good moment to refresh
-        // the device's last-known GPS position. Do this in the
-        // background so the message send stays fast.
-        sendLocationCheckIn();
-
         setTimeout(() => {
           sendRoomStatus.innerHTML = "";
         }, 1800);
@@ -3409,9 +3367,6 @@ if (familyMember) {
           lat: lat,
           lon: lon
         };
-
-        // Keep last-known locations across reloads/offline use.
-        saveFamilyLocations();
       }
     }
   }
@@ -3533,28 +3488,6 @@ if (!text.startsWith(FAMILY_STATUS_PREFIX)) {
       return `Last check-in ${days} day${days === 1 ? "" : "s"} ago`;
     }
 
-    function formatLocationAge(timestamp) {
-      if (!timestamp) return "location age unknown";
-
-      const seconds = Math.max(
-        0,
-        Math.floor(Date.now() / 1000) - timestamp
-      );
-
-      if (seconds < 60) return "location just now";
-
-      const minutes = Math.floor(seconds / 60);
-      if (minutes < 60) return `location ${minutes} min old`;
-
-      const hours = Math.floor(minutes / 60);
-      if (hours < 24) {
-        return `location ${hours} hr${hours === 1 ? "" : "s"} old`;
-      }
-
-      const days = Math.floor(hours / 24);
-      return `location ${days} day${days === 1 ? "" : "s"} old`;
-    }
-
 
     function renderFamilyStatus() {
 
@@ -3604,38 +3537,31 @@ if (!text.startsWith(FAMILY_STATUS_PREFIX)) {
   let locationText =
     "Location unknown";
 
-        const hasSavedLocation =
-          savedLocation &&
-          Number.isFinite(savedLocation.lat) &&
-          Number.isFinite(savedLocation.lon);
-
-        if (hasSavedLocation && myPosition) {
+        if (
+        data &&
+        myPosition &&
+        Number.isFinite(data.lat) &&
+        Number.isFinite(data.lon)
+        ) {
 
           const distance =
           distanceMiles(
           myPosition.lat,
           myPosition.lon,
-          savedLocation.lat,
-          savedLocation.lon
+          data.lat,
+          data.lon
           );
 
           const bearing =
           bearingDegrees(
           myPosition.lat,
           myPosition.lon,
-          savedLocation.lat,
-          savedLocation.lon
+          data.lat,
+          data.lon
           );
 
           locationText =
-          `${distance.toFixed(1)} mi ${bearingName(bearing)} · ${formatLocationAge(savedLocation.timestamp)}`;
-
-        } else if (hasSavedLocation) {
-
-          // We know where the family member last was, but this phone
-          // has no current GPS fix from which to calculate distance.
-          locationText =
-          `Location received · ${formatLocationAge(savedLocation.timestamp)}`;
+          `${distance.toFixed(1)} mi ${bearingName(bearing)}`;
         }
 
         html += `
