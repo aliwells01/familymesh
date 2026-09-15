@@ -750,7 +750,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin8</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin9</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -2226,7 +2226,7 @@ async function requestRoomHistory(room, since = 1) {
         frame[2] = 0x00;
 
         frame.set(
-        uint32ToLEBytes(timestamp),
+        uint32ToLE(timestamp),
         3
         );
 
@@ -3769,7 +3769,7 @@ if (!text.startsWith(FAMILY_STATUS_PREFIX)) {
     frame[2] = 0x00;
 
     frame.set(
-      uint32ToLEBytes(timestamp),
+      uint32ToLE(timestamp),
       3
     );
 
