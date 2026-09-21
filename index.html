@@ -1660,12 +1660,7 @@ radioDeviceLabel.textContent =
           installBatteryListener();
           installRawMessageListener();
 
-// Automatically check for a direct zero-hop repeater
-setTimeout(() => {
-  if (!repeatersBtn.disabled) {
-    repeatersBtn.click();
-  }
-}, 1200);
+
 
           message("Announcing node to mesh...");
 
