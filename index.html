@@ -758,7 +758,7 @@
 
       <!-- Radio, mesh and battery status -->
       <section class="status-strip" aria-label="Radio status">
-        <div class="status-card" id="radioStatusCard" role="button" tabindex="0" aria-label="Connect to radio">
+        <div class="status-card" id="radioStatusCard" role="button" tabindex="0" aria-label="Connect or switch radio">
           <div class="status-icon radio"></div>
           <div class="status-copy">
             <div id="status" class="status-value disconnected">Not connected</div>
@@ -1576,13 +1576,20 @@ gaMap.addEventListener(
           throw new Error("No Bluetooth device selected");
         }
 
+        // Keep a reference to this specific BLE connection so events from a
+        // radio we intentionally disconnected cannot overwrite a newer one.
+        const thisConnection = connection;
+
         connection.on("connected", async () => {
+
+          if (connection !== thisConnection) return;
 
           status.innerHTML = "Connected";
           status.className = "status-value connected";
           message("MeshCore radio connected.");
 
           const connectedRadioName =
+          connection.bleDevice?.name ||
           connection.device?.name ||
           connection.bluetoothDevice?.name ||
           connection.gatt?.device?.name ||
@@ -1645,6 +1652,10 @@ gaMap.addEventListener(
         });
 
         connection.on("disconnected", () => {
+
+          // Ignore the disconnect event from an old radio after the user has
+          // already opened the selector for a replacement radio.
+          if (connection !== thisConnection) return;
 
           status.innerHTML = "Disconnected";
           status.className = "status-value disconnected";
@@ -3467,14 +3478,57 @@ if (!text.startsWith(FAMILY_STATUS_PREFIX)) {
   // ==================== VISIBLE UI EVENT HANDLERS ====================
     const radioStatusCard = document.getElementById("radioStatusCard");
 
-    radioStatusCard.addEventListener("click", () => {
-      if (!connectBtn.disabled) connectBtn.click();
-    });
+    function chooseOrSwitchRadio() {
+
+      // When already connected, tapping the Connected card means
+      // "switch radio": drop the current GATT connection and immediately
+      // reopen the Bluetooth picker while this tap still counts as a user gesture.
+      if (connectBtn.disabled && connection) {
+
+        const oldConnection = connection;
+
+        // Mark the old connection stale before closing it. Its delayed
+        // disconnected event will therefore be ignored by the guard above.
+        connection = null;
+
+        status.innerHTML = "Select radio";
+        status.className = "status-value connecting";
+        radioDeviceLabel.textContent = "Choose Bluetooth device";
+
+        advertBtn.disabled = true;
+        floodBtn.disabled = true;
+        repeatersBtn.disabled = true;
+        roomBtn.disabled = true;
+        readRoomBtn.disabled = true;
+        mapRepeatersBtn.disabled = true;
+        sendRoomPostBtn.disabled = true;
+
+        connectBtn.innerHTML = "CONNECT TO RADIO";
+        connectBtn.disabled = false;
+
+        try {
+          // WebBleConnection.close() disconnects GATT immediately.
+          // Do not await here: requestDevice() needs to happen from this tap.
+          oldConnection.close();
+        } catch (err) {
+          console.warn("Radio close failed:", err);
+        }
+
+        connectBtn.click();
+        return;
+      }
+
+      if (!connectBtn.disabled) {
+        connectBtn.click();
+      }
+    }
+
+    radioStatusCard.addEventListener("click", chooseOrSwitchRadio);
 
     radioStatusCard.addEventListener("keydown", (event) => {
-      if ((event.key === "Enter" || event.key === " ") && !connectBtn.disabled) {
+      if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
-        connectBtn.click();
+        chooseOrSwitchRadio();
       }
     });
 
