@@ -750,7 +750,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin6</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin7</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -1498,14 +1498,26 @@ gaMap.addEventListener(
   // ==================== ZERO-HOP REPEATER DISCOVERY ====================
     function installDiscoveryListener() {
 
-      connection.txCharacteristic.addEventListener(
-      "characteristicvaluechanged",
-      (event) => {
+  connection.txCharacteristic.addEventListener(
+    "characteristicvaluechanged",
+    (event) => {
 
-        const frame = new Uint8Array(event.target.value.buffer);
+      const frame =
+        new Uint8Array(event.target.value.buffer);
 
-        // 0x8E = PUSH_CODE_CONTROL_DATA
-        if (frame[0] !== 0x8E) return;
+      // TEMP DEBUG:
+      // Show any incoming MeshCore control packet.
+      if (frame[0] === 0x8E) {
+        meshReadySub.textContent =
+          "RX " +
+          Array.from(frame)
+            .map(b =>
+              b.toString(16).padStart(2, "0")
+            )
+            .join(" ");
+      }
+
+      if (frame[0] !== 0x8E) return;
 
         const localSnr = (frame[1] << 24 >> 24) / 4;
         const localRssi = frame[2] << 24 >> 24;
