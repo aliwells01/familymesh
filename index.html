@@ -750,7 +750,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin2</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin3</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -768,13 +768,20 @@
 
 
 
-        <div class="status-card">
-          <div class="status-icon mesh">⌁</div>
-          <div class="status-copy">
-            <div id="meshReadyMain" class="status-value">Mesh Ready</div>
-            <div id="meshReadySub" class="status-sub">not checked yet</div>
-          </div>
-        </div>
+        <div class="status-card"
+     id="meshStatusCard"
+     role="button"
+     tabindex="0"
+     aria-label="Check nearby mesh repeaters">
+
+  <div class="status-icon mesh">⌁</div>
+
+  <div class="status-copy">
+    <div id="meshReadyMain" class="status-value">Mesh Check</div>
+    <div id="meshReadySub" class="status-sub">tap to check</div>
+  </div>
+
+</div>
 
         <div class="status-card">
           <div class="status-icon battery"></div>
@@ -1009,6 +1016,34 @@ window.NORTH_GEORGIA_BASEMAP={"version":"2.0-tiger2025","name":"North Georgia Of
 
     const meshReadySub =
     document.getElementById("meshReadySub");
+
+    const meshStatusCard =
+document.getElementById("meshStatusCard");
+
+
+meshStatusCard.onclick = () => {
+
+  if (!connection) {
+    meshReadyMain.textContent = "Mesh Check";
+    meshReadySub.textContent = "connect radio first";
+    return;
+  }
+
+  if (!repeatersBtn.disabled) {
+    repeatersBtn.click();
+  }
+};
+
+meshStatusCard.onkeydown = (event) => {
+
+  if (
+    event.key === "Enter" ||
+    event.key === " "
+  ) {
+    event.preventDefault();
+    meshStatusCard.click();
+  }
+};
 
     const familyStatus =
     document.getElementById("familyStatus");
@@ -1795,8 +1830,8 @@ setTimeout(() => {
           if (discoveredRepeaters.length === 0) {
 
             repeatersList.innerHTML = "";
-            meshReadyMain.textContent = "No direct link";
-            meshReadySub.textContent = "use nearest repeater";
+meshReadyMain.textContent = "No direct link";
+meshReadySub.textContent = "tap to retry";
             message("Discovery finished — no repeater heard.");
 
           } else {
