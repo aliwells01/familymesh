@@ -108,6 +108,27 @@
       padding: 0;
     }
 
+    .fullscreen-btn {
+      position: absolute;
+      right: 46px;
+      top: 3px;
+      width: 44px;
+      height: 44px;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      color: #7fc4f4;
+      font-size: 24px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    .fullscreen-btn:active {
+      transform: scale(.94);
+    }
+
   /* ---------- Top connection / mesh / battery status ---------- */
     .status-strip {
       display: grid;
@@ -750,9 +771,9 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin3</span>
+        <span class="brand-mesh">HomeMesh</span><span class="brand-kin">1</span>
 
-
+        <button id="fullscreenBtn" class="fullscreen-btn" type="button" aria-label="Enter full screen">⛶</button>
         <div class="gear" aria-hidden="true">⚙</div>
       </header>
 
@@ -1007,6 +1028,52 @@ window.NORTH_GEORGIA_BASEMAP={"version":"2.0-tiger2025","name":"North Georgia Of
 
     const radioDeviceLabel =
     document.getElementById("radioDeviceLabel");
+
+    const fullscreenBtn =
+    document.getElementById("fullscreenBtn");
+
+    if (fullscreenBtn) {
+      fullscreenBtn.addEventListener("click", async () => {
+        try {
+          const root = document.documentElement;
+
+          if (document.fullscreenElement || document.webkitFullscreenElement) {
+            if (document.exitFullscreen) {
+              await document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+              document.webkitExitFullscreen();
+            }
+            fullscreenBtn.textContent = "⛶";
+            fullscreenBtn.setAttribute("aria-label", "Enter full screen");
+            return;
+          }
+
+          if (root.requestFullscreen) {
+            await root.requestFullscreen();
+          } else if (root.webkitRequestFullscreen) {
+            root.webkitRequestFullscreen();
+          } else {
+            message("Full screen is not supported by this Bluefy version.");
+            return;
+          }
+
+          fullscreenBtn.textContent = "⤢";
+          fullscreenBtn.setAttribute("aria-label", "Exit full screen");
+        } catch (err) {
+          console.error("Fullscreen failed:", err);
+          message("Bluefy did not allow webpage full screen.");
+        }
+      });
+
+      document.addEventListener("fullscreenchange", () => {
+        const active = !!document.fullscreenElement;
+        fullscreenBtn.textContent = active ? "⤢" : "⛶";
+        fullscreenBtn.setAttribute(
+          "aria-label",
+          active ? "Exit full screen" : "Enter full screen"
+        );
+      });
+    }
 
     const batteryVolts =
     document.getElementById("batteryVolts");
