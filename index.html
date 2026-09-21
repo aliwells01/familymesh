@@ -881,7 +881,9 @@ window.NORTH_GEORGIA_BASEMAP={"version":"2.0-tiger2025","name":"North Georgia Of
 
   // ==================== GLOBAL STATE / CONNECTION STATE ====================
     let connection = null;
+    let discoveryTag = null;
     let discoveredRepeaters = [];
+    let discoveryTimer = null;
     let roomConnectTimer = null;
 
   // ==================== DOM REFERENCES ====================
@@ -1493,88 +1495,125 @@ gaMap.addEventListener(
     }
 
 
-  // ==================== DIRECT REPEATER PATH CHECK ====================
-    // This companion firmware does not support CMD_SEND_CONTROL_DATA (0x37).
-    // Instead, ask the radio for the stored advert path of each repeater contact.
-    // RESP_CODE_ADVERT_PATH (0x16) returns path_len; path_len === 0 means the
-    // repeater's last advert was heard directly (zero hop).
-    async function queryAdvertPath(contact, timeoutMs = 1800) {
+  // ==================== ZERO-HOP REPEATER DISCOVERY ====================
+    function installDiscoveryListener() {
 
-      const publicKey = Uint8Array.from(
-        Object.values(contact.publicKey)
+  connection.txCharacteristic.addEventListener(
+    "characteristicvaluechanged",
+    (event) => {
+
+      const frame =
+        new Uint8Array(event.target.value.buffer);
+
+      // TEMP DEBUG:
+      // Show any incoming MeshCore control packet.
+      if (
+  frame[0] === 0x00 ||
+  frame[0] === 0x01 ||
+  frame[0] === 0x8E
+) {
+  meshReadySub.textContent =
+    "RX " +
+    Array.from(frame)
+      .map(b => b.toString(16).padStart(2, "0"))
+      .join(" ");
+}
+
+      if (frame[0] !== 0x8E) return;
+
+        const localSnr = (frame[1] << 24 >> 24) / 4;
+        const localRssi = frame[2] << 24 >> 24;
+
+      
+
+        // Byte 3 is the encoded MeshCore path-length field.
+// PUSH_CODE_CONTROL_DATA does NOT include path bytes here.
+// The control payload always begins at byte 4.
+const pathLen = frame[3];
+
+const payload = frame.slice(4);
+
+
+
+        if (payload.length < 6) return;
+
+        // upper nibble 0x90 = DISCOVER_RESP
+        const responseType = payload[0] & 0xF0;
+
+        if (responseType !== 0x90) return;
+
+        // lower nibble is node type
+        const nodeType = payload[0] & 0x0F;
+
+        // 2 = repeater
+        if (nodeType !== 2) return;
+
+        const remoteSnr = (payload[1] << 24 >> 24) / 4;
+
+        const responseTag =
+        payload[2] |
+        (payload[3] << 8) |
+        (payload[4] << 16) |
+        (payload[5] << 24);
+
+        // only accept replies to OUR discovery request
+        if ((responseTag >>> 0) !== (discoveryTag >>> 0)) return;
+
+        const pubKey = payload.slice(6);
+
+        const pubKeyHex = bytesToHex(pubKey);
+
+        // avoid duplicate responders
+        if (discoveredRepeaters.some(r => r.pubKey === pubKeyHex)) {
+          return;
+        }
+
+        discoveredRepeaters.push({
+          pubKey: pubKeyHex,
+          localSnr,
+          localRssi,
+          remoteSnr
+        });
+
+        showDiscoveryResults();
+      }
       );
+    }
+    function showDiscoveryResults() {
 
-      if (publicKey.length !== 32) {
-        throw new Error("Invalid repeater public key");
+      if (discoveredRepeaters.length === 0) {
+        meshReadyMain.textContent = "Checking...";
+        meshReadySub.textContent = "listening nearby";
+        repeatersList.innerHTML = "";
+        return;
       }
 
-      return new Promise(async (resolve) => {
-        let finished = false;
+      let html =
+      "<h3>✅ " +
+      discoveredRepeaters.length +
+      " nearby repeater" +
+      (discoveredRepeaters.length === 1 ? "" : "s") +
+      " found</h3>";
 
-        const finish = (result) => {
-          if (finished) return;
-          finished = true;
-          clearTimeout(timer);
-          connection.txCharacteristic.removeEventListener(
-            "characteristicvaluechanged",
-            onFrame
-          );
-          resolve(result);
-        };
+      discoveredRepeaters.forEach((r, i) => {
 
-        const onFrame = (event) => {
-          const frame = new Uint8Array(event.target.value.buffer);
-
-          // RESP_CODE_ADVERT_PATH = 0x16
-          if (frame[0] === 0x16 && frame.length >= 6) {
-            const recvTimestamp =
-              frame[1] |
-              (frame[2] << 8) |
-              (frame[3] << 16) |
-              (frame[4] << 24);
-
-            const pathLen = frame[5];
-
-            finish({
-              ok: true,
-              pathLen,
-              recvTimestamp: recvTimestamp >>> 0
-            });
-            return;
-          }
-
-          // RESP_CODE_ERR = 0x01. For GET_ADVERT_PATH this means the
-          // contact/path is not known by the radio.
-          if (frame[0] === 0x01) {
-            finish({
-              ok: false,
-              errorCode: frame.length > 1 ? frame[1] : null
-            });
-          }
-        };
-
-        const timer = setTimeout(() => {
-          finish({ ok: false, timeout: true });
-        }, timeoutMs);
-
-        connection.txCharacteristic.addEventListener(
-          "characteristicvaluechanged",
-          onFrame
-        );
-
-        try {
-          // CMD_GET_ADVERT_PATH = 0x2A
-          const request = new Uint8Array(34);
-          request[0] = 0x2A;
-          request[1] = 0x00;
-          request.set(publicKey, 2);
-
-          await connection.sendToRadioFrame(request);
-        } catch (err) {
-          console.error("Advert path query failed:", err);
-          finish({ ok: false, error: err });
-        }
+        html +=
+        "<div style='padding:12px;border-bottom:1px solid #444;text-align:left;'>" +
+        "<strong>Repeater " + (i + 1) + "</strong>" +
+        "<br>Radio SNR: " + r.localSnr + " dB" +
+        "<br>Repeater heard us: " + r.remoteSnr + " dB" +
+        "<br>RSSI: " + r.localRssi + " dBm" +
+        "<br><small>" + r.pubKey.substring(0, 16) + "...</small>" +
+        "</div>";
       });
+
+      repeatersList.innerHTML = "";
+      meshReadyMain.textContent = "Mesh Ready";
+      meshReadySub.textContent =
+      discoveredRepeaters.length +
+      " repeater" +
+      (discoveredRepeaters.length === 1 ? "" : "s") +
+      " heard";
     }
 
   // ==================== BLUETOOTH RADIO CONNECTION ====================
@@ -1755,73 +1794,84 @@ setTimeout(() => {
 
     };
 
-  // ==================== MANUAL MESH READY CHECK ====================
+  // ==================== ACTIVE REPEATER DISCOVERY COMMAND ====================
     repeatersBtn.onclick = async () => {
 
-      if (!connection) {
-        meshReadyMain.textContent = "Mesh Check";
-        meshReadySub.textContent = "connect radio first";
-        return;
-      }
-
-      repeatersBtn.disabled = true;
-      meshReadyMain.textContent = "Checking...";
-      meshReadySub.textContent = "reading repeater paths";
-      repeatersList.innerHTML = "";
-
       try {
-        const contacts = await connection.getContacts();
-        const repeaters = contacts.filter(c => c.type === 2);
 
-        if (repeaters.length === 0) {
-          meshReadyMain.textContent = "No repeaters";
-          meshReadySub.textContent = "tap to retry";
-          return;
+        discoveredRepeaters = [];
+
+        repeatersList.innerHTML = "";
+        meshReadyMain.textContent = "Checking...";
+        meshReadySub.textContent = "zero-hop scan";
+        message("Sending zero-hop repeater discovery...");
+
+        // random 32-bit discovery tag
+        discoveryTag =
+        Math.floor(Math.random() * 0xFFFFFFFF) >>> 0;
+
+        /*
+        Companion command:
+
+        byte 0 = 0x37   CMD_SEND_CONTROL_DATA
+        byte 1 = 0x00   flags
+        byte 2 = 0x80   NODE_DISCOVER_REQ
+        byte 3 = 0x04   filter bit for ADV_TYPE_REPEATER (type 2)
+        bytes 4-7 = random discovery tag
+        bytes 8-11 = "since", zero
+        */
+
+        const frame = new Uint8Array([
+        0x37,
+        0x00,
+        0x80,
+        0x04,
+        ...uint32ToLE(discoveryTag),
+        0x00, 0x00, 0x00, 0x00
+        ]);
+
+        await connection.sendToRadioFrame(frame);
+
+        message("📡 Discovery transmitted. Listening...");
+
+        if (discoveryTimer) {
+          clearTimeout(discoveryTimer);
         }
 
-        const directRepeaters = [];
-        let knownPaths = 0;
+        discoveryTimer = setTimeout(() => {
 
-        // Query sequentially so each 0x16 response belongs to the contact
-        // currently being checked. Stop as soon as a direct repeater is found.
-        for (const repeater of repeaters) {
-          const result = await queryAdvertPath(repeater);
+          if (discoveredRepeaters.length === 0) {
 
-          if (!result.ok) continue;
-          knownPaths += 1;
+            repeatersList.innerHTML = "";
+meshReadyMain.textContent = "No direct link";
+meshReadySub.textContent = "tap to retry";
+            message("Discovery finished — no repeater heard.");
 
-          if (result.pathLen === 0) {
-            directRepeaters.push({
-              name: repeater.advName || "Repeater",
-              recvTimestamp: result.recvTimestamp
-            });
-            break;
+          } else {
+
+            message(
+            "✅ Discovery finished — " +
+            discoveredRepeaters.length +
+            " repeater(s) heard."
+            );
+
           }
-        }
 
-        if (directRepeaters.length > 0) {
-          const direct = directRepeaters[0];
-          meshReadyMain.textContent = "Mesh Ready";
-          meshReadySub.textContent = direct.name + " direct";
-          message("Direct repeater path found: " + direct.name);
-        } else if (knownPaths > 0) {
-          meshReadyMain.textContent = "No direct link";
-          meshReadySub.textContent = "tap to retry";
-          message("Repeater paths found, but none are zero hop.");
-        } else {
-          meshReadyMain.textContent = "No path data";
-          meshReadySub.textContent = "tap to retry";
-          message("No stored advert paths were available from the radio.");
-        }
+        }, 7000);
 
-      } catch (err) {
-        console.error("Mesh check failed:", err);
-        meshReadyMain.textContent = "Mesh Check failed";
-        meshReadySub.textContent = "tap to retry";
-        message("Mesh check error: " + err);
-      } finally {
-        repeatersBtn.disabled = false;
       }
+
+      catch(err) {
+
+        console.error(err);
+
+        repeatersList.innerHTML =
+        "<pre>" + String(err) + "</pre>";
+
+        message("Discovery error: " + err);
+
+      }
+
     };
 
   // ==================== CHECK-IN ROOM CONNECTION ====================
