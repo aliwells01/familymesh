@@ -750,7 +750,7 @@
       <!-- Header / MeshKin branding -->
       <header class="brand">
 
-        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin1</span>
+        <span class="brand-mesh">Mesh</span><span class="brand-kin">Kin3</span>
 
 
         <div class="gear" aria-hidden="true">⚙</div>
@@ -1020,17 +1020,52 @@ window.NORTH_GEORGIA_BASEMAP={"version":"2.0-tiger2025","name":"North Georgia Of
     const meshStatusCard =
 document.getElementById("meshStatusCard");
 
+    const meshStatusIcon =
+    meshStatusCard.querySelector(".status-icon.mesh");
+
+    function setMeshState(state) {
+      if (state === "ready") {
+        meshReadyMain.textContent = "Mesh Ready";
+        meshReadySub.textContent = "Check-In reachable";
+        meshStatusIcon.style.color = "#35d67a";
+        meshStatusIcon.style.background = "rgba(53,214,122,.08)";
+        return;
+      }
+
+      if (state === "checking") {
+        meshReadyMain.textContent = "Checking Mesh...";
+        meshReadySub.textContent = "trying Check-In";
+        meshStatusIcon.style.color = "#ffd36e";
+        meshStatusIcon.style.background = "rgba(255,211,110,.08)";
+        return;
+      }
+
+      if (state === "failed") {
+        meshReadyMain.textContent = "Mesh Problem";
+        meshReadySub.textContent = "retry or try another repeater";
+        meshStatusIcon.style.color = "#ff6b6b";
+        meshStatusIcon.style.background = "rgba(255,107,107,.08)";
+        return;
+      }
+
+      meshReadyMain.textContent = "Mesh Check";
+      meshReadySub.textContent = connection ? "tap to retry" : "connect radio first";
+      meshStatusIcon.style.color = "#9ab6cb";
+      meshStatusIcon.style.background = "rgba(154,182,203,.08)";
+    }
+
+    setMeshState("idle");
 
 meshStatusCard.onclick = () => {
 
   if (!connection) {
-    meshReadyMain.textContent = "Mesh Check";
-    meshReadySub.textContent = "connect radio first";
+    setMeshState("idle");
     return;
   }
 
-  if (!repeatersBtn.disabled) {
-    repeatersBtn.click();
+  if (!roomBtn.disabled) {
+    setMeshState("checking");
+    roomBtn.click();
   }
 };
 
@@ -1670,7 +1705,6 @@ radioDeviceLabel.textContent =
           mapRepeatersBtn.disabled = false;
 
          
-installDiscoveryListener();
 installRoomHandlers();
 installBatteryListener();
 installRawMessageListener();
@@ -1730,6 +1764,7 @@ setTimeout(() => {
           mapRepeatersBtn.disabled = true;
 
           roomRequestPending = false;
+          setMeshState("idle");
 
           if (roomConnectTimer) {
             clearTimeout(roomConnectTimer);
@@ -1888,6 +1923,7 @@ meshReadySub.textContent = "tap to retry";
 
         roomStatus.innerHTML = "Connecting to family room...";
         if (familyStatus) familyStatus.textContent = "Checking...";
+        setMeshState("checking");
 
         roomMessages.innerHTML = `
           <div class="empty-chat">
@@ -1955,12 +1991,14 @@ await connection.sendCommandSendLogin(
 
           roomStatus.innerHTML = "";
           sendRoomPostBtn.disabled = true;
+          setMeshState("failed");
         }, 8000);
 
       } catch (err) {
         console.error(err);
         roomStatus.innerHTML = "❌ " + String(err);
         message("Room error: " + err);
+        setMeshState("failed");
       }
     };
 
@@ -2018,6 +2056,7 @@ await connection.sendCommandSendLogin(
 
     familyStatus.textContent =
       "Check-In Connected";
+    setMeshState("ready");
 
     // Show whatever we already have saved from last time immediately,
     // rather than blanking the chat while we wait on the mesh.
@@ -2094,6 +2133,7 @@ await connection.sendCommandSendLogin(
         familyStatus.textContent =
           "Check-In Connected";
       }
+      setMeshState("ready");
 
       // History sync is finished and the room is idle. Send location later,
       // without awaiting it, so this cannot interfere with Check-In.
